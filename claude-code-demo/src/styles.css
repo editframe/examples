@@ -1,0 +1,198 @@
+@import "tailwindcss";
+
+/* Claude Code — Agent View (v2) — Anthropic palette */
+:root {
+  /* Paper / canvas */
+  --paper: #C5DABF;
+  --paper-deep: #B0CAB0;
+  --wave: #95B59C;
+  --wave-light: #B0CAB0;
+
+  /* Terminal */
+  --terminal-bg: #1E1E1C;
+  --terminal-bg-deep: #161614;
+  --terminal-chrome: #2C2C2A;
+  --terminal-border: #3A3A36;
+
+  /* Traffic lights */
+  --light-red: #E07B6E;
+  --light-yellow: #E7BD68;
+  --light-green: #5FB76E;
+
+  /* Terminal text */
+  --text-primary: #F0EEE6;   /* cream */
+  --text-secondary: #B2AD96;
+  --text-dim: #7A7A6E;
+  --text-deep-dim: #54544A;
+
+  /* Claude / Anthropic brand */
+  --claude: #CC785C;
+  --claude-soft: #E89B7C;
+  --claude-deep: #A85940;
+
+  /* Mascot */
+  --mascot-body: #E89B7C;
+  --mascot-belly: #F2B89A;
+  --mascot-shadow: #B57258;
+  --mascot-line: #5C3A2A;
+
+  /* Hat */
+  --hat-brown: #5C3A1F;
+  --hat-band: #3E2611;
+  --hat-highlight: #8A5E3F;
+
+  /* Misc */
+  --gold: #E0BF52;
+  --outro-burst: #CC785C;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #000;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  color: var(--text-primary);
+}
+
+* { box-sizing: border-box; }
+
+.paper { background: var(--paper); color: var(--terminal-bg); }
+
+.pixel {
+  font-family: "VT323", ui-monospace, monospace;
+  letter-spacing: 0.02em;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+  text-rendering: optimizeSpeed;
+}
+
+.mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+/* Display serif — Claude brand canonical stack (Tiempos Headline equivalents).
+   Newsreader is an acceptable Tiempos sub (literary, modern transitional). */
+.serif {
+  font-family: "Source Serif 4 Display", "Tiempos Headline", "Newsreader",
+               "EB Garamond", Georgia, serif;
+  font-feature-settings: "ss01" on;
+}
+
+.pixel-art {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  shape-rendering: crispEdges;
+}
+
+/* Terminal chrome — FLAT (no drop shadows, paper-style 2D card per brand rules) */
+.terminal {
+  background: var(--terminal-bg);
+  border-radius: 10px;
+  /* Single 1px inner hairline keeps card readable on sage paper without depth */
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+  position: relative;
+}
+
+.terminal-chrome {
+  background: var(--terminal-chrome);
+  height: 32px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-bottom: 1px solid var(--terminal-border);
+}
+
+.tl-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.terminal-title {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+  flex: 1;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.terminal-body {
+  padding: 16px 22px;
+  font-family: "VT323", ui-monospace, monospace;
+  font-size: 26px;
+  line-height: 1.18;
+  color: var(--text-primary);
+  height: calc(100% - 32px);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Flat scene container — kept as a class for layout parity, but NO 3D.
+   Per Claude brand rules (flat-only mandate): no perspective, no preserve-3d. */
+.scene-3d {
+  /* intentionally empty — was perspective + preserve-3d in the 3D draft */
+}
+
+/* Chat stack — newest at bottom, flexes upward.
+   Center anchored so content sits in the visual center of the terminal,
+   matching Claude reference pegs (centered, minimalist composition). */
+.chat-stack {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.chat-msg {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.chat-user {
+  color: var(--text-primary);
+}
+
+.chat-user-pill {
+  display: inline-block;
+  background: rgba(204, 120, 92, 0.18);
+  border-left: 3px solid var(--claude);
+  padding: 2px 12px;
+  border-radius: 0 6px 6px 0;
+}
+
+.chat-claude-pre {
+  color: var(--claude-soft);
+}
+
+.chat-bash {
+  color: var(--text-secondary);
+}
+
+.chat-out-good { color: var(--light-green); }
+.chat-out-warn { color: var(--claude-soft); }
+.chat-out-info { color: var(--text-dim); }
+
+.input-bar {
+  border-top: 1px solid var(--terminal-border);
+  margin-top: 12px;
+  padding-top: 10px;
+  color: var(--text-secondary);
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.input-cursor {
+  display: inline-block;
+  width: 11px;
+  height: 24px;
+  background: var(--text-primary);
+  vertical-align: text-bottom;
+  margin-left: 2px;
+}

@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@theme {
+  /* Figma chrome */
+  --color-fig-panel:    #2C2C2C;
+  --color-fig-panel-2:  #1E1E1E;
+  --color-fig-rule:     #383838;
+  --color-fig-text:     #FFFFFF;
+  --color-fig-text-dim: #B3B3B3;
+  --color-fig-text-mute:#7A7A7A;
+  --color-fig-canvas:   #E5E5E5;
+  --color-fig-select:   #0D99FF;
+
+  /* Bookworm mockup */
+  --color-lime-1:       #E8F5D8;
+  --color-lime-2:       #D4EDA8;
+  --color-lime-deep:    #A8DA8F;
+  --color-green-acc:    #7CB342;
+  --color-green-dark:   #1F5B2E;
+  --color-pink-acc:     #E91E63;
+  --color-blue-acc:     #3B82F6;
+
+  /* Card grid bg */
+  --color-grid-bg:      #2A2A2A;
+
+  --font-display: "Inter", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+}
+
+@layer base {
+  html, body, #root {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    background: #2A2A2A;
+    color: #FFFFFF;
+    font-family: var(--font-display);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+  * { box-sizing: border-box; }
+}

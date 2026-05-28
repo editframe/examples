@@ -1,0 +1,35 @@
+{
+  "name": "figma-agent-demo",
+  "version": "1.0.0",
+  "description": "Editframe React SDK template \u2014 Figma Native Agent product demo (30.8s, 1920\u00d71080 @ 30fps)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/editframe/examples"
+  },
+  "type": "module",
+  "scripts": {
+    "start": "editframe preview",
+    "render": "editframe render -o output/demo-silent.mp4"
+  },
+  "dependencies": {
+    "@editframe/cli": "0.54.0",
+    "@editframe/react": "0.54.0",
+    "@editframe/vite-plugin": "0.54.0",
+    "@fal-ai/client": "^1.10.1",
+    "@tailwindcss/vite": "^4.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "animejs": "^4.0.0",
+    "gsap": "^3.13.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "tailwindcss": "^4.0.0",
+    "three": "^0.180.0",
+    "vite": "^8.0.0",
+    "vite-plugin-singlefile": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@types/three": "^0.180.0"
+  }
+}
