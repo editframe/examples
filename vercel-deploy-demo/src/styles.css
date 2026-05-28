@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+/* Geist Sans + Geist Mono are loaded via <link> in index.html.
+   Falls back to the @import below if HTML link is stripped. */
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap");
+
+@theme {
+  /* Vercel canonical concrete-gray ramp — memorized from gray-100 → gray-950 */
+  --color-vc-gray-100: #f7f7f7;
+  --color-vc-gray-200: #e5e5e5;
+  --color-vc-gray-300: #d4d4d4;
+  --color-vc-gray-400: #a3a3a3; /* secondary text on dark */
+  --color-vc-gray-500: #737373; /* tertiary, dividers, prompt chars */
+  --color-vc-gray-600: #525252;
+  --color-vc-gray-700: #404040;
+  --color-vc-gray-800: #262626; /* subtle borders on dark */
+  --color-vc-gray-900: #171717; /* "Cod Gray" — most-shipped UI surface */
+  --color-vc-gray-950: #0a0a0a; /* off-black — canonical default bg */
+
+  --color-vc-fg: #ffffff;
+  --color-vc-blue: #0070f3; /* the ONE official brand color */
+  --color-vc-success: #3fb950; /* "Ready" / deploy success — pure green, not mint-cyan */
+  --color-vc-error: #ee0000;
+  --color-vc-warning: #f5a623;
+
+  --font-display: "Geist", system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "JetBrains Mono", monospace;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    background: #0a0a0a;
+    color: #ffffff;
+    font-family: var(--font-display);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    letter-spacing: -0.005em;
+  }
+  * {
+    box-sizing: border-box;
+  }
+}
