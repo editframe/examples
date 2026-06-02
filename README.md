@@ -30,58 +30,22 @@ npm install
 npm run render
 ```
 
-## Videos
+https://github.com/user-attachments/assets/0b080baa-e7e2-4900-bd86-7cfa04e66689
 
-Rendered outputs ship in each example’s `output/demo.mp4`. Preview below.
 
-### Figma — Native Agent
+https://github.com/user-attachments/assets/e42c4ef1-aae1-4992-8b24-1740f585f3d0
 
-https://github.com/editframe/examples/raw/main/figma-agent-demo/output/demo.mp4
 
-### Vercel — Deploy Flow
 
-https://github.com/editframe/examples/raw/main/vercel-deploy-demo/output/demo.mp4
+https://github.com/user-attachments/assets/6322af25-19e4-4bac-b155-46090f0bdce2
 
-### Vercel — Knowledge Base
 
-https://github.com/editframe/examples/raw/main/vercel-knowledge-base-demo/output/demo.mp4
 
-### Claude — Security Announcement
+https://github.com/user-attachments/assets/88ab8452-8850-48f3-b829-89140dec10f6
 
-https://github.com/editframe/examples/raw/main/claude-security-demo/output/demo.mp4
 
-### Claude Code — Agent View
 
-https://github.com/editframe/examples/raw/main/claude-code-demo/output/demo.mp4
+https://github.com/user-attachments/assets/22e375eb-3dc2-4d19-af09-000e577f42c3
 
-### Claude — Office
 
-https://github.com/editframe/examples/raw/main/claude-office-demo/output/demo.mp4
 
-### Claude Code — Financial Services
-
-https://github.com/editframe/examples/raw/main/claude-code-financial-demo/output/demo.mp4
-
-### Cursor + Jira
-
-https://github.com/editframe/examples/raw/main/cursor-jira-demo/output/demo.mp4
-
-### Cursor — SDK
-
-https://github.com/editframe/examples/raw/main/cursor-sdk-demo/output/demo.mp4
-
-### Cursor — Cloud Agents
-
-https://github.com/editframe/examples/raw/main/cursor-cloud-agents-demo/output/demo.mp4
-
-### fal.ai — Assets
-
-https://github.com/editframe/examples/raw/main/fal-ai-demo/output/demo.mp4
-
-### Clerk — CLI Setup
-
-https://github.com/editframe/examples/raw/main/clerk-cli-demo/output/demo.mp4
-
-### Codex — Bug Fix Workflow
-
-https://github.com/editframe/examples/raw/main/codex-demo/output/demo.mp4
