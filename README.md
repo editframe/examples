@@ -13,6 +13,14 @@ Each example is a self-contained project. Clone the repo, install dependencies, 
 | [`claude-security-demo`](claude-security-demo/) | Claude security public beta announcement — 19s |
 | [`cursor-jira-demo`](cursor-jira-demo/) | Cursor replying to a Jira comment inside the editor — 28.5s |
 | [`claude-code-demo`](claude-code-demo/) | Claude Code agent view with orchestrated parallel subagents — 36s |
+| [`claude-office-demo`](claude-office-demo/) | Claude for Excel, PowerPoint, and Word — 30s |
+| [`claude-code-financial-demo`](claude-code-financial-demo/) | Claude Code agent templates for financial services — 30s |
+| [`cursor-sdk-demo`](cursor-sdk-demo/) | Cursor SDK product demo (light paper variant) — 25.3s |
+| [`cursor-cloud-agents-demo`](cursor-cloud-agents-demo/) | Cursor Cloud Agents — 20.4s |
+| [`vercel-knowledge-base-demo`](vercel-knowledge-base-demo/) | Vercel Knowledge Base — 28.1s |
+| [`fal-ai-demo`](fal-ai-demo/) | fal.ai Assets introduction — 15.1s |
+| [`clerk-cli-demo`](clerk-cli-demo/) | Clerk CLI setup — 17.1s |
+| [`codex-demo`](codex-demo/) | OpenAI Codex bug fix workflow — 30s |
 
 ## Quick start
 

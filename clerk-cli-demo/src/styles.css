@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* JetBrains Mono + Inter via <link> in index.html. Fallback import below. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap");
+
+@theme {
+  /* Clerk canonical color system */
+  --color-clerk-bg:          #0D0D0D; /* near-black canvas — NOT pure #000 */
+  --color-clerk-surface:     #131313; /* terminal window bg */
+  --color-clerk-surface2:    #1A1A1A; /* subtle elevated surface */
+  --color-clerk-border:      #2A2A2A; /* hairline borders */
+  --color-clerk-fg:          #FFFFFF; /* primary text */
+  --color-clerk-fg-muted:    #888888; /* dim lines, dim status */
+  --color-clerk-fg-dim:      #555555; /* tree chars (|, L, r) */
+  --color-clerk-purple:      #7C3AED; /* Clerk brand purple */
+  --color-clerk-purple-hi:   #9333EA; /* elevated purple — checks, CREATE/MODIFY */
+  --color-clerk-purple-soft: #A78BFA; /* logo icon lavender top arc */
+  --color-clerk-cyan:        #67E8F9; /* "npm install -g clerk" command color */
+
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    background: #0D0D0D;
+    color: #ffffff;
+    font-family: var(--font-mono);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    letter-spacing: 0;
+  }
+  * {
+    box-sizing: border-box;
+  }
+}

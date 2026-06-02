@@ -1,0 +1,32 @@
+{
+  "name": "fal-ai-demo",
+  "version": "1.0.0",
+  "description": "Editframe React SDK \u2014 Fal.ai 'Introducing fal Assets' product demo (15.1s, 1920\u00d71080 @ 30fps)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/editframe/examples"
+  },
+  "type": "module",
+  "scripts": {
+    "start": "editframe preview",
+    "render": "editframe render -o output/demo-silent.mp4"
+  },
+  "dependencies": {
+    "@editframe/cli": "0.54.0",
+    "@editframe/react": "0.54.0",
+    "@editframe/vite-plugin": "0.54.0",
+    "@tailwindcss/vite": "^4.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "animejs": "^4.0.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "tailwindcss": "^4.0.0",
+    "vite": "^8.0.0",
+    "vite-plugin-singlefile": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.9.3"
+  }
+}
