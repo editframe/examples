@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: #d9d1c4;
+}
+
+body {
+  overflow: hidden;
+}
+
+.checkpoint-shell {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #d9d1c4;
+}
+
+.checkpoint-shell canvas {
+  display: block;
+}
+
+.checkpoint-canvas-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.checkpoint-view-label {
+  position: absolute;
+  left: 32px;
+  bottom: 28px;
+  padding: 10px 14px;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(33, 29, 25, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 6px;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 20px;
+  letter-spacing: 0;
+  backdrop-filter: blur(8px);
+}
+
+.room-label {
+  position: absolute;
+  left: 54px;
+  bottom: 52px;
+  color: rgba(255, 255, 255, 0.88);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.45);
+  transition: opacity 120ms linear;
+  pointer-events: none;
+}
+
+.cut-fade {
+  position: absolute;
+  inset: 0;
+  background: #050403;
+  pointer-events: none;
+}
