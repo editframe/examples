@@ -21,6 +21,7 @@ Each example is a self-contained project. Clone the repo, install dependencies, 
 | [`fal-ai-demo`](fal-ai-demo/) | fal.ai Assets introduction — 15.1s |
 | [`clerk-cli-demo`](clerk-cli-demo/) | Clerk CLI setup — 17.1s |
 | [`codex-demo`](codex-demo/) | OpenAI Codex bug fix workflow — 30s |
+| [`apartment-walkthrough-demo`](apartment-walkthrough-demo/) | 3D apartment walkthrough with React Three Fiber — 116s |
 
 ## Quick start
 
@@ -79,7 +80,6 @@ https://github.com/user-attachments/assets/c8c74dcd-826e-4310-af73-b8f507e4b94c
 
 
 https://github.com/user-attachments/assets/40e13133-7637-4c0e-aa0a-3989965a6620
-
 
 
 
