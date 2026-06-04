@@ -1,0 +1,155 @@
+{
+  "asset": {
+    "generator": "Khronos glTF Blender I/O v1.6.16",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "name": "side_table_tall_01"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "side_table_tall_01",
+      "normalTexture": {
+        "index": 0
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 1
+        },
+        "metallicRoughnessTexture": {
+          "index": 2
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Cube.001",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    }
+  ],
+  "images": [
+    {
+      "mimeType": "image/jpeg",
+      "name": "side_table_tall_01_gl_normal",
+      "uri": "textures/side_table_tall_01_nor_gl_2k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "side_table_tall_01_BaseColor.png",
+      "uri": "textures/side_table_tall_01_diff_2k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "side_table_tall_01_metallic-side_table_tall_01_roughness",
+      "uri": "textures/side_table_tall_01_arm_2k.jpg"
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 5186,
+      "max": [
+        0.19199135899543762,
+        0.7611303329467773,
+        0.19199137389659882
+      ],
+      "min": [
+        -0.19199135899543762,
+        -0.000021163985366001725,
+        -0.19199134409427643
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 5186,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 5186,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5123,
+      "count": 19224,
+      "type": "SCALAR"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 62232,
+      "byteOffset": 0
+    },
+    {
+      "buffer": 0,
+      "byteLength": 62232,
+      "byteOffset": 62232
+    },
+    {
+      "buffer": 0,
+      "byteLength": 41488,
+      "byteOffset": 124464
+    },
+    {
+      "buffer": 0,
+      "byteLength": 38448,
+      "byteOffset": 165952
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 204400,
+      "uri": "side_table_tall_01.bin"
+    }
+  ]
+}

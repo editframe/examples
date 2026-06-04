@@ -1,0 +1,595 @@
+{
+  "asset": {
+    "generator": "Khronos glTF Blender I/O v3.5.30",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "name": "modern_wooden_cabinet_body"
+    },
+    {
+      "mesh": 1,
+      "name": "modern_wooden_cabinet_door_l",
+      "translation": [
+        -1.189986228942871,
+        0.1639975905418396,
+        0.22995403409004211
+      ]
+    },
+    {
+      "mesh": 2,
+      "name": "modern_wooden_cabinet_door_r",
+      "rotation": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "translation": [
+        1.1899865865707397,
+        0.1639975905418396,
+        0.22995403409004211
+      ]
+    },
+    {
+      "name": "modern_wooden_cabinet_path_l",
+      "translation": [
+        -1.1899863481521606,
+        0.1639975905418396,
+        0.22995403409004211
+      ]
+    },
+    {
+      "name": "modern_wooden_cabinet_path_r",
+      "translation": [
+        1.1899865865707397,
+        0.1639975905418396,
+        0.22995403409004211
+      ]
+    }
+  ],
+  "animations": [
+    {
+      "channels": [
+        {
+          "sampler": 0,
+          "target": {
+            "node": 0,
+            "path": "translation"
+          }
+        },
+        {
+          "sampler": 1,
+          "target": {
+            "node": 0,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 2,
+          "target": {
+            "node": 0,
+            "path": "scale"
+          }
+        }
+      ],
+      "name": "modern_wooden_cabinet_body",
+      "samplers": [
+        {
+          "input": 12,
+          "interpolation": "LINEAR",
+          "output": 13
+        },
+        {
+          "input": 12,
+          "interpolation": "LINEAR",
+          "output": 14
+        },
+        {
+          "input": 12,
+          "interpolation": "LINEAR",
+          "output": 15
+        }
+      ]
+    },
+    {
+      "channels": [
+        {
+          "sampler": 0,
+          "target": {
+            "node": 3,
+            "path": "translation"
+          }
+        },
+        {
+          "sampler": 1,
+          "target": {
+            "node": 3,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 2,
+          "target": {
+            "node": 3,
+            "path": "scale"
+          }
+        }
+      ],
+      "name": "modern_wooden_cabinet_path_l",
+      "samplers": [
+        {
+          "input": 12,
+          "interpolation": "LINEAR",
+          "output": 16
+        },
+        {
+          "input": 12,
+          "interpolation": "LINEAR",
+          "output": 17
+        },
+        {
+          "input": 12,
+          "interpolation": "LINEAR",
+          "output": 18
+        }
+      ]
+    },
+    {
+      "channels": [
+        {
+          "sampler": 0,
+          "target": {
+            "node": 4,
+            "path": "translation"
+          }
+        },
+        {
+          "sampler": 1,
+          "target": {
+            "node": 4,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 2,
+          "target": {
+            "node": 4,
+            "path": "scale"
+          }
+        }
+      ],
+      "name": "modern_wooden_cabinet_path_r",
+      "samplers": [
+        {
+          "input": 12,
+          "interpolation": "LINEAR",
+          "output": 19
+        },
+        {
+          "input": 12,
+          "interpolation": "LINEAR",
+          "output": 20
+        },
+        {
+          "input": 12,
+          "interpolation": "LINEAR",
+          "output": 21
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "modern_wooden_cabinet",
+      "normalTexture": {
+        "index": 0
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 1
+        },
+        "metallicFactor": 0,
+        "metallicRoughnessTexture": {
+          "index": 2
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "modern_wooden_cabinet_body",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "TEXCOORD_0": 1,
+            "NORMAL": 2
+          },
+          "indices": 3,
+          "material": 0
+        }
+      ]
+    },
+    {
+      "name": "modern_wooden_cabinet_door_l",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 4,
+            "TEXCOORD_0": 5,
+            "NORMAL": 6
+          },
+          "indices": 7,
+          "material": 0
+        }
+      ]
+    },
+    {
+      "name": "modern_wooden_cabinet_door_r",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 8,
+            "TEXCOORD_0": 9,
+            "NORMAL": 10
+          },
+          "indices": 11,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    }
+  ],
+  "images": [
+    {
+      "mimeType": "image/jpeg",
+      "name": "modern_wooden_cabinet_nor_gl",
+      "uri": "textures/modern_wooden_cabinet_nor_gl_2k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "modern_wooden_cabinet_diff",
+      "uri": "textures/modern_wooden_cabinet_diff_2k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "modern_wooden_cabinet_rough",
+      "uri": "textures/modern_wooden_cabinet_arm_2k.jpg"
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 17383,
+      "max": [
+        1.2200002670288086,
+        0.680159330368042,
+        0.25
+      ],
+      "min": [
+        -1.220000147819519,
+        0.000016823410987854004,
+        -0.27000001072883606
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 17383,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 17383,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5123,
+      "count": 55200,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 7076,
+      "max": [
+        1.1797165870666504,
+        0.4763185381889343,
+        0.010218984447419643
+      ],
+      "min": [
+        -0.010000068694353104,
+        -2.2930717324953775e-9,
+        -0.34221288561820984
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5126,
+      "count": 7076,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 6,
+      "componentType": 5126,
+      "count": 7076,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5123,
+      "count": 9864,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 8,
+      "componentType": 5126,
+      "count": 7076,
+      "max": [
+        1.179332971572876,
+        0.4763185381889343,
+        0.3422127664089203
+      ],
+      "min": [
+        -0.01000018510967493,
+        -2.2930715104507726e-9,
+        -0.01000000536441803
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 9,
+      "componentType": 5126,
+      "count": 7076,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 10,
+      "componentType": 5126,
+      "count": 7076,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 11,
+      "componentType": 5123,
+      "count": 9864,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 12,
+      "componentType": 5126,
+      "count": 90,
+      "max": [
+        3.75
+      ],
+      "min": [
+        0.041666666666666664
+      ],
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 13,
+      "componentType": 5126,
+      "count": 90,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 14,
+      "componentType": 5126,
+      "count": 90,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 15,
+      "componentType": 5126,
+      "count": 90,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 16,
+      "componentType": 5126,
+      "count": 90,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 17,
+      "componentType": 5126,
+      "count": 90,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 18,
+      "componentType": 5126,
+      "count": 90,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 19,
+      "componentType": 5126,
+      "count": 90,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 20,
+      "componentType": 5126,
+      "count": 90,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 21,
+      "componentType": 5126,
+      "count": 90,
+      "type": "VEC3"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 208596,
+      "byteOffset": 0,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 139064,
+      "byteOffset": 208596,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 208596,
+      "byteOffset": 347660,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 110400,
+      "byteOffset": 556256,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 84912,
+      "byteOffset": 666656,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 56608,
+      "byteOffset": 751568,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 84912,
+      "byteOffset": 808176,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 19728,
+      "byteOffset": 893088,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 84912,
+      "byteOffset": 912816,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 56608,
+      "byteOffset": 997728,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 84912,
+      "byteOffset": 1054336,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 19728,
+      "byteOffset": 1139248,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 360,
+      "byteOffset": 1158976
+    },
+    {
+      "buffer": 0,
+      "byteLength": 1080,
+      "byteOffset": 1159336
+    },
+    {
+      "buffer": 0,
+      "byteLength": 1440,
+      "byteOffset": 1160416
+    },
+    {
+      "buffer": 0,
+      "byteLength": 1080,
+      "byteOffset": 1161856
+    },
+    {
+      "buffer": 0,
+      "byteLength": 1080,
+      "byteOffset": 1162936
+    },
+    {
+      "buffer": 0,
+      "byteLength": 1440,
+      "byteOffset": 1164016
+    },
+    {
+      "buffer": 0,
+      "byteLength": 1080,
+      "byteOffset": 1165456
+    },
+    {
+      "buffer": 0,
+      "byteLength": 1080,
+      "byteOffset": 1166536
+    },
+    {
+      "buffer": 0,
+      "byteLength": 1440,
+      "byteOffset": 1167616
+    },
+    {
+      "buffer": 0,
+      "byteLength": 1080,
+      "byteOffset": 1169056
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 1170136,
+      "uri": "modern_wooden_cabinet.bin"
+    }
+  ]
+}

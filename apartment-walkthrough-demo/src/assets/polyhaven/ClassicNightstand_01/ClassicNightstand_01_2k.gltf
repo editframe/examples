@@ -1,0 +1,155 @@
+{
+  "asset": {
+    "generator": "Khronos glTF Blender I/O v1.6.16",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "name": "ClassicNightstand_01"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "ClassicNightstand_01",
+      "normalTexture": {
+        "index": 0
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 1
+        },
+        "metallicRoughnessTexture": {
+          "index": 2
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Plane.003",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    }
+  ],
+  "images": [
+    {
+      "mimeType": "image/jpeg",
+      "name": "ClassicNightstand_01_nor_gl",
+      "uri": "textures/ClassicNightstand_01_nor_gl_2k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "ClassicNightstand_01_diff",
+      "uri": "textures/ClassicNightstand_01_diff_2k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "ClassicNightstand_01_metallic-ClassicNightstand_01_roughness",
+      "uri": "textures/ClassicNightstand_01_arm_2k.jpg"
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 1771,
+      "max": [
+        0.28387612104415894,
+        0.6999649405479431,
+        0.2120964378118515
+      ],
+      "min": [
+        -0.2838761508464813,
+        -4.329826097659861e-8,
+        -0.2120964378118515
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 1771,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 1771,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5123,
+      "count": 6006,
+      "type": "SCALAR"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 21252,
+      "byteOffset": 0
+    },
+    {
+      "buffer": 0,
+      "byteLength": 21252,
+      "byteOffset": 21252
+    },
+    {
+      "buffer": 0,
+      "byteLength": 14168,
+      "byteOffset": 42504
+    },
+    {
+      "buffer": 0,
+      "byteLength": 12012,
+      "byteOffset": 56672
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 68684,
+      "uri": "ClassicNightstand_01.bin"
+    }
+  ]
+}

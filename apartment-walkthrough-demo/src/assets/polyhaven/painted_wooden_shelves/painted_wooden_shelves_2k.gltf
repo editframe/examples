@@ -1,0 +1,160 @@
+{
+  "asset": {
+    "generator": "Khronos glTF Blender I/O v4.0.44",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "name": "painted_wooden_shelves"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "painted_wooden_shelves",
+      "normalTexture": {
+        "index": 0
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 1
+        },
+        "metallicFactor": 0,
+        "metallicRoughnessTexture": {
+          "index": 2
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "shevles.001",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    }
+  ],
+  "images": [
+    {
+      "mimeType": "image/jpeg",
+      "name": "painted_wooden_shelves_nor_gl",
+      "uri": "textures/painted_wooden_shelves_nor_gl_2k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "painted_wooden_shelves_diff",
+      "uri": "textures/painted_wooden_shelves_diff_2k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "painted_wooden_shelves_rough",
+      "uri": "textures/painted_wooden_shelves_arm_2k.jpg"
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 548,
+      "max": [
+        0.25550732016563416,
+        1.1241090297698975,
+        0.36709490418434143
+      ],
+      "min": [
+        -0.25560837984085083,
+        -0.000963064085226506,
+        -1.1169147384748612e-8
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 548,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 548,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5123,
+      "count": 1572,
+      "type": "SCALAR"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 6576,
+      "byteOffset": 0,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 6576,
+      "byteOffset": 6576,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 4384,
+      "byteOffset": 13152,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 3144,
+      "byteOffset": 17536,
+      "target": 34963
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 20680,
+      "uri": "painted_wooden_shelves.bin"
+    }
+  ]
+}

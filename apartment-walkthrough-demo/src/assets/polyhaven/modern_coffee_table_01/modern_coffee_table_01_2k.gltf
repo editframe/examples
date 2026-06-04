@@ -1,0 +1,156 @@
+{
+  "asset": {
+    "generator": "Khronos glTF Blender I/O v1.7.33",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "name": "modern_coffee_table_01"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "modern_coffee_table_01",
+      "normalTexture": {
+        "index": 0
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 1
+        },
+        "metallicFactor": 0,
+        "metallicRoughnessTexture": {
+          "index": 2
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Cube.003",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    }
+  ],
+  "images": [
+    {
+      "mimeType": "image/jpeg",
+      "name": "modern_coffee_table_01_nor_gl",
+      "uri": "textures/modern_coffee_table_01_nor_gl_2k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "modern_coffee_table_01_diff",
+      "uri": "textures/modern_coffee_table_01_diff_2k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "modern_coffee_table_01_rough",
+      "uri": "textures/modern_coffee_table_01_rough_2k.jpg"
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 3995,
+      "max": [
+        0.3000001311302185,
+        0.3898848593235016,
+        0.601161003112793
+      ],
+      "min": [
+        -0.2999998927116394,
+        -0.00011512637138366699,
+        -0.6006690263748169
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 3995,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 3995,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5123,
+      "count": 13512,
+      "type": "SCALAR"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 47940,
+      "byteOffset": 0
+    },
+    {
+      "buffer": 0,
+      "byteLength": 47940,
+      "byteOffset": 47940
+    },
+    {
+      "buffer": 0,
+      "byteLength": 31960,
+      "byteOffset": 95880
+    },
+    {
+      "buffer": 0,
+      "byteLength": 27024,
+      "byteOffset": 127840
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 154864,
+      "uri": "modern_coffee_table_01.bin"
+    }
+  ]
+}

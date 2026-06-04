@@ -1,0 +1,268 @@
+{
+  "asset": {
+    "generator": "Khronos glTF Blender I/O v3.3.32",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "blend_export.001",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "name": "modern_arm_chair_01"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "modern_arm_chair_01_legs",
+      "normalTexture": {
+        "index": 0
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 1
+        },
+        "metallicRoughnessTexture": {
+          "index": 2
+        }
+      }
+    },
+    {
+      "doubleSided": true,
+      "name": "modern_arm_chair_01_pillow",
+      "normalTexture": {
+        "index": 3
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 4
+        },
+        "metallicRoughnessTexture": {
+          "index": 5
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Cube.007",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0
+        },
+        {
+          "attributes": {
+            "POSITION": 4,
+            "NORMAL": 5,
+            "TEXCOORD_0": 6
+          },
+          "indices": 7,
+          "material": 1
+        }
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    },
+    {
+      "sampler": 0,
+      "source": 3
+    },
+    {
+      "sampler": 0,
+      "source": 4
+    },
+    {
+      "sampler": 0,
+      "source": 5
+    }
+  ],
+  "images": [
+    {
+      "mimeType": "image/jpeg",
+      "name": "modern_arm_chair_01_legs_nor_gl",
+      "uri": "textures/modern_arm_chair_01_legs_nor_gl_2k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "modern_arm_chair_01_legs_diff",
+      "uri": "textures/modern_arm_chair_01_legs_diff_2k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "modern_arm_chair_01_legs_metal-modern_arm_chair_01_legs_rough",
+      "uri": "textures/modern_arm_chair_01_legs_arm_2k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "modern_arm_chair_01_pillow_nor_gl",
+      "uri": "textures/modern_arm_chair_01_pillow_nor_gl_2k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "modern_arm_chair_01_pillow_diff",
+      "uri": "textures/modern_arm_chair_01_pillow_diff_2k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "modern_arm_chair_01_pillow_metal-modern_arm_chair_01_pillow_rough",
+      "uri": "textures/modern_arm_chair_01_pillow_arm_2k.jpg"
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 3884,
+      "max": [
+        0.4135356843471527,
+        0.8698092699050903,
+        0.41110995411872864
+      ],
+      "min": [
+        -0.4068087339401245,
+        0.0003815953677985817,
+        -0.56038498878479
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 3884,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 3884,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5123,
+      "count": 16824,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 1967,
+      "max": [
+        0.3583531975746155,
+        1.0232336521148682,
+        0.38417327404022217
+      ],
+      "min": [
+        -0.3549351990222931,
+        0.34748637676239014,
+        -0.5754517316818237
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5126,
+      "count": 1967,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 6,
+      "componentType": 5126,
+      "count": 1967,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5123,
+      "count": 9924,
+      "type": "SCALAR"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 46608,
+      "byteOffset": 0,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 46608,
+      "byteOffset": 46608,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 31072,
+      "byteOffset": 93216,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 33648,
+      "byteOffset": 124288,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 23604,
+      "byteOffset": 157936,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 23604,
+      "byteOffset": 181540,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 15736,
+      "byteOffset": 205144,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 19848,
+      "byteOffset": 220880,
+      "target": 34963
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 240728,
+      "uri": "modern_arm_chair_01.bin"
+    }
+  ]
+}
