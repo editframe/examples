@@ -1,0 +1,10 @@
+node_modules/
+dist/
+output/
+*.mp4
+*.webm
+*.mov
+*.log
+.DS_Store
+direct-export-frames*/
+*-frames/

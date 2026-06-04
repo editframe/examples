@@ -1,0 +1,42 @@
+{
+  "name": "apartment-walkthrough-demo",
+  "version": "1.0.0",
+  "description": "Editframe and React Three Fiber 3D apartment walkthrough demo (116s, 1280x720 canvas export)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/editframe/examples"
+  },
+  "type": "module",
+  "scripts": {
+    "start": "vite --host 127.0.0.1 --port 5184",
+    "typecheck": "tsc --noEmit",
+    "render": "node scripts/record-canvas-export.mjs"
+  },
+  "dependencies": {
+    "@editframe/cli": "0.56.0",
+    "@editframe/react": "0.56.0",
+    "@editframe/vite-plugin": "0.56.0",
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.17.10",
+    "@react-three/offscreen": "0.0.8",
+    "@react-three/postprocessing": "^2.16.3",
+    "@tailwindcss/vite": "^4.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "maath": "^0.10.8",
+    "playwright": "^1.53.0",
+    "postprocessing": "^6.36.3",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "tailwindcss": "^4.0.0",
+    "three": "^0.164.1",
+    "vite": "^8.0.0",
+    "vite-plugin-singlefile": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@types/three": "^0.184.1",
+    "typescript": "^5.9.3"
+  }
+}
