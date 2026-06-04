@@ -21,4 +21,8 @@ Both are loaded from Fontshare with system fallbacks.
 
 ## Audio
 
-No audio is bundled in this build. The rendered `output/demo.mp4` is silent.
+Original synthetic score generated for this example.
+
+- Runtime asset: `public/audio/openclaw-score.m4a`
+- Mixed into `output/demo.mp4` by `scripts/render-with-audio.sh`
+- No external music, loops, or samples are bundled.

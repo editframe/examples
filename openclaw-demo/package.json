@@ -9,7 +9,7 @@
   "type": "module",
   "scripts": {
     "start": "editframe preview",
-    "render": "editframe render -o output/demo.mp4"
+    "render": "bash scripts/render-with-audio.sh"
   },
   "dependencies": {
     "@editframe/cli": "0.54.0",
