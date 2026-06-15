@@ -1,0 +1,177 @@
+<div align="center">
+
+# OLIPOP — A New Kind of Soda
+
+**A 20-second retro-illustrated social ad, built with the [Editframe](https://editframe.com) React SDK.**
+
+A rotating-sunburst hook lifts the OLIPOP wordmark, a Tropical Punch can pushes in over rising bubbles, a real retro-animation clip plays inside a stationary framed well, the sugar-swap health story slams in (39g → 4g · 9g fiber), the flavor rainbow montages into a grid, and it resolves on a "drink olipop" lockup.
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-E8503A.svg?style=for-the-badge)](LICENSE)
+[![Built with Editframe](https://img.shields.io/badge/built_with-Editframe-0066CC?style=for-the-badge)](https://editframe.com)
+[![Brand: OLIPOP](https://img.shields.io/badge/brand-OLIPOP-14433D?style=for-the-badge)](#brand)
+[![Format](https://img.shields.io/badge/1080×1920-30fps-14433D?style=for-the-badge)](#)
+[![Audio: music](https://img.shields.io/badge/audio-music-F2B705?style=for-the-badge)](CREDITS.md)
+
+</div>
+
+---
+
+## Watch
+
+<!--
+  Inline player: open a new Issue (or PR/comment) in this repo, drag-drop
+  output/demo.mp4 into the editor so GitHub mints a
+  https://github.com/user-attachments/assets/<uuid> URL, then paste that bare
+  URL on its own line right here and commit. It renders as a native <video>.
+-->
+
+> The final shipped render sits at [`output/demo.mp4`](output/demo.mp4) — 1080×1920 · 30fps · ~20s · with audio.
+
+---
+
+## Quick start
+
+```bash
+npm install
+NO_COLOR=1 FORCE_COLOR=0 npm run render    # → output/demo-silent.mp4  (poster in the well)
+bash composite-well.sh                     # → output/demo-composite.mp4  (real clip composited into the well)
+bash add-audio.sh                          # → output/demo.mp4  (music + SFX muxed — the committed final)
+```
+
+This is the **2-step composite pipeline**: the React render leaves the video well
+**empty** with a poster placeholder; `composite-well.sh` (pure FFmpeg) overlays the
+real OLIPOP retro-animation clip into the exact well rect (`180,640,720,720`, r36)
+during the stationary `5–9s` window; `add-audio.sh` then lays the music bed and SFX.
+
+> **Windows quirk:** the Editframe CLI's Vite spawn parses ANSI-colored stdout. The
+> `NO_COLOR=1 FORCE_COLOR=0` prefix is required or render init times out. Run the
+> `.sh` steps in Git Bash / WSL.
+
+---
+
+## Scene timeline
+
+| # | Time | Scene | What happens |
+|---|---|---|---|
+| 1 | `0.0 – 2.0s` | **Hook** | Rotating coral sunburst + twinkle stars; OLIPOP wordmark mask-wipes up on a cream sticker-badge, palm emblem, "a new kind of soda" bounce-settles; coral color-block wipes out |
+| 2 | `2.0 – 5.0s` | **Can hero** | Tropical Punch can cinematic push-in on a coral sunburst + concentric rings — rising bubbles, condensation specular sweep, grounded shadow + bob, "tropical punch" + "prebiotics · botanicals · plant fiber" |
+| 3 | `5.0 – 9.0s` | **Video well** | A chunky retro-TV badge (gold star, blinking "NOW PLAYING" pill) holds **perfectly stationary** around the fixed well `180,640,720,720`; the real OLIPOP retro-animation plays inside, editorial copy around it |
+| 4 | `9.0 – 12.2s` | **The swap** | "regular soda 39g sugar" card slides in and gets struck through + grayed; a "vs" pops; the OLIPOP card slams in — "4g sugar", "9g fiber", "gut-healthy" chips stagger up |
+| 5 | `12.2 – 16.2s` | **Flavor rainbow** | Six flavor cans montage with a color-block flip per flavor, then collapse into a 3×2 grid under "find your flavor" |
+| 6 | `16.2 – 18.2s` | **Offer** | The 12-pack pushes in on a sunburst, "build your variety pack" drops, supporting line clip-wipes in |
+| 7 | `18.2 – 20.0s` | **CTA** | Outro coral sunburst + concentric rings open, the "drink olipop" lockup pops + bobs, sparkle stars twinkle, drinkolipop.com rises in |
+
+---
+
+## Audio
+
+A single music bed runs under the full 20s — loudnorm-normalized with a fade-in at the
+top and a fade-out under the CTA hold. This cut is **music only**; there are no sound
+effects. The mux is reproduced by [`add-audio.sh`](add-audio.sh). See [`CREDITS.md`](CREDITS.md)
+for provenance.
+
+| Cue | Master ms | Source file |
+|---|---|---|
+| Music bed | 0 – 20000 | `audio/music-bed.mp3` (loudnorm −16, fade-in 0.6s, fade-out 18.5s) |
+
+---
+
+## Brand
+
+OLIPOP runs a retro-illustrated, nostalgic palette — seafoam/mint ground, deep teal/forest
+ink, warm cream, with coral as the Tropical Punch hero accent and golden sunburst rays.
+**Playfair Display** (warm Windsor-ish serif) carries the display voice; **Archivo** (clean
+grotesque sans) handles tracked caps and body. Tokens are the source of truth in
+[`src/constants.ts`](src/constants.ts); text never uses pure `#000`.
+
+| Token | Hex | Use |
+|---|---|---|
+| `SEAFOAM` | `#BFE3E0` | Tropical can body / mint ground |
+| `SEAFOAM_LT` | `#EAF5F6` | Pale seafoam wash |
+| `TEAL_INK` | `#14433D` | Display ink, borders, body on light |
+| `TEAL_DEEP` | `#0E332E` | Deep backing / well interior |
+| `CREAM` | `#F3ECDD` | Warm cream surfaces |
+| `CREAM_LT` | `#FAF4E8` | Badge / card fills |
+| `CORAL` | `#E8503A` | Tropical Punch accent, wordmark, CTA |
+| `SOFT_PINK` | `#F2B6AA` | Soft pink sunburst accent |
+| `SUNSET_GOLD` | `#F2B705` | Golden sunburst rays, star flourish |
+| Headline font | Playfair Display (serif) | Wordmark + display copy |
+| Body font | Archivo (sans) | Tracked caps, labels, body |
+
+---
+
+## Repo layout
+
+```
+.
+├── README.md                  ← you are here
+├── LICENSE                    ← MIT (code) + brand/audio notes
+├── BRIEF.md                   ← creative brief + scene plan
+├── CREDITS.md                 ← audio provenance + brand notes
+├── brand-rules-olipop.md      ← brand spec (canonical: src/constants.ts)
+├── .env.example               ← env vars (none required to render)
+├── composite-well.sh          ← STEP 1 — FFmpeg: real clip → the fixed video well
+├── add-audio.sh               ← STEP 2 — FFmpeg: music mux → output/demo.mp4
+├── index.html
+├── package.json
+├── package-lock.json
+├── vite.config.ts
+├── tsconfig.json
+├── assets/
+│   ├── well-video.mp4         ← OLIPOP retro-animation composited into the well (5–9s)
+│   └── well-mask.png          ← 720×720 rounded-rect alpha mask for the well
+├── audio/                     ← music bed (commercial-cleared)  (+ audio/README.md)
+│   └── music-bed.mp3
+├── output/
+│   └── demo.mp4               ← final shipped render (well composited + audio)
+└── src/
+    ├── Video.tsx              ← composition root (20s, 7 beats, fixed Timegroup)
+    ├── main.tsx
+    ├── constants.ts           ← canonical brand tokens + master beat timings
+    ├── styles.css
+    ├── assets.ts              ← base64-inlined can/pack/poster images (Editframe inlines assets)
+    ├── assets/                ← source can/pack/poster art (raw PNG + optimized WebP cache)
+    └── components/
+        ├── retro.tsx          ← Sunburst, Rings, WaveBand, Scallop, Star, PalmEmblem, Bubble
+        └── helpers.ts         ← track, lerp, clamp, easings (outBack, easeOutCubic…)
+```
+
+---
+
+## Fork & adapt
+
+```bash
+git clone https://github.com/editframe/olipop-demo.git
+cd olipop-demo
+npm install
+NO_COLOR=1 FORCE_COLOR=0 npm run render
+bash composite-well.sh
+bash add-audio.sh
+```
+
+1. **Swap the story** — each beat lives in `src/Video.tsx`, gated by the master ms
+   constants in `src/constants.ts`. Edit a beat's timing window and its `onFrame` body.
+2. **Rebrand** — replace the tokens in `src/constants.ts` (seafoam, teal, coral, cream,
+   fonts). Never read pure `#000` or drop shadows on text.
+3. **Re-skin the well** — drop a new clip at `assets/well-video.mp4` and a matching
+   720×720 alpha mask at `assets/well-mask.png`; the well rect stays `180,640,720,720`.
+4. **Swap the music** — drop a replacement `music-bed.mp3` into `audio/` (or update the
+   `MUSIC=` variable in `add-audio.sh`); log it in [`CREDITS.md`](CREDITS.md).
+5. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render`, then `bash composite-well.sh`,
+   then `bash add-audio.sh`.
+
+---
+
+## License
+
+[MIT](LICENSE) — the demo **code** is free for commercial use, no attribution required.
+OLIPOP brand assets and bundled media are demo-only; see [`LICENSE`](LICENSE) and
+[`CREDITS.md`](CREDITS.md).
+
+---
+
+<div align="center">
+
+Built with [Editframe](https://editframe.com) · Brand: OLIPOP
+
+</div>

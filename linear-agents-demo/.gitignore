@@ -1,0 +1,61 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+.vite/
+.vite-cache/
+.turbo/
+
+# Render artifacts — the repo commits ONLY output/demo.mp4 (final, with audio)
+output/*
+!output/demo.mp4
+output.mp4
+demo-silent.mp4
+demo-final.mp4
+demo-test.mp4
+demo-raw.mp4
+frames/
+myframes/
+_refframes/
+cur_*.png
+*_f[0-9]*.jpg
+
+# Internal build / QA artifacts — not part of the published template
+.claude/
+_linear_run/
+qa/
+judgeqa/
+editframes-opus48-base/
+.trace-frames/
+ref-frames/
+refs/
+debug-frames/
+verify/
+verify-frames/
+verify-final/
+scripts/
+write-scenes.mjs
+src.*-bak/
+_check/
+*_COMMENTS*.md
+_ROUND*.md
+_USER_COMMENTS.txt
+chk*.jpg
+chk*.png
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Env
+.env
+.env.local
+.env.*.local

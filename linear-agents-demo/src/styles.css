@@ -1,0 +1,25 @@
+/* Linear for Agents — global render canvas styles.
+ * All scene styling is inline in Video.tsx; this just resets the
+ * document so the 1920×1080 composition fills the frame with no
+ * scrollbars or default margins. Fonts are loaded in index.html
+ * (Inter for UI/headlines, Roboto Mono as the monospace fallback). */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #111115;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}

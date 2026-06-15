@@ -1,0 +1,290 @@
+@import "tailwindcss";
+
+/* Opus 4.8 ad — palette (mirrors src/brand.ts; sampled from reference frames) */
+:root {
+  /* Background (sage) */
+  --paper: #BCD2C8;
+  --paper-deep: #B2C9BF;
+  --topo: #C7D8CF;
+
+  /* Terminal */
+  --terminal-bg: #191916;
+  --terminal-bg-deep: #141411;
+  --terminal-chrome: #23211F;
+  --terminal-border: #2A2926;
+  --term-sel-row: #2E2D29;
+
+  /* Traffic lights */
+  --light-red: #ED6A5E;
+  --light-yellow: #F4BF4F;
+  --light-green: #61C554;
+
+  /* Terminal text */
+  --text-primary: #E6E4DE;
+  --text-secondary: #8A8A82;
+  --text-dim: #7C7C74;
+  --text-deep-dim: #54544A;
+  --term-accent: #F0C674;          /* amber — auto mode on */
+
+  /* Claude / accents (kept for back-compat with template components) */
+  --claude: #CE6E58;
+  --claude-soft: #E08C72;
+  --claude-deep: #A85440;
+
+  /* Creature + kites */
+  --creature: #CE6E58;
+  --creature-eye: #1A1A1A;
+  --kite-orange: #E7AA5C;
+  --kite-purple: #8276B8;
+  --kite-pink: #E6C4B9;
+  --kite-spar: #38291E;
+
+  /* Headlines (faint grey serif) */
+  --headline: #8EA49A;
+
+  /* Notification cards */
+  --card-white: #EFF1F1;
+  --card-title: #1A1A1A;
+  --card-body: #6E6F70;
+  --card-ts: #8A8C8E;
+  --icon-green: #5EBB86;
+  --icon-blue: #67A0F5;
+
+  /* Code syntax */
+  --code-keyword: #C586C0;
+  --code-string: #6A9955;
+  --code-type: #4EC9B0;
+  --code-variable: #9CDCFE;
+  --code-text: #D4D4D4;
+  --code-bullet: #E6E4DE;
+
+  /* Misc */
+  --gold: #F0C674;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #000;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  color: var(--text-primary);
+}
+
+* { box-sizing: border-box; }
+
+.paper { background: var(--paper); color: var(--terminal-bg); }
+
+.pixel {
+  font-family: "VT323", ui-monospace, monospace;
+  letter-spacing: 0.02em;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+  text-rendering: optimizeSpeed;
+}
+
+.mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+/* Display serif — Claude brand canonical stack (Tiempos Headline equivalents).
+   Newsreader is an acceptable Tiempos sub (literary, modern transitional). */
+.serif {
+  font-family: "Source Serif 4 Display", "Tiempos Headline", "Newsreader",
+               "EB Garamond", Georgia, serif;
+  font-feature-settings: "ss01" on;
+}
+
+.pixel-art {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  shape-rendering: crispEdges;
+}
+
+/* Terminal chrome — FLAT (no drop shadows, paper-style 2D card per brand rules) */
+.terminal {
+  background: var(--terminal-bg);
+  border-radius: 10px;
+  /* Single 1px inner hairline keeps card readable on sage paper without depth */
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+  position: relative;
+}
+
+.terminal-chrome {
+  background: var(--terminal-chrome);
+  height: 32px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-bottom: 1px solid var(--terminal-border);
+}
+
+.tl-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.terminal-title {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+  flex: 1;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.terminal-body {
+  padding: 16px 22px;
+  font-family: "VT323", ui-monospace, monospace;
+  font-size: 26px;
+  line-height: 1.18;
+  color: var(--text-primary);
+  height: calc(100% - 32px);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Flat scene container — kept as a class for layout parity, but NO 3D.
+   Per Claude brand rules (flat-only mandate): no perspective, no preserve-3d. */
+.scene-3d {
+  /* intentionally empty — was perspective + preserve-3d in the 3D draft */
+}
+
+/* Chat stack — newest at bottom, flexes upward.
+   Center anchored so content sits in the visual center of the terminal,
+   matching Claude reference pegs (centered, minimalist composition). */
+.chat-stack {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.chat-msg {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.chat-user {
+  color: var(--text-primary);
+}
+
+.chat-user-pill {
+  display: inline-block;
+  background: rgba(204, 120, 92, 0.18);
+  border-left: 3px solid var(--claude);
+  padding: 2px 12px;
+  border-radius: 0 6px 6px 0;
+}
+
+.chat-claude-pre {
+  color: var(--claude-soft);
+}
+
+.chat-bash {
+  color: var(--text-secondary);
+}
+
+.chat-out-good { color: var(--light-green); }
+.chat-out-warn { color: var(--claude-soft); }
+.chat-out-info { color: var(--text-dim); }
+
+.input-bar {
+  border-top: 1px solid var(--terminal-border);
+  margin-top: 12px;
+  padding-top: 10px;
+  color: var(--text-secondary);
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.input-cursor {
+  display: inline-block;
+  width: 11px;
+  height: 24px;
+  background: var(--text-primary);
+  vertical-align: text-bottom;
+  margin-left: 2px;
+}
+
+/* ── Opus 4.8 additions ── */
+
+/* Serif headline on sage — DARK near-black (frames k_019/k_024 show black, NOT grey) */
+.headline {
+  font-family: "Source Serif 4 Display", "Tiempos Headline", "Newsreader",
+               "EB Garamond", Georgia, serif;
+  color: #292826;
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  text-align: center;
+  white-space: nowrap;
+  will-change: transform, opacity;
+}
+
+/* Notification card (macOS-style) — sized for 1000px NATIVE width (centered state).
+   The small top-right state is a CSS transform scale (0.326). */
+.notif-card {
+  background: var(--card-white);
+  border-radius: 30px;
+  box-shadow: 0 14px 44px rgba(40, 55, 48, 0.16),
+              0 3px 8px rgba(40, 55, 48, 0.08);
+  padding: 30px 38px;
+  font-family: -apple-system, "SF Pro Text", "Inter", system-ui, sans-serif;
+  will-change: transform, opacity;
+}
+.notif-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 13px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.notif-title {
+  color: var(--card-title);
+  font-size: 41px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+.notif-body {
+  color: var(--card-body);
+  font-size: 37px;
+  line-height: 1.26;
+  margin-top: 10px;
+}
+.notif-ts {
+  color: var(--card-ts);
+  font-size: 31px;
+  font-weight: 500;
+}
+
+/* Code block lines (syntax-highlighted) */
+.code-line {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  white-space: pre;
+  will-change: opacity;
+}
+.code-line .kw  { color: var(--code-keyword); }
+.code-line .str { color: var(--code-string); }
+.code-line .typ { color: var(--code-type); }
+.code-line .var { color: var(--code-variable); }
+.code-line .txt { color: var(--code-text); }
+.code-line .bul { color: var(--code-bullet); font-weight: 600; }
+.code-line .com { color: var(--code-string); font-style: italic; }
+
+/* Solid block caret for the command type-on */
+.block-caret {
+  display: inline-block;
+  width: 16px;
+  height: 30px;
+  background: var(--text-primary);
+  vertical-align: middle;
+  margin-left: 1px;
+}

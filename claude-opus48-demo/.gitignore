@@ -1,0 +1,14 @@
+node_modules/
+output/demo-silent.mp4
+output/demo-final.mp4
+output/demo-test.mp4
+output/demo-raw.mp4
+output/*.png
+output/*.jpg
+.DS_Store
+*.log
+.vite/
+dist/
+refs/
+.trace-frames/
+ref-frames/
