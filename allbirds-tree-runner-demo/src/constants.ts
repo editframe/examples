@@ -1,9 +1,10 @@
 /**
  * ALLBIRDS — Tree Runner NZ · 9:16 social ad · master constants.
- * 1080x1920 @ 30fps. ONE fixed Timegroup clock. All times = MASTER milliseconds.
+ * 1080x1920 @ 30fps. Seven scenes, each its own `<Timegroup mode="fixed">`, sequenced
+ * with a shared `overlap` (see SCENES below) — no single master-ms clock.
  * Brand world: light, natural, calm, weightless. Oat canvas, soft black, FLOAT motion.
  */
-export const DURATION_MS = 25000;   // ~25s (inside the 20-30s limit)
+export const DURATION_MS = 25000;   // ~25s (inside the 20-30s limit) — sum(SCENES.*.duration) - 6*OVERLAP_MS
 export const FPS = 30;
 export const W = 1080;
 export const H = 1920;
@@ -32,21 +33,31 @@ export const WELL_A = { x: 160, y: 540, w: 760, h: 1000, r: 22 };  // PORTRAIT l
 export const WELL_B = { x: 120, y: 760, w: 840, h: 560, r: 18 };   // LANDSCAPE material macro (well-b-material-macro.mp4)
 
 /**
- * ── BEATS (~25s, calm Allbirds pacing — each beat breathes) ──
- * Nominal in/out boundaries for each beat, in master ms. This is the single
- * source of truth for the scene timeline (see README.md "Scene timeline").
+ * ── SCENES ──
+ * Each beat is its own `<Timegroup mode="fixed">`, sequenced by the root
+ * `<Timegroup mode="sequence" overlap={OVERLAP_MS}>` in `Video.tsx`. There is
+ * no master clock read anywhere — every scene animates against its OWN local
+ * time (`--ef-progress` / plain CSS keyframe delays), which is what makes the
+ * per-scene components declarative instead of one big `onFrame` switchboard.
  *
- * The per-element enter/exit windows inside `Video.tsx`'s `handleFrame` are
- * intentionally offset a few hundred ms from these boundaries so the incoming
- * beat's transition overlaps the outgoing one (no dead frame, no hard cut) —
- * they are not expected to match these numbers exactly.
+ * `OVERLAP_MS` of shared time exists at every scene boundary — during it, the
+ * outgoing scene is playing the tail of its own duration (see
+ * `--ef-transition-out-start` in `references/css-variables.md`) while the
+ * incoming scene plays the head of its own. `duration` below already accounts
+ * for that: every scene after the first is `nominal + OVERLAP_MS` so its own
+ * "solo" screen time still matches the original cut. Net result: the 7
+ * durations minus 6 overlaps sum to exactly `DURATION_MS`.
  */
-export const BEATS = {
-  hook: { in: 0, out: 2000 },         // wordmark "allbirds" + "EFFORTLESS BY NATURE" float-in on oat
-  hero: { in: 2000, out: 6000 },      // Tree Runner NZ floats in (weightless), "Tread lightly" + $100
-  wellA: { in: 6000, out: 11000 },    // portrait lifestyle well + "Comfort, naturally"
-  feat: { in: 11000, out: 14500 },    // MATERIALS: merino wool · tree fiber · sugarcane + carbon label (mono)
-  wellB: { in: 14500, out: 19000 },   // 2nd well + "TREAD LIGHTER" / carbon-zero proof
-  range: { in: 19000, out: 22500 },   // THE RANGE — colorway grid + main preview (muted palette)
-  cta: { in: 22500, out: 25000 },     // wordmark + "SHOP NOW" + carbon-zero + allbirds.com, clean on oat
+export const OVERLAP_MS = 600;
+
+export const SCENES = {
+  hook: { duration: 2000, label: "wordmark + EFFORTLESS BY NATURE float-in on oat" },
+  hero: { duration: 4600, label: "Tree Runner NZ floats in (weightless), Tread lightly + $100" },
+  wellA: { duration: 5600, label: "portrait lifestyle well + Comfort, naturally" },
+  feat: { duration: 4100, label: "MERINO · TREE FIBER · SUGARCANE + carbon label (mono)" },
+  wellB: { duration: 5100, label: "landscape well + TREAD LIGHTER" },
+  range: { duration: 4100, label: "the family across the muted palette + main preview" },
+  cta: { duration: 3100, label: "wordmark + SHOP NOW + B Corp + allbirds.com on oat" },
 } as const;
+
+export type SceneName = keyof typeof SCENES;

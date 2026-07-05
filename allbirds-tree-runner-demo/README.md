@@ -23,7 +23,7 @@ npm run render        # -> output/demo.mp4 (native, single pass)
 
 > **Windows:** prefix render with `NO_COLOR=1 FORCE_COLOR=0` to avoid an ANSI hang.
 
-The well footage plays as `<Video>` elements (`src/assets/well-a-people-walk.mp4`, `src/assets/well-b-material-macro.mp4`), each offset to its well's window, and the music bed plays as an `<Audio>` element. Audio and video sit on the composition timeline.
+The well footage plays as `<Video>` elements (`src/assets/well-a-people-walk.mp4`, `src/assets/well-b-material-macro.mp4`) inside their own scene's `Timegroup`, and the music bed plays as a single `<Audio>` element spanning the whole composition. Audio and video sit on the composition timeline alongside everything else.
 
 ---
 
@@ -44,10 +44,21 @@ The well footage plays as `<Video>` elements (`src/assets/well-a-people-walk.mp4
 ## Architecture
 
 ```
-TimelineRoot -> Video -> one fixed 25s Timegroup (root, workbench, id="root")
+TimelineRoot -> Video
+  -> Timegroup (mode="contain", workbench, root)
+       -> Timegroup (mode="sequence", overlap=600ms)
+            -> Hook -> Hero -> WellA -> Feat -> WellB -> Range -> Cta
+                (each its own Timegroup mode="fixed")
+       -> AmbientField (grain, weave, wool fibers)
+       -> Audio (music bed)
 ```
 
-All 7 beats run on a single fixed-mode Timegroup clock, driven by one `onFrame` callback. Scene timing is driven by master-ms constants in `src/constants.ts`.
+Each beat is its own `<Timegroup mode="fixed">` in `src/scenes/`, played back-to-back by
+one root `<Timegroup mode="sequence" overlap="600ms">`. There's no master-ms clock and no
+`onFrame` — every scene animates against its own local time via plain CSS `@keyframes` and
+the `--ef-progress` / `--ef-transition-out-start` variables Editframe exposes on every
+temporal element (see `references/css-variables.md` in the `composition` skill). Scene
+durations live in `SCENES` in `src/constants.ts`.
 
 ---
 
@@ -66,14 +77,24 @@ All 7 beats run on a single fixed-mode Timegroup clock, driven by one `onFrame` 
 ├── tsconfig.json
 ├── output/                     <- npm run render writes demo.mp4 here (not committed)
 └── src/
-    ├── Video.tsx               <- master timeline (25s, 7 beats)
+    ├── Video.tsx               <- root: contain -> sequence of 7 scenes + AmbientField + Audio
     ├── main.tsx                <- TimelineRoot entry
-    ├── constants.ts            <- palette, type, beat timings, well rects
-    ├── styles.css              <- Tailwind + base64-embedded fonts
+    ├── constants.ts            <- palette, type, well rects, SCENES (durations + overlap)
+    ├── styles.css              <- Tailwind + base64-embedded fonts + all scene `@keyframes`
     ├── assets/                 <- woff2 fonts, product/colorway/poster imagery, music-bed.mp3, well-a-people-walk.mp4, well-b-material-macro.mp4
+    ├── scenes/                 <- one component per beat, each its own `<Timegroup mode="fixed">`
+    │   ├── Hook.tsx
+    │   ├── Hero.tsx
+    │   ├── WellA.tsx
+    │   ├── Feat.tsx
+    │   ├── WellB.tsx
+    │   ├── Range.tsx
+    │   └── Cta.tsx
     └── components/
-        ├── helpers.ts          <- track, lerp, clamp, easing helpers (continuous/procedural motion)
-        └── Reveal.tsx          <- declarative fade + float-up/out (CSS `@keyframes`, see styles.css)
+        ├── AmbientField.tsx    <- grain + weave + wool-fiber drift (infinite CSS loops, no JS)
+        ├── CornerMarks.tsx     <- reusable well-frame corner marks (CSS stagger)
+        ├── Reveal.tsx          <- declarative fade + float-up/out (CSS `@keyframes`)
+        └── texture.ts          <- procedural knit-texture gradient helper
 ```
 
 ---
@@ -115,7 +136,7 @@ npm start
 npm run render
 ```
 
-1. **Re-time beats** — nominal windows live in `BEATS` in `src/constants.ts`; the actual per-element enter/exit timings are in `src/Video.tsx` (`handleFrame` for continuous motion, `<Reveal enter={...} exit={...}>` for simple fades).
+1. **Re-time beats** — scene durations + the shared crossfade length live in `SCENES` / `OVERLAP_MS` in `src/constants.ts`; each scene's own enter/exit timing lives in its file under `src/scenes/`, as local ms offsets from that scene's own start (`<Reveal enter={...} exit="transition">` for fades, `@keyframes` in `styles.css` for anything more custom).
 2. **Rebrand** — replace palette and font `@font-face` declarations in `src/constants.ts` and `src/styles.css`.
 3. **Re-skin wells** — replace `src/assets/well-a-people-walk.mp4` / `well-b-material-macro.mp4` and update `WELL_A` / `WELL_B` rects in `src/constants.ts`.
 4. **Swap audio** — replace `src/assets/music-bed.mp3` and adjust the `<Audio>` `volume` in `src/Video.tsx`; log in [`CREDITS.md`](CREDITS.md).

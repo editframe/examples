@@ -2,7 +2,7 @@ import React from "react";
 
 type Easing = "out-cubic" | "in-cubic" | "in-out-quad";
 
-// CSS cubic-bezier equivalents of the power-curve easings in ./helpers.ts
+// CSS cubic-bezier equivalents of the power-curve easings this project used to compute per-frame.
 const EASE_CSS: Record<Easing, string> = {
   "out-cubic": "cubic-bezier(0.33,1,0.68,1)",   // matches easeOutCubic
   "in-cubic": "cubic-bezier(0.32,0,0.67,0)",    // matches easeInCubic
@@ -10,12 +10,23 @@ const EASE_CSS: Record<Easing, string> = {
 };
 
 export type RevealProps = {
-  /** [start, end] master ms window for the enter fade + float-up. */
+  /** [delay, end] local-ms window (relative to this scene's own Timegroup) for the enter fade + float-up. */
   enter: readonly [number, number];
   /** px to float up from on enter (default 20). */
   y?: number;
-  /** [start, end] master ms window for the exit fade. Omit if the beat has no independent exit (e.g. CTA). */
-  exit?: readonly [number, number];
+  /**
+   * Exit fade. Either:
+   * - `"transition"` — align with this scene's own outgoing crossfade, via the
+   *   `--ef-transition-duration` / `--ef-transition-out-start` CSS vars the parent
+   *   `<Timegroup>` exposes (see references/css-variables.md). Use this whenever the
+   *   element should simply fade out as the scene hands off to the next one.
+   * - `[delay, end]` local-ms tuple — for exits that happen mid-scene, independent of
+   *   the scene boundary.
+   * Omit entirely for elements with no exit (e.g. the closing CTA beat).
+   */
+  exit?: "transition" | readonly [number, number];
+  /** Extra delay added on top of `--ef-transition-out-start` when `exit="transition"` (ms). Lets a layered exit stagger slightly after the scene's own crossfade begins. */
+  exitDelay?: number;
   /** px to continue sliding by during the exit (default 0 = fades in place). */
   exitY?: number;
   easeIn?: Easing;
@@ -29,16 +40,17 @@ export type RevealProps = {
  * Declarative fade + translateY reveal, driven by the `reveal-in` / `reveal-out` CSS
  * `@keyframes` in styles.css instead of a per-frame imperative style mutation.
  *
- * Editframe's Timegroup drives `animation.currentTime` for every CSS animation in the
- * composition against the master clock, so this stays perfectly scrubbable/deterministic —
- * see the `css-animations` skill. Use this for one-shot "float up + fade in, later fade out"
- * callouts; keep continuous/procedural motion (ambient drift, breathing, shape-morphs) as
- * imperative `onFrame` code since it has no clean closed-form keyframe.
+ * Every scene is its own `<Timegroup mode="fixed">` (see `src/scenes/`), so `enter`/`exit`
+ * are local to that scene's own clock — small, human-scale numbers instead of master-ms.
+ * Use this for one-shot "float up + fade in, later fade out" callouts; keep continuous/
+ * procedural motion (ambient drift, breathing, shape-morphs) as infinite CSS keyframes
+ * with no scene-relative timing at all — never per-frame JS.
  */
 export function Reveal({
   enter,
   y = 20,
   exit,
+  exitDelay = 0,
   exitY = 0,
   easeIn = "out-cubic",
   easeOut = "in-cubic",
@@ -48,7 +60,12 @@ export function Reveal({
 }: RevealProps) {
   const [inAt, inEnd] = enter;
   const animations = [`reveal-in ${inEnd - inAt}ms ${inAt}ms ${EASE_CSS[easeIn]} backwards`];
-  if (exit) {
+  if (exit === "transition") {
+    const delay = exitDelay
+      ? `calc(var(--ef-transition-out-start) + ${exitDelay}ms)`
+      : "var(--ef-transition-out-start)";
+    animations.push(`reveal-out var(--ef-transition-duration) ${delay} ${EASE_CSS[easeOut]} forwards`);
+  } else if (exit) {
     const [outAt, outEnd] = exit;
     animations.push(`reveal-out ${outEnd - outAt}ms ${outAt}ms ${EASE_CSS[easeOut]} forwards`);
   }
