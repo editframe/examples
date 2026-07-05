@@ -24,8 +24,8 @@ There are **no sound effects** in this video — it is music only.
   this demo only. Replace with licensed fonts for production use.
 
 ## Imagery
-- Product, colorway, and material stills (base64-embedded in `src/assets_opt.ts` / `src/assets.ts`)
-  are real Allbirds product/lifestyle imagery, used for demonstration only.
+- Product, colorway, material, and poster stills (`src/assets/*.png`, `src/assets/*.jpg`, served via
+  `<Image>`) are real Allbirds product/lifestyle imagery, used for demonstration only.
 
 ## SDK
 - Built with the [Editframe](https://editframe.com) React SDK (`@editframe/*` 0.54.0).

@@ -1,22 +1,29 @@
 import React, { useCallback, useRef } from "react";
-import { Timegroup, Audio, Video as Clip } from "@editframe/react";
-import { clamp, lerp, track, easeOutCubic, easeInCubic, easeInOutQuad, outBack } from "./components/helpers";
+import { Timegroup, Audio, Image, Video as Clip } from "@editframe/react";
+import { clamp, lerp, track, easeOutCubic, easeInCubic, easeInOutQuad } from "./components/helpers";
+import { Reveal } from "./components/Reveal";
 import {
-  DURATION_MS, W, H, OAT, SAND, COOL_OAT, INK, CHARCOAL, STONE, LINE,
-  SAGE, DUSTY_BLUE, DUSTY_MAUVE, TAUPE, AUBURN, GEOGRAPH, MONO, PRICE,
-  WELL_A, WELL_B, WELL_A_IN, WELL_A_OUT, WELL_B_IN, WELL_B_OUT,
-  HOOK_IN, HOOK_OUT, HERO_IN, HERO_OUT, WELLA_IN, WELLA_OUT,
-  FEAT_IN, FEAT_OUT, WELLB_IN, WELLB_OUT, RANGE_IN, RANGE_OUT, CTA_IN,
+  DURATION_MS, W, H, OAT, SAND, COOL_OAT, INK, STONE, LINE,
+  SAGE, DUSTY_BLUE, TAUPE, GEOGRAPH, MONO, PRICE,
+  WELL_A, WELL_B, BEATS,
 } from "./constants";
-// Small assets straight from the locked base64 file:
-import { POSTER_PORTRAIT, POSTER_LANDSCAPE } from "./assets";
+
 const MUSIC = "/assets/music-bed.mp3";
-// Heavy assets (4000px → would OOM the render tab) come pre-downscaled, same imagery:
-import {
-  TREE_LEFT, TREE_TOP,
-  CW_ANTHRACITE, CW_AUBURN, CW_BLACK, CW_GOLD, CW_LIGHTGREY, CW_MUSHROOM, CW_NAVY, CW_PORT, CW_SEASPRAY,
-  MAT_MERINO_TEE,
-} from "./assets_opt";
+// Product, colorway, material and poster imagery — real files served from src/assets/ (no base64).
+const POSTER_PORTRAIT = "/assets/poster-portrait.jpg";
+const POSTER_LANDSCAPE = "/assets/poster-landscape.jpg";
+const TREE_LEFT = "/assets/tree-left.png";
+const TREE_TOP = "/assets/tree-top.png";
+const MAT_MERINO_TEE = "/assets/mat-merino-tee.png";
+const CW_ANTHRACITE = "/assets/cw-anthracite.png";
+const CW_AUBURN = "/assets/cw-auburn.png";
+const CW_BLACK = "/assets/cw-black.png";
+const CW_GOLD = "/assets/cw-gold.png";
+const CW_LIGHTGREY = "/assets/cw-lightgrey.png";
+const CW_MUSHROOM = "/assets/cw-mushroom.png";
+const CW_NAVY = "/assets/cw-navy.png";
+const CW_PORT = "/assets/cw-port.png";
+const CW_SEASPRAY = "/assets/cw-seaspray.png";
 
 /**
  * ALLBIRDS — Tree Runner NZ · 9:16 · "Natural Materials" cut
@@ -67,40 +74,30 @@ export const Video: React.FC = () => {
   // ── HERO ──
   const heroRef = useRef<HTMLDivElement>(null);
   const heroTileRef = useRef<HTMLDivElement>(null);
-  const heroShoeRef = useRef<HTMLImageElement>(null);
+  const heroShoeRef = useRef<HTMLElement>(null);
   const heroShadowRef = useRef<HTMLDivElement>(null);
-  const heroNameRef = useRef<HTMLDivElement>(null);
-  const heroEyebrowRef = useRef<HTMLDivElement>(null);
-  const heroPriceRef = useRef<HTMLDivElement>(null);
+  const heroNameRef = useRef<HTMLDivElement>(null); // letter-spacing tween — stays imperative
 
   // ── WELL_A ──
   const wellARef = useRef<HTMLDivElement>(null);
   const wellAFrameRef = useRef<HTMLDivElement>(null);
   const wellAPosterRef = useRef<HTMLDivElement>(null);
   const wellACornersRef = useRef<(HTMLDivElement | null)[]>([]);
-  const wellACopyRef = useRef<HTMLDivElement>(null);
-  const wellAEyebrowRef = useRef<HTMLDivElement>(null);
 
   // ── FEAT (materials) ──
   const featRef = useRef<HTMLDivElement>(null);
   const knitMacroRef = useRef<HTMLDivElement>(null);
-  const featTitleRef = useRef<HTMLDivElement>(null);
   const featChipRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const carbonRef = useRef<HTMLDivElement>(null);
 
   // ── WELL_B ──
   const wellBRef = useRef<HTMLDivElement>(null);
   const wellBFrameRef = useRef<HTMLDivElement>(null);
   const wellBPosterRef = useRef<HTMLDivElement>(null);
   const wellBCornersRef = useRef<(HTMLDivElement | null)[]>([]);
-  const wellBCopyRef = useRef<HTMLDivElement>(null);
-  const wellBProofRef = useRef<HTMLDivElement>(null);
 
   // ── RANGE ──
   const rangeRef = useRef<HTMLDivElement>(null);
-  const rangeTitleRef = useRef<HTMLDivElement>(null);
   const rangeTileRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const rangeSubRef = useRef<HTMLDivElement>(null);
 
   // ── CTA ──
   const ctaRef = useRef<HTMLDivElement>(null);
@@ -108,7 +105,7 @@ export const Video: React.FC = () => {
   const ctaShopRef = useRef<HTMLDivElement>(null);
   const ctaProofRef = useRef<HTMLDivElement>(null);
   const ctaDomainRef = useRef<HTMLDivElement>(null);
-  const ctaMiniShoeRef = useRef<HTMLImageElement>(null);
+  const ctaMiniShoeRef = useRef<HTMLElement>(null);
 
   const RANGE = [
     { img: CW_MUSHROOM, name: "Mushroom" },
@@ -236,24 +233,14 @@ export const Video: React.FC = () => {
         heroShadowRef.current.style.opacity = String(0.16 * sh * (1 - Math.abs(float) / 28));
         heroShadowRef.current.style.transform = `translate(-50%, -50%) scaleX(${lerp(0.8, 1, enter) - Math.abs(float) / 200})`;
       }
-      if (heroEyebrowRef.current) {
-        const p = track(ms, 2650, 3300, easeOutCubic);
-        const e = track(ms, 5450, 5900, easeInCubic);
-        heroEyebrowRef.current.style.opacity = String(clamp(p) * (1 - e));
-        heroEyebrowRef.current.style.transform = `translateY(${lerp(16, 0, p)}px)`;
-      }
+      // heroEyebrowRef / heroPriceRef: declarative <Reveal> in JSX (see below).
+      // heroNameRef keeps its letter-spacing tween here — <Reveal> only handles opacity + translateY.
       if (heroNameRef.current) {
         const p = track(ms, 2850, 3600, easeOutCubic);
         const e = track(ms, 5450, 5900, easeInCubic);
         heroNameRef.current.style.opacity = String(clamp(p) * (1 - e));
         heroNameRef.current.style.transform = `translateY(${lerp(20, 0, p)}px)`;
         heroNameRef.current.style.letterSpacing = `${lerp(0.04, 0.005, p)}em`;
-      }
-      if (heroPriceRef.current) {
-        const p = track(ms, 3150, 3850, easeOutCubic);
-        const e = track(ms, 5450, 5900, easeInCubic);
-        heroPriceRef.current.style.opacity = String(clamp(p) * (1 - e));
-        heroPriceRef.current.style.transform = `translateY(${lerp(18, 0, p)}px)`;
       }
     }
 
@@ -280,18 +267,7 @@ export const Video: React.FC = () => {
         el.style.opacity = String(clamp(p));
         el.style.transform = `scale(${lerp(0.4, 1, p)})`;
       });
-      if (wellAEyebrowRef.current) {
-        const p = track(ms, 6550, 7100, easeOutCubic);
-        const e = track(ms, 10450, 10850, easeInCubic);
-        wellAEyebrowRef.current.style.opacity = String(clamp(p) * (1 - e));
-        wellAEyebrowRef.current.style.transform = `translateY(${lerp(18, 0, p)}px)`;
-      }
-      if (wellACopyRef.current) {
-        const p = track(ms, 6800, 7500, easeOutCubic);
-        const e = track(ms, 10450, 10850, easeInCubic);
-        wellACopyRef.current.style.opacity = String(clamp(p) * (1 - e));
-        wellACopyRef.current.style.transform = `translateY(${lerp(22, 0, p)}px)`;
-      }
+      // wellAEyebrowRef / wellACopyRef: declarative <Reveal> in JSX (see below).
     }
 
     // ════════════════════ T3 knit-reveal (10550-11050) ════════════════════
@@ -313,11 +289,7 @@ export const Video: React.FC = () => {
         featRef.current.style.opacity = String(vis);
         featRef.current.style.visibility = (ms > 10650 && ms < 14600) ? "visible" : "hidden";
       }
-      if (featTitleRef.current) {
-        const p = track(ms, 11150, 11800, easeOutCubic);
-        featTitleRef.current.style.opacity = String(clamp(p) * (1 - t4));
-        featTitleRef.current.style.transform = `translateY(${lerp(22, 0, p) - lerp(0, 24, t4)}px)`;
-      }
+      // featTitleRef: declarative <Reveal> in JSX (see below).
       // material chips stagger in (merino · tree fiber · sugarcane); each on its chalky tile
       featChipRefs.current.forEach((el, i) => {
         if (!el) return;
@@ -327,11 +299,7 @@ export const Video: React.FC = () => {
         el.style.opacity = String(clamp(p) * (1 - t4));
         el.style.transform = `translateY(${lerp(34, 0, p) + lift}px)`;
       });
-      if (carbonRef.current) {
-        const p = track(ms, 12650, 13350, easeOutCubic);
-        carbonRef.current.style.opacity = String(clamp(p) * (1 - t4));
-        carbonRef.current.style.transform = `translateY(${lerp(20, 0, p) - lerp(0, 20, t4)}px)`;
-      }
+      // carbonRef: declarative <Reveal> in JSX (see below).
     }
 
     // ════════════════════ WELL_B 14500–19000 ════════════════════
@@ -361,18 +329,7 @@ export const Video: React.FC = () => {
         el.style.opacity = String(clamp(p) * (1 - t5));
         el.style.transform = `scale(${lerp(0.4, 1, p)})`;
       });
-      if (wellBCopyRef.current) {
-        const p = track(ms, 15150, 15850, easeOutCubic);
-        const e = track(ms, 18450, 18850, easeInCubic);
-        wellBCopyRef.current.style.opacity = String(clamp(p) * (1 - e));
-        wellBCopyRef.current.style.transform = `translateY(${lerp(22, 0, p)}px)`;
-      }
-      if (wellBProofRef.current) {
-        const p = track(ms, 15500, 16200, easeOutCubic);
-        const e = track(ms, 18450, 18850, easeInCubic);
-        wellBProofRef.current.style.opacity = String(clamp(p) * (1 - e));
-        wellBProofRef.current.style.transform = `translateY(${lerp(18, 0, p)}px)`;
-      }
+      // wellBCopyRef / wellBProofRef: declarative <Reveal> in JSX (see below).
     }
 
     // ════════════════════ RANGE 19000–22500 ════════════════════
@@ -384,16 +341,7 @@ export const Video: React.FC = () => {
         rangeRef.current.style.opacity = String(vis);
         rangeRef.current.style.visibility = (ms > 18650 && ms < 22600) ? "visible" : "hidden";
       }
-      if (rangeTitleRef.current) {
-        const p = track(ms, 19150, 19800, easeOutCubic);
-        rangeTitleRef.current.style.opacity = String(clamp(p) * (1 - t6));
-        rangeTitleRef.current.style.transform = `translateY(${lerp(20, 0, p) - lerp(0, 22, t6)}px)`;
-      }
-      if (rangeSubRef.current) {
-        const p = track(ms, 19350, 20000, easeOutCubic);
-        rangeSubRef.current.style.opacity = String(clamp(p) * (1 - t6));
-        rangeSubRef.current.style.transform = `translateY(${lerp(16, 0, p)}px)`;
-      }
+      // rangeTitleRef / rangeSubRef: declarative <Reveal> in JSX (see below).
       // tiles float in (multiplied from WELL_B in T5); calm float settle; T6 they drift up away
       rangeTileRefs.current.forEach((el, i) => {
         if (!el) return;
@@ -540,22 +488,21 @@ export const Video: React.FC = () => {
             transform: "translate(-50%,-50%)", opacity: 0, filter: "blur(6px)",
           }} />
           {/* the hero shoe (seated on tile so its cream photo bg reads as the tile, no white box) */}
-          <img ref={heroShoeRef} src={TREE_LEFT} alt="" style={{
+          <Image ref={heroShoeRef} src={TREE_LEFT} style={{
             position: "absolute", left: W / 2, top: H * 0.46, width: 760, height: "auto",
             transform: "translate(-50%,-50%)", opacity: 0, willChange: "transform,opacity",
             mixBlendMode: "multiply",
           }} />
           {/* copy */}
           <div style={{ position: "absolute", left: 0, right: 0, top: H * 0.46 + 360, textAlign: "center" }}>
-            <div ref={heroEyebrowRef} style={{ ...eyebrow, fontSize: 16, letterSpacing: "3px", opacity: 0, willChange: "transform,opacity" }}>Tree Runner NZ</div>
+            <Reveal enter={[2650, 3300]} exit={[5450, 5900]} y={16} style={{ ...eyebrow, fontSize: 16, letterSpacing: "3px" }}>Tree Runner NZ</Reveal>
             <div ref={heroNameRef} style={{
               fontFamily: GEOGRAPH, fontWeight: 500, fontSize: 64, color: INK, marginTop: 16,
               opacity: 0, willChange: "transform,opacity",
             }}>Tread lightly</div>
-            <div ref={heroPriceRef} style={{
-              fontFamily: GEOGRAPH, fontWeight: 400, fontSize: 30, color: STONE, marginTop: 18,
-              letterSpacing: "0.04em", opacity: 0, willChange: "transform,opacity",
-            }}>{PRICE}</div>
+            <Reveal enter={[3150, 3850]} exit={[5450, 5900]} y={18} style={{
+              fontFamily: GEOGRAPH, fontWeight: 400, fontSize: 30, color: STONE, marginTop: 18, letterSpacing: "0.04em",
+            }}>{PRICE}</Reveal>
           </div>
         </div>
 
@@ -565,8 +512,8 @@ export const Video: React.FC = () => {
             boxShadow: "0 30px 80px rgba(33,33,33,0.10)", border: `1px solid ${LINE}` }}>
             {/* WELL_A footage — poster + Video on the timeline (offset to 6–11s) */}
             <div ref={wellAPosterRef} style={{ position: "absolute", inset: 0, opacity: 0 }}>
-              <img src={POSTER_PORTRAIT} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-              <Clip src="/assets/well-a-people-walk.mp4" offset="6000ms" duration="5000ms" sourcein="0.5s" mute style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+              <Image src={POSTER_PORTRAIT} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+              <Clip src="/assets/well-a-people-walk.mp4" offset={`${BEATS.wellA.in}ms`} duration={`${BEATS.wellA.out - BEATS.wellA.in}ms`} sourcein="0.5s" mute style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
             {/* thin inner mat line */}
             <div style={{ position: "absolute", inset: 10, border: `1px solid rgba(255,255,255,0.5)`, borderRadius: WELL_A.r - 8, pointerEvents: "none" }} />
@@ -578,11 +525,10 @@ export const Video: React.FC = () => {
           ))}
           {/* copy block above the well */}
           <div style={{ position: "absolute", left: WELL_A.x, top: WELL_A.y - 170, width: WELL_A.w }}>
-            <div ref={wellAEyebrowRef} style={{ ...eyebrow, fontSize: 15, opacity: 0, willChange: "transform,opacity" }}>Comfort, naturally</div>
-            <div ref={wellACopyRef} style={{
+            <Reveal enter={[6550, 7100]} exit={[10450, 10850]} y={18} style={{ ...eyebrow, fontSize: 15 }}>Comfort, naturally</Reveal>
+            <Reveal enter={[6800, 7500]} exit={[10450, 10850]} y={22} style={{
               fontFamily: GEOGRAPH, fontWeight: 500, fontSize: 54, color: INK, marginTop: 14, lineHeight: 1.05,
-              opacity: 0, willChange: "transform,opacity",
-            }}>Wear-all-day<br />comfort</div>
+            }}>Wear-all-day<br />comfort</Reveal>
           </div>
         </div>
 
@@ -598,10 +544,10 @@ export const Video: React.FC = () => {
         {/* ───────────── FEAT (materials) ───────────── */}
         <div ref={featRef} style={{ position: "absolute", inset: 0, visibility: "hidden" }}>
           <div style={{ position: "absolute", left: 0, right: 0, top: 250, textAlign: "center" }}>
-            <div ref={featTitleRef} style={{ willChange: "transform,opacity", opacity: 0 }}>
+            <Reveal enter={[11150, 11800]} exit={[13950, 14550]} y={22} exitY={-24} easeOut="in-out-quad">
               <div style={{ ...eyebrow, fontSize: 15 }}>Made from</div>
               <div style={{ fontFamily: GEOGRAPH, fontWeight: 500, fontSize: 56, color: INK, marginTop: 14 }}>Natural materials</div>
-            </div>
+            </Reveal>
           </div>
           {/* three material chips on chalky tiles */}
           <div style={{ position: "absolute", left: 90, right: 90, top: 470, display: "flex", flexDirection: "column", gap: 30 }}>
@@ -621,7 +567,7 @@ export const Video: React.FC = () => {
                   background: m.img ? OAT : knitTexture(m.tone, COOL_OAT),
                   position: "relative", border: `1px solid ${LINE}`,
                 }}>
-                  {m.img && <img src={m.img} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", mixBlendMode: "multiply" }} />}
+                  {m.img && <Image src={m.img} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", mixBlendMode: "multiply" }} />}
                   {!m.img && <div style={{ position: "absolute", inset: 0, background: knitTexture(m.tone, OAT), opacity: 0.55 }} />}
                 </div>
                 <div style={{ textAlign: "left" }}>
@@ -633,36 +579,34 @@ export const Video: React.FC = () => {
             ))}
           </div>
           {/* carbon footprint badge (mono) */}
-          <div ref={carbonRef} style={{
-            position: "absolute", left: 90, right: 90, top: 1620, display: "flex", justifyContent: "center",
-            alignItems: "center", gap: 18, opacity: 0, willChange: "transform,opacity",
+          <Reveal enter={[12650, 13350]} exit={[13950, 14550]} y={20} exitY={-20} easeOut="in-out-quad" style={{
+            position: "absolute", left: 90, right: 90, top: 1620, display: "flex", justifyContent: "center", alignItems: "center", gap: 18,
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 14, border: `1px solid ${LINE}`, borderRadius: 999, padding: "16px 28px", background: OAT }}>
               <div style={{ fontFamily: MONO, fontSize: 30, color: INK, letterSpacing: "0.04em" }}>7.1 KG CO₂E</div>
               <div style={{ width: 1, height: 26, background: LINE }} />
               <div style={{ ...eyebrow, fontSize: 14, letterSpacing: "2px" }}>per pair · B Corp since 2016</div>
             </div>
-          </div>
+          </Reveal>
         </div>
 
         {/* ───────────── WELL_B (landscape) ───────────── */}
         <div ref={wellBRef} style={{ position: "absolute", inset: 0, visibility: "hidden" }}>
           {/* copy above */}
           <div style={{ position: "absolute", left: WELL_B.x, top: WELL_B.y - 230, width: WELL_B.w }}>
-            <div ref={wellBCopyRef} style={{
-              fontFamily: GEOGRAPH, fontWeight: 500, fontSize: 92, color: INK, lineHeight: 1, opacity: 0,
-              willChange: "transform,opacity",
-            }}>Tread Lighter</div>
-            <div ref={wellBProofRef} style={{ ...eyebrow, fontSize: 16, marginTop: 22, opacity: 0, willChange: "transform,opacity" }}>
+            <Reveal enter={[15150, 15850]} exit={[18450, 18850]} y={22} style={{
+              fontFamily: GEOGRAPH, fontWeight: 500, fontSize: 92, color: INK, lineHeight: 1,
+            }}>Tread Lighter</Reveal>
+            <Reveal enter={[15500, 16200]} exit={[18450, 18850]} y={18} style={{ ...eyebrow, fontSize: 16, marginTop: 22 }}>
               Give light. Tread lighter. · Carbon-negative sole
-            </div>
+            </Reveal>
           </div>
           <div ref={wellBFrameRef} style={{ ...wellFrameBase(WELL_B), opacity: 0, willChange: "transform,opacity,filter",
             boxShadow: "0 30px 80px rgba(33,33,33,0.10)", border: `1px solid ${LINE}` }}>
             {/* WELL_B footage — poster + Video on the timeline (offset to 14.5–19s) */}
             <div ref={wellBPosterRef} style={{ position: "absolute", inset: 0, opacity: 0 }}>
-              <img src={POSTER_LANDSCAPE} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-              <Clip src="/assets/well-b-material-macro.mp4" offset="14500ms" duration="4500ms" sourcein="0.5s" mute style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+              <Image src={POSTER_LANDSCAPE} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+              <Clip src="/assets/well-b-material-macro.mp4" offset={`${BEATS.wellB.in}ms`} duration={`${BEATS.wellB.out - BEATS.wellB.in}ms`} sourcein="0.5s" mute style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
             <div style={{ position: "absolute", inset: 10, border: `1px solid rgba(255,255,255,0.5)`, borderRadius: WELL_B.r - 8, pointerEvents: "none" }} />
           </div>
@@ -675,8 +619,8 @@ export const Video: React.FC = () => {
         {/* ───────────── RANGE ───────────── */}
         <div ref={rangeRef} style={{ position: "absolute", inset: 0, visibility: "hidden" }}>
           <div style={{ position: "absolute", left: 0, right: 0, top: 210, textAlign: "center" }}>
-            <div ref={rangeTitleRef} style={{ fontFamily: GEOGRAPH, fontWeight: 500, fontSize: 64, color: INK, opacity: 0, willChange: "transform,opacity" }}>The Range</div>
-            <div ref={rangeSubRef} style={{ ...eyebrow, fontSize: 16, marginTop: 18, opacity: 0, willChange: "transform,opacity" }}>Find your pair · in nature's palette</div>
+            <Reveal enter={[19150, 19800]} exit={[21950, 22550]} y={20} exitY={-22} easeOut="in-out-quad" style={{ fontFamily: GEOGRAPH, fontWeight: 500, fontSize: 64, color: INK }}>The Range</Reveal>
+            <Reveal enter={[19350, 20000]} exit={[21950, 22550]} y={16} easeOut="in-out-quad" style={{ ...eyebrow, fontSize: 16, marginTop: 18 }}>Find your pair · in nature's palette</Reveal>
           </div>
           {/* 3x3 calm float grid of colorways on soft tiles */}
           <div style={{ position: "absolute", left: 90, right: 90, top: 430, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 26 }}>
@@ -688,7 +632,7 @@ export const Video: React.FC = () => {
                 boxShadow: "0 16px 38px rgba(33,33,33,0.06)", textAlign: "center",
               }}>
                 <div style={{ width: "100%", height: 200, position: "relative" }}>
-                  <img src={cw.img} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", mixBlendMode: "multiply" }} />
+                  <Image src={cw.img} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", mixBlendMode: "multiply" }} />
                 </div>
                 <div style={{ ...eyebrow, fontSize: 13, letterSpacing: "1.6px", marginTop: 6 }}>{cw.name}</div>
               </div>
@@ -699,7 +643,7 @@ export const Video: React.FC = () => {
         {/* ───────────── CTA ───────────── */}
         <div ref={ctaRef} style={{ position: "absolute", inset: 0, visibility: "hidden" }}>
           {/* mini floating preview shoe above the wordmark */}
-          <img ref={ctaMiniShoeRef} src={TREE_LEFT} alt="" style={{
+          <Image ref={ctaMiniShoeRef} src={TREE_LEFT} style={{
             position: "absolute", left: W / 2, top: "33%", width: 360, height: "auto",
             transform: "translate(-50%,-50%)", opacity: 0, willChange: "transform,opacity", mixBlendMode: "multiply",
           }} />

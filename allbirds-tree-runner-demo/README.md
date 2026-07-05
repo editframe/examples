@@ -70,11 +70,10 @@ All 7 beats run on a single fixed-mode Timegroup clock, driven by one `onFrame` 
     ├── main.tsx                <- TimelineRoot entry
     ├── constants.ts            <- palette, type, beat timings, well rects
     ├── styles.css              <- Tailwind + base64-embedded fonts
-    ├── assets.ts               <- base64 poster stills
-    ├── assets_opt.ts           <- downscaled base64 product / colorway imagery
-    ├── assets/                 <- woff2 fonts, music-bed.mp3, well-a-people-walk.mp4, well-b-material-macro.mp4
+    ├── assets/                 <- woff2 fonts, product/colorway/poster imagery, music-bed.mp3, well-a-people-walk.mp4, well-b-material-macro.mp4
     └── components/
-        └── helpers.ts          <- track, lerp, clamp, easing helpers
+        ├── helpers.ts          <- track, lerp, clamp, easing helpers (continuous/procedural motion)
+        └── Reveal.tsx          <- declarative fade + float-up/out (CSS `@keyframes`, see styles.css)
 ```
 
 ---
@@ -116,7 +115,7 @@ npm start
 npm run render
 ```
 
-1. **Re-time beats** — adjust constants in `src/constants.ts` (`HOOK_IN/OUT`, `HERO_IN/OUT`, …).
+1. **Re-time beats** — nominal windows live in `BEATS` in `src/constants.ts`; the actual per-element enter/exit timings are in `src/Video.tsx` (`handleFrame` for continuous motion, `<Reveal enter={...} exit={...}>` for simple fades).
 2. **Rebrand** — replace palette and font `@font-face` declarations in `src/constants.ts` and `src/styles.css`.
 3. **Re-skin wells** — replace `src/assets/well-a-people-walk.mp4` / `well-b-material-macro.mp4` and update `WELL_A` / `WELL_B` rects in `src/constants.ts`.
 4. **Swap audio** — replace `src/assets/music-bed.mp3` and adjust the `<Audio>` `volume` in `src/Video.tsx`; log in [`CREDITS.md`](CREDITS.md).
