@@ -1,4 +1,4 @@
-﻿import path from "node:path";
+import path from "node:path";
 import { vitePluginEditframe } from "@editframe/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
@@ -33,5 +33,3 @@ export default defineConfig({
     react(),
   ],
 });
-
-

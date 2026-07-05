@@ -30,11 +30,11 @@ export const MONO = "'Akkurat Mono', ui-monospace, monospace"; // spec/carbon-da
 
 export const PRICE = "$100";
 
-// ── FIXED VIDEO WELLS (real videos composited AFTER render via FFmpeg) ──
-export const WELL_A = { x: 160, y: 540, w: 760, h: 1000, r: 22 };  // PORTRAIT lifestyle (life-2, 606x1080)
+// ── FIXED VIDEO WELLS (lifestyle/material footage frames) ──
+export const WELL_A = { x: 160, y: 540, w: 760, h: 1000, r: 22 };  // PORTRAIT lifestyle (well-a-people-walk.mp4)
 export const WELL_A_IN = 6000;
 export const WELL_A_OUT = 11000;
-export const WELL_B = { x: 120, y: 760, w: 840, h: 560, r: 18 };   // LANDSCAPE lifestyle/material (life-1, 1920x1080)
+export const WELL_B = { x: 120, y: 760, w: 840, h: 560, r: 18 };   // LANDSCAPE material macro (well-b-material-macro.mp4)
 export const WELL_B_IN = 14500;
 export const WELL_B_OUT = 19000;
 

@@ -1,5 +1,5 @@
 import React, { useCallback, useRef } from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio, Video as Clip } from "@editframe/react";
 import { clamp, lerp, track, easeOutCubic, easeInCubic, easeInOutQuad, outBack } from "./components/helpers";
 import {
   DURATION_MS, W, H, OAT, SAND, COOL_OAT, INK, CHARCOAL, STONE, LINE,
@@ -10,6 +10,7 @@ import {
 } from "./constants";
 // Small assets straight from the locked base64 file:
 import { POSTER_PORTRAIT, POSTER_LANDSCAPE } from "./assets";
+const MUSIC = "/assets/music-bed.mp3";
 // Heavy assets (4000px → would OOM the render tab) come pre-downscaled, same imagery:
 import {
   TREE_LEFT, TREE_TOP,
@@ -18,7 +19,7 @@ import {
 } from "./assets_opt";
 
 /**
- * ALLBIRDS — Tree Runner NZ · 9:16 · "Natural Materials" cut (Builder A)
+ * ALLBIRDS — Tree Runner NZ · 9:16 · "Natural Materials" cut
  * 1080×1920 @ 30fps. ONE fixed Timegroup clock — all times = MASTER ms.
  *
  * LEAN: motion EMERGES FROM THE MATERIALS. Wool fibers, the tree-fiber knit weave and
@@ -75,7 +76,7 @@ export const Video: React.FC = () => {
   // ── WELL_A ──
   const wellARef = useRef<HTMLDivElement>(null);
   const wellAFrameRef = useRef<HTMLDivElement>(null);
-  const wellAPosterRef = useRef<HTMLImageElement>(null);
+  const wellAPosterRef = useRef<HTMLDivElement>(null);
   const wellACornersRef = useRef<(HTMLDivElement | null)[]>([]);
   const wellACopyRef = useRef<HTMLDivElement>(null);
   const wellAEyebrowRef = useRef<HTMLDivElement>(null);
@@ -90,7 +91,7 @@ export const Video: React.FC = () => {
   // ── WELL_B ──
   const wellBRef = useRef<HTMLDivElement>(null);
   const wellBFrameRef = useRef<HTMLDivElement>(null);
-  const wellBPosterRef = useRef<HTMLImageElement>(null);
+  const wellBPosterRef = useRef<HTMLDivElement>(null);
   const wellBCornersRef = useRef<(HTMLDivElement | null)[]>([]);
   const wellBCopyRef = useRef<HTMLDivElement>(null);
   const wellBProofRef = useRef<HTMLDivElement>(null);
@@ -269,7 +270,7 @@ export const Video: React.FC = () => {
       if (wellAFrameRef.current) {
         wellAFrameRef.current.style.opacity = String(clamp(frameIn));
       }
-      // poster fills the well (reveals FILLED — real video composited later)
+      // well footage reveals as it fills (base64 image-seq below)
       if (wellAPosterRef.current) {
         wellAPosterRef.current.style.opacity = String(clamp(track(ms, 6050, 6650)));
       }
@@ -476,11 +477,13 @@ export const Video: React.FC = () => {
     <Timegroup
       mode="fixed"
       duration={`${DURATION_MS}ms`}
-      onFrame={handleFrame as any}
       workbench
+      onFrame={handleFrame as any}
       className="w-[1080px] h-[1920px] relative overflow-hidden"
       style={{ background: OAT }}
     >
+      {/* Music bed on the composition timeline. */}
+      <Audio src={MUSIC} volume={1} />
       <div ref={rootRef} style={{ position: "absolute", inset: 0, background: OAT, fontFamily: GEOGRAPH, color: INK }}>
 
         {/* ambient oat weave (densifies in T1) */}
@@ -560,10 +563,11 @@ export const Video: React.FC = () => {
         <div ref={wellARef} style={{ position: "absolute", inset: 0, visibility: "hidden" }}>
           <div ref={wellAFrameRef} style={{ ...wellFrameBase(WELL_A), opacity: 0, willChange: "opacity",
             boxShadow: "0 30px 80px rgba(33,33,33,0.10)", border: `1px solid ${LINE}` }}>
-            {/* poster reveals FILLED (real portrait video composited later into WELL_A) */}
-            <img ref={wellAPosterRef} src={POSTER_PORTRAIT} alt="" style={{
-              position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0,
-            }} />
+            {/* WELL_A footage — poster + Video on the timeline (offset to 6–11s) */}
+            <div ref={wellAPosterRef} style={{ position: "absolute", inset: 0, opacity: 0 }}>
+              <img src={POSTER_PORTRAIT} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+              <Clip src="/assets/well-a-people-walk.mp4" offset="6000ms" duration="5000ms" sourcein="0.5s" mute style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
             {/* thin inner mat line */}
             <div style={{ position: "absolute", inset: 10, border: `1px solid rgba(255,255,255,0.5)`, borderRadius: WELL_A.r - 8, pointerEvents: "none" }} />
           </div>
@@ -655,9 +659,11 @@ export const Video: React.FC = () => {
           </div>
           <div ref={wellBFrameRef} style={{ ...wellFrameBase(WELL_B), opacity: 0, willChange: "transform,opacity,filter",
             boxShadow: "0 30px 80px rgba(33,33,33,0.10)", border: `1px solid ${LINE}` }}>
-            <img ref={wellBPosterRef} src={POSTER_LANDSCAPE} alt="" style={{
-              position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0,
-            }} />
+            {/* WELL_B footage — poster + Video on the timeline (offset to 14.5–19s) */}
+            <div ref={wellBPosterRef} style={{ position: "absolute", inset: 0, opacity: 0 }}>
+              <img src={POSTER_LANDSCAPE} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+              <Clip src="/assets/well-b-material-macro.mp4" offset="14500ms" duration="4500ms" sourcein="0.5s" mute style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
             <div style={{ position: "absolute", inset: 10, border: `1px solid rgba(255,255,255,0.5)`, borderRadius: WELL_B.r - 8, pointerEvents: "none" }} />
           </div>
           {["tl", "tr", "bl", "br"].map((c, i) => (
