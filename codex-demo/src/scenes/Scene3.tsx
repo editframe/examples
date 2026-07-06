@@ -13,9 +13,11 @@ import React from "react";
 import { Timegroup } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
+import { Sfx } from "../components/Sfx";
 
 const SCENE_DURATION = 1500;
 const SCENE_START_MS = 4500;
+const CLICK_START = 200;
 
 export const Scene3: React.FC = () => {
   return (
@@ -30,6 +32,9 @@ export const Scene3: React.FC = () => {
       }}
     >
       <TraceLayer sceneStartMs={SCENE_START_MS} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
+
+      {/* Send button click SFX, synced to the click pulse */}
+      <Sfx cue="click" at={CLICK_START / 1000} dur={0.3} volume={1} sourceIn={0.6} />
 
       {/* Full-screen white card — NEVER moves, NEVER shrinks, NEVER reveals desktop */}
       <div

@@ -31,6 +31,7 @@ import React from "react";
 import { Timegroup, Image } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
+import { Sfx } from "../components/Sfx";
 import { cursorMacosSrc } from "../scenes/scene-assets";
 import {
   XcodeWindow,
@@ -93,6 +94,9 @@ export const Scene8: React.FC = () => {
       style={{ position: "relative", width: 1920, height: 1080, overflow: "hidden" }}
     >
       <TraceLayer sceneStartMs={SCENE_START_MS} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
+
+      {/* Cell click SFX, synced to the click-ring pulse */}
+      <Sfx cue="click" at={CLICK_T / 1000} dur={0.3} volume={1} sourceIn={0.6} />
 
       {!TRACE_MODE && (
         <div style={{

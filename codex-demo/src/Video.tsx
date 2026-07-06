@@ -23,7 +23,7 @@
  * Scene8:  17500–22000ms — Cursor → center cell, X+Os spawn, fade out (4500ms)
  */
 import React from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { Scene1 } from "./scenes/Scene1";
 import { Scene2 } from "./scenes/Scene2";
 import { Scene3 } from "./scenes/Scene3";
@@ -33,9 +33,13 @@ import { Scene6 } from "./scenes/Scene6";
 import { Scene7 } from "./scenes/Scene7";
 import { Scene8 } from "./scenes/Scene8";
 
+const MUSIC = "/assets/music-bed.mp3";
+const TOTAL_MS = 22000;
+
 export const Video: React.FC = () => (
   <Timegroup
-    mode="sequence"
+    mode="contain"
+    workbench
     className="relative w-full h-full overflow-hidden"
     style={{
       width: 1920,
@@ -43,13 +47,19 @@ export const Video: React.FC = () => (
       background: "#000000",
     }}
   >
-    <Scene1 />
-    <Scene2 />
-    <Scene3 />
-    <Scene4 />
-    <Scene5 />
-    <Scene6 />
-    <Scene7 />
-    <Scene8 />
+    <Timegroup mode="sequence" className="absolute inset-0">
+      <Scene1 />
+      <Scene2 />
+      <Scene3 />
+      <Scene4 />
+      <Scene5 />
+      <Scene6 />
+      <Scene7 />
+      <Scene8 />
+    </Timegroup>
+
+    {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the
+        composition's total runtime regardless of the source file's own length. */}
+    <Audio src={MUSIC} volume={1} duration={`${TOTAL_MS}ms`} />
   </Timegroup>
 );

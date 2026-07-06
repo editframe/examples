@@ -14,15 +14,6 @@ output.mp4
 frames/
 _refframes/
 
-# Reference frames + QA captures extracted from source demo videos — NOT redistributable
-public/extracted/_*
-public/extracted/verify_*
-public/**/_ref*
-public/**/_ours*
-public/**/_cur*
-**/verify_*.jpg
-**/verify_*.png
-
 # Internal build / QA artifacts — not part of the published template
 .claude/
 .trace-frames/

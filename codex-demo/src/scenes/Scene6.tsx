@@ -24,6 +24,7 @@ import React from "react";
 import { Timegroup, Image } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
+import { Sfx } from "../components/Sfx";
 import { cursorMacosSrc } from "../scenes/scene-assets";
 import {
   XcodeWindow,
@@ -37,6 +38,7 @@ const DESKTOP_BG = "linear-gradient(135deg, #8B9EC8 0%, #6B7FA8 20%, #4A5F9E 40%
 
 const SCENE_DURATION = 1500;
 const SCENE_START_MS = 13000;
+const CLICK_T = 760; // RUN button click — matches the click-ring animation delay below
 
 const CODEX_W = 640; // FIX 3: widened from 540 to 640
 const CODEX_H = 620;
@@ -63,6 +65,9 @@ export const Scene6: React.FC = () => {
       style={{ position: "relative", width: 1920, height: 1080, overflow: "hidden" }}
     >
       <TraceLayer sceneStartMs={SCENE_START_MS} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
+
+      {/* RUN button click SFX, synced to the click-ring pulse */}
+      <Sfx cue="click" at={CLICK_T / 1000} dur={0.3} volume={1} sourceIn={0.6} />
 
       {!TRACE_MODE && (
         <div style={{

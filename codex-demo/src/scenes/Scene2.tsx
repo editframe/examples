@@ -25,6 +25,7 @@ import { Timegroup } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
 import { Reveal } from "../components/Reveal";
+import { Sfx } from "../components/Sfx";
 
 const SCENE_DURATION = 2000;
 const SCENE_START_MS = 2500;
@@ -78,6 +79,9 @@ export const Scene2: React.FC = () => {
       }}
     >
       <TraceLayer sceneStartMs={SCENE_START_MS} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
+
+      {/* Keyboard typing SFX, synced to TYPE_START */}
+      <Sfx cue="keyboard" at={TYPE_START / 1000} dur={1.2} volume={0.7} />
 
       {!TRACE_MODE && (
         <Reveal enter={[0, 300]} y={0} style={{ position: "absolute", inset: 0, background: "#FFFFFF", zIndex: 1 }} />
