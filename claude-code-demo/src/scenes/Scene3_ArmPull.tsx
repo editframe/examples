@@ -262,10 +262,10 @@ export const Scene3_ArmPull: React.FC = () => {
       </div>
 
       {/* Four arm-pull impacts (master 13.1s / 14.1s / 15.1s / 16.1s → local 1.1s / 2.1s / 3.1s / 4.1s) */}
-      <Audio src="/assets/sfx/punch-whoosh.wav" offset="1100ms" duration="0.55s" volume={1.5} />
-      <Audio src="/assets/sfx/punch-whoosh.wav" offset="2100ms" duration="0.55s" volume={1.5} />
-      <Audio src="/assets/sfx/punch-whoosh.wav" offset="3100ms" duration="0.55s" volume={1.5} />
-      <Audio src="/assets/sfx/punch-whoosh.wav" offset="4100ms" duration="0.55s" volume={1.5} />
+      <Audio src="/assets/sfx/punch-whoosh.wav" offset="1100ms" duration="0.55s" volume={1} />
+      <Audio src="/assets/sfx/punch-whoosh.wav" offset="2100ms" duration="0.55s" volume={1} />
+      <Audio src="/assets/sfx/punch-whoosh.wav" offset="3100ms" duration="0.55s" volume={1} />
+      <Audio src="/assets/sfx/punch-whoosh.wav" offset="4100ms" duration="0.55s" volume={1} />
     </Timegroup>
   );
 };
