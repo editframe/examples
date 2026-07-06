@@ -18,13 +18,10 @@
 import React, { useCallback, useRef } from "react";
 import { Timegroup } from "@editframe/react";
 import { CreamBackdrop } from "../components/CreamBackdrop";
-import { TraceLayer } from "../components/TraceLayer";
 import { track, lerp, clamp } from "../components/helpers";
 import { eases } from "animejs";
-import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 
 const DURATION_MS = 6500;
-const SCENE_START_MASTER = 8000; // Scene1(5000) + Scene2(3000) = 8000
 
 // ── Unified window layout ──
 const WIN_LEFT = 60;
@@ -171,7 +168,6 @@ export function Scene3_OutlookChromeAndType() {
       className="absolute inset-0"
       style={{ position: "absolute", inset: 0, width: 1920, height: 1080, overflow: "hidden" }}
     >
-      <TraceLayer sceneStartMs={SCENE_START_MASTER} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
       <CreamBackdrop variant="light" />
 
       {/* Camera rig — orange glow is INSIDE the rig so it scales with the zoom */}
@@ -614,8 +610,6 @@ export function Scene3_OutlookChromeAndType() {
     </Timegroup>
   );
 }
-
-Scene3_OutlookChromeAndType.duration = DURATION_MS;
 
 function MacCursorSvg({ size }: { size: number }) {
   const w = size * 0.65;

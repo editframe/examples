@@ -9,16 +9,12 @@
  *   - 2300–2700ms: Press-and-pop on logo (keep subtle)
  */
 import React, { useCallback, useRef } from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Image } from "@editframe/react";
 import { CreamBackdrop } from "../components/CreamBackdrop";
-import { TraceLayer } from "../components/TraceLayer";
 import { track, lerp, clamp, outBack } from "../components/helpers";
 import { eases } from "animejs";
-import { TRACE_MODE, TRACE_OPACITY } from "../constants";
-import { outlookIcon } from "../assets/officeIcons2025";
 
 const DURATION_MS = 3000;
-const SCENE_START_MASTER = 5000; // updated: Scene1 is now 5000ms
 
 const ICON_SIZE = 264;
 const ICON_START_CX = 960;
@@ -103,7 +99,6 @@ export function Scene2_OutlookFocus() {
       className="absolute inset-0"
       style={{ position: "absolute", inset: 0, width: 1920, height: 1080, overflow: "hidden" }}
     >
-      <TraceLayer sceneStartMs={SCENE_START_MASTER} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
       <CreamBackdrop variant="dark" />
 
       {/* Warm radial glow */}
@@ -128,8 +123,8 @@ export function Scene2_OutlookFocus() {
         alignItems: "center",
         justifyContent: "center",
       }}>
-        <img
-          src={outlookIcon}
+        <Image
+          src="/assets/outlook-icon.png"
           alt="Outlook"
           style={{ width: ICON_SIZE, height: ICON_SIZE, objectFit: "contain", display: "block" }}
         />
@@ -179,5 +174,3 @@ export function Scene2_OutlookFocus() {
     </Timegroup>
   );
 }
-
-Scene2_OutlookFocus.duration = DURATION_MS;

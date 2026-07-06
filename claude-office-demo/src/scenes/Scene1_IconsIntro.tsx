@@ -12,13 +12,10 @@
  *    instantaneous #4). Equal spacing preserved, Outlook never overlaps Word (#11,#12).
  */
 import React, { useCallback, useRef } from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Image } from "@editframe/react";
 import { CreamBackdrop } from "../components/CreamBackdrop";
-import { TraceLayer } from "../components/TraceLayer";
 import { track, lerp, clamp } from "../components/helpers";
 import { eases } from "animejs";
-import { TRACE_MODE, TRACE_OPACITY } from "../constants";
-import { outlookIcon, wordIcon, excelIcon, powerpointIcon } from "../assets/officeIcons2025";
 
 // Outlook icon fully settles at SLIDE_END (2900ms); trimmed the dead hold so the
 // Scene2 phrase ("Focus your attention in Outlook with Claude") appears ~1.5s sooner.
@@ -145,20 +142,19 @@ export function Scene1_IconsIntro() {
       className="absolute inset-0"
       style={{ position: "absolute", inset: 0, width: 1920, height: 1080, overflow: "hidden" }}
     >
-      <TraceLayer sceneStartMs={0} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
       <CreamBackdrop variant="dark" />
 
       <div ref={outlookRef} style={iconWrap(OUTLOOK_LEFT)}>
-        <img src={outlookIcon} alt="Outlook" style={imgStyle} />
+        <Image src="/assets/outlook-icon.png" alt="Outlook" style={imgStyle} />
       </div>
       <div ref={wordRef} style={iconWrap(WORD_LEFT)}>
-        <img src={wordIcon} alt="Word" style={imgStyle} />
+        <Image src="/assets/word-icon.png" alt="Word" style={imgStyle} />
       </div>
       <div ref={excelRef} style={iconWrap(EXCEL_LEFT)}>
-        <img src={excelIcon} alt="Excel" style={imgStyle} />
+        <Image src="/assets/excel-icon.png" alt="Excel" style={imgStyle} />
       </div>
       <div ref={ppRef} style={iconWrap(PP_LEFT)}>
-        <img src={powerpointIcon} alt="PowerPoint" style={imgStyle} />
+        <Image src="/assets/powerpoint-icon.png" alt="PowerPoint" style={imgStyle} />
       </div>
 
       {/* Headline — TWO LINES, bigger, more gap below icons (#13) */}
@@ -178,5 +174,3 @@ export function Scene1_IconsIntro() {
     </Timegroup>
   );
 }
-
-Scene1_IconsIntro.duration = DURATION_MS;

@@ -10,16 +10,13 @@
 import React, { useCallback, useRef } from "react";
 import { Timegroup } from "@editframe/react";
 import { CreamBackdrop } from "../components/CreamBackdrop";
-import { TraceLayer } from "../components/TraceLayer";
 import { track, lerp, clamp } from "../components/helpers";
 import { eases } from "animejs";
-import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 
 // FIX 7: Extended duration to accommodate slow pan + hold final frame
 // Timeline: ~2250ms slow scroll + 1000ms hold = need extra ~2450ms beyond old end
 // Scene1(5000) + Scene2(3000) + Scene3(6500) + Scene4(3000) = 17500 start
 const DURATION_MS = 8500;
-const SCENE_START_MASTER = 17500;
 
 // Layout mirrors Scene3
 const OUTLOOK_CONTENT_W = 1200;
@@ -499,7 +496,6 @@ export function Scene5_ResponseAndScroll() {
       className="absolute inset-0"
       style={{ position: "absolute", inset: 0, width: 1920, height: 1080, overflow: "hidden" }}
     >
-      <TraceLayer sceneStartMs={SCENE_START_MASTER} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
       <CreamBackdrop variant="light" />
 
       {/*
@@ -750,5 +746,3 @@ export function Scene5_ResponseAndScroll() {
     </Timegroup>
   );
 }
-
-Scene5_ResponseAndScroll.duration = DURATION_MS;

@@ -17,13 +17,10 @@
 import React, { useCallback, useRef } from "react";
 import { Timegroup } from "@editframe/react";
 import { CreamBackdrop } from "../components/CreamBackdrop";
-import { TraceLayer } from "../components/TraceLayer";
 import { track, lerp } from "../components/helpers";
 import { eases } from "animejs";
-import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 
 const DURATION_MS = 3000;
-const SCENE_START_MASTER = 14500; // Scene1(5000) + Scene2(3000) + Scene3(6500) = 14500
 
 const ASTERISK_SPOKES = 8;
 const ASTERISK_SIZE = 130;
@@ -133,7 +130,6 @@ export function Scene4_Thinking() {
       className="absolute inset-0"
       style={{ position: "absolute", inset: 0, width: 1920, height: 1080 }}
     >
-      <TraceLayer sceneStartMs={SCENE_START_MASTER} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
       <CreamBackdrop variant="light" />
 
       {/* Warm radial bg */}
@@ -237,5 +233,3 @@ export function Scene4_Thinking() {
     </Timegroup>
   );
 }
-
-Scene4_Thinking.duration = DURATION_MS;
