@@ -32,20 +32,15 @@
  *   BTN_CENTER_Y = 340 + 308 = 648
  *   BTN_CENTER_X = right side: 520+880-36 = 1364, btn width ~190, center = 1364-95 = 1269
  */
-import React, { useRef, useCallback } from "react";
-import { Timegroup } from "@editframe/react";
-import { lerp, clamp } from "../components/helpers";
+import React from "react";
+import { Timegroup, Image } from "@editframe/react";
 import { TraceLayer } from "../components/TraceLayer";
-import { TRACE_MODE } from "../constants";
-import { gradientBgV5 } from "../assets/gradient-bg-v5";
+import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 
 const DURATION = 2500;
 const START_MASTER = 6500;
 
 const POPUP_W = 880;
-// We'll let the popup height be auto, just set a generous initial top
-const POPUP_LEFT = (1920 - POPUP_W) / 2;   // 520
-const POPUP_TOP = 280; // slightly above center to make room for button near center
 
 // Button geometry (must match JSX below precisely)
 // Popup centered at (960, 540), width 880
@@ -72,104 +67,23 @@ const BTN_CENTER_Y = 362 + 303;  // ≈ 665
 const ZOOM_ORIGIN_X = BTN_CENTER_X;
 const ZOOM_ORIGIN_Y = BTN_CENTER_Y;
 
-// Cursor: starts at bottom-right, moves to button center in SCREEN space
-// Since button is at zoom origin, its screen position = (BTN_CENTER_X, BTN_CENTER_Y) regardless of scale
-const CURSOR_START_X = 1600;
-const CURSOR_START_Y = 980;
-// Cursor tip (top-left of arrow SVG) should land at button center
-const BTN_TIP_X = BTN_CENTER_X - 6;   // tip slightly left of center
-const BTN_TIP_Y = BTN_CENTER_Y - 8;   // tip slightly above center
+// Cursor: starts at bottom-right (1600,980), moves to button tip in SCREEN space
+// (button sits at the zoom origin, so its screen position is fixed regardless of scale).
+// Cursor tip (top-left of arrow SVG) lands at button centre minus (6,8) = (1258,657).
+// These are baked directly into the `scene4-cursor-move` @keyframes (styles.css).
 
 export function Scene4_CreateEnv() {
-  const panelRef = useRef<HTMLDivElement>(null);
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const startBtnRef = useRef<HTMLDivElement>(null);
-  const clickRippleRef = useRef<HTMLDivElement>(null);
-  const zoomWrapRef = useRef<HTMLDivElement>(null);
-
-  const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    // Panel fades + slides up: 0–450ms
-    const panelT = clamp(ms / 450);
-    const panelE = 1 - Math.pow(1 - panelT, 3);
-    if (panelRef.current) {
-      panelRef.current.style.opacity = String(lerp(0, 1, panelE));
-      panelRef.current.style.transform = `translate(-50%, calc(-50% + ${lerp(20, 0, panelE)}px))`;
-    }
-
-    // Camera zoom: 600ms → 1350ms (scale 1 → 2.4), origin on button
-    const zoomT = clamp((ms - 600) / 750);
-    const zoomE = zoomT < 0.5 ? 4 * zoomT * zoomT * zoomT : 1 - Math.pow(-2 * zoomT + 2, 3) / 2;
-    const zoomScale = lerp(1, 2.4, zoomE);
-    if (zoomWrapRef.current) {
-      zoomWrapRef.current.style.transformOrigin = `${ZOOM_ORIGIN_X}px ${ZOOM_ORIGIN_Y}px`;
-      zoomWrapRef.current.style.transform = `scale(${zoomScale})`;
-    }
-
-    // Cursor fades in: 500–700ms (appears BEFORE camera finishes zooming)
-    const cursorFadeT = clamp((ms - 500) / 200);
-    // Cursor moves: 700ms → 1400ms toward button tip position (in screen coords)
-    const cursorMoveT = clamp((ms - 700) / 700);
-    const cursorMoveE = 1 - Math.pow(1 - cursorMoveT, 3);
-    const cx = lerp(CURSOR_START_X, BTN_TIP_X, cursorMoveE);
-    const cy = lerp(CURSOR_START_Y, BTN_TIP_Y, cursorMoveE);
-
-    if (cursorRef.current) {
-      cursorRef.current.style.opacity = String(lerp(0, 1, cursorFadeT));
-      cursorRef.current.style.left = `${cx}px`;
-      cursorRef.current.style.top = `${cy}px`;
-    }
-
-    // Click at 1500ms — cursor squeeze
-    if (cursorRef.current) {
-      if (ms >= 1500 && ms < 1620) {
-        cursorRef.current.style.transform = `scale(0.86)`;
-      } else {
-        cursorRef.current.style.transform = `scale(1)`;
-      }
-    }
-
-    // Button click animation
-    let btnScale = 1;
-    if (ms >= 1500 && ms < 1580) {
-      btnScale = lerp(1, 0.93, clamp((ms - 1500) / 80));
-    } else if (ms >= 1580 && ms < 1780) {
-      const t = clamp((ms - 1580) / 200);
-      btnScale = lerp(0.93, 1.04, 1 - Math.pow(1 - t, 3));
-    } else if (ms >= 1780) {
-      btnScale = lerp(1.04, 1, clamp((ms - 1780) / 160));
-    }
-
-    if (startBtnRef.current) {
-      startBtnRef.current.style.transform = `scale(${btnScale})`;
-      if (ms >= 1500 && ms < 1720) {
-        startBtnRef.current.style.background = "#1C1C1C";
-      } else {
-        startBtnRef.current.style.background = "#000000";
-      }
-    }
-
-    // Click ripple: 1500ms → 1900ms
-    const rippleT = clamp((ms - 1500) / 400);
-    if (clickRippleRef.current) {
-      const rippleScale = lerp(0, 2.2, rippleT);
-      const rippleOpacity = ms >= 1500 ? lerp(0.5, 0, rippleT) : 0;
-      clickRippleRef.current.style.transform = `translate(-50%, -50%) scale(${rippleScale})`;
-      clickRippleRef.current.style.opacity = String(rippleOpacity);
-    }
-  }, []);
-
   return (
     <Timegroup
       mode="fixed"
       duration="2.5s"
-      onFrame={onFrame as any}
       className="absolute inset-0"
       style={{ position: "absolute", inset: 0, width: 1920, height: 1080 }}
     >
       {/* Gradient bg */}
       {!TRACE_MODE && (
-        <img
-          src={gradientBgV5}
+        <Image
+          src="/assets/gradient-bg-v5.png"
           style={{
             position: "absolute",
             inset: 0,
@@ -181,9 +95,8 @@ export function Scene4_CreateEnv() {
         />
       )}
 
-      {/* Zoom wrapper — contains only the popup, NOT the cursor */}
+      {/* Zoom wrapper — contains only the popup, NOT the cursor. Camera zoom: 600ms -> 1350ms, scale 1 -> 2.4, origin on button */}
       <div
-        ref={zoomWrapRef}
         style={{
           position: "absolute",
           inset: 0,
@@ -191,23 +104,22 @@ export function Scene4_CreateEnv() {
           height: 1080,
           zIndex: 10,
           transformOrigin: `${ZOOM_ORIGIN_X}px ${ZOOM_ORIGIN_Y}px`,
+          animation: "scene4-camera-zoom 750ms 600ms cubic-bezier(0.65,0,0.35,1) both",
         }}
       >
-        {/* Create New Environment popup */}
+        {/* Create New Environment popup — fades + slides up 0-450ms */}
         <div
-          ref={panelRef}
           style={{
             position: "absolute",
             left: "50%",
             top: "50%",
-            transform: "translate(-50%, -50%)",
             width: POPUP_W,
+            animation: "scene4-panel-in 450ms cubic-bezier(0.33,1,0.68,1) both",
             background: "#FFFFFF",
             borderRadius: 20,
             boxShadow: "0 24px 72px rgba(0,0,0,0.22), 0 6px 20px rgba(0,0,0,0.10)",
             zIndex: 10,
             overflow: "visible",
-            opacity: 0,
             fontFamily: "system-ui, -apple-system, 'SF Pro Display', 'Inter', sans-serif",
           }}
         >
@@ -310,11 +222,9 @@ export function Scene4_CreateEnv() {
                 Set up manually
               </span>
 
-              {/* START AGENT button */}
+              {/* START AGENT button — click-squeeze scale + darken at 1500-1940ms */}
               <div
-                ref={startBtnRef}
                 style={{
-                  background: "#000000",
                   color: "#FFFFFF",
                   borderRadius: 12,
                   padding: "15px 38px",
@@ -331,6 +241,10 @@ export function Scene4_CreateEnv() {
                   minWidth: 200,
                   justifyContent: "center",
                   letterSpacing: "-0.01em",
+                  animation: [
+                    "scene4-btn-scale 2500ms linear both",
+                    "scene4-btn-bg 2500ms linear both",
+                  ].join(", "),
                 }}
               >
                 Start Agent
@@ -338,9 +252,8 @@ export function Scene4_CreateEnv() {
                   <path d="M3 11L11 3M11 3H5M11 3v6" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
 
-                {/* Click ripple */}
+                {/* Click ripple: 1500ms -> 1900ms */}
                 <div
-                  ref={clickRippleRef}
                   style={{
                     position: "absolute",
                     left: "50%",
@@ -349,9 +262,8 @@ export function Scene4_CreateEnv() {
                     height: 100,
                     borderRadius: "50%",
                     background: "rgba(255,255,255,0.36)",
-                    transform: "translate(-50%, -50%) scale(0)",
-                    opacity: 0,
                     pointerEvents: "none",
+                    animation: "scene4-ripple 400ms 1500ms linear both",
                   }}
                 />
               </div>
@@ -362,16 +274,19 @@ export function Scene4_CreateEnv() {
 
       {/* CURSOR — OUTSIDE zoom wrapper, moves in screen space */}
       <div
-        ref={cursorRef}
         style={{
           position: "absolute",
-          left: CURSOR_START_X,
-          top: CURSOR_START_Y,
+          left: 1600,
+          top: 980,
           zIndex: 100,
-          opacity: 0,
           pointerEvents: "none",
           filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.4))",
           transformOrigin: "top left",
+          animation: [
+            "fade-in 200ms 500ms linear both",
+            "scene4-cursor-move 700ms 700ms cubic-bezier(0.33,1,0.68,1) both",
+            "scene4-cursor-squeeze 2500ms linear both",
+          ].join(", "),
         }}
       >
         {/* macOS pointer cursor (hand) — matches reference which shows a hand cursor */}
@@ -387,7 +302,7 @@ export function Scene4_CreateEnv() {
         </svg>
       </div>
 
-      <TraceLayer sceneStartMs={START_MASTER} enabled={TRACE_MODE} opacity={0.4} />
+      <TraceLayer sceneStartMs={START_MASTER} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
     </Timegroup>
   );
 }

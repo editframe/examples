@@ -4,32 +4,20 @@
  * FIX 7: WHITE background + BLACK text (NOT gradient bg + white text as in prior version)
  * ONE LINE, ~90px, centered, quick fade-in 300ms
  */
-import React, { useRef, useCallback } from "react";
+import React from "react";
 import { Timegroup } from "@editframe/react";
-import { track, lerp } from "../components/helpers";
+import { Reveal } from "../components/Reveal";
 import { TraceLayer } from "../components/TraceLayer";
-import { TRACE_MODE } from "../constants";
+import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 
 const DURATION = 2000;
 const START_MASTER = 21000; // Scene6 now ends at 16000+5000=21000ms
 
 export function Scene7_DevTagline() {
-  const textRef = useRef<HTMLDivElement>(null);
-
-  const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    const fadeT = track(ms, 0, 300);
-    const ty = lerp(14, 0, fadeT);
-    if (textRef.current) {
-      textRef.current.style.opacity = String(lerp(0, 1, fadeT));
-      textRef.current.style.transform = `translateY(${ty}px)`;
-    }
-  }, []);
-
   return (
     <Timegroup
       mode="fixed"
       duration="2s"
-      onFrame={onFrame as any}
       className="absolute inset-0"
       style={{ position: "absolute", inset: 0, width: 1920, height: 1080 }}
     >
@@ -56,8 +44,10 @@ export function Scene7_DevTagline() {
           zIndex: 10,
         }}
       >
-        <div
-          ref={textRef}
+        <Reveal
+          enter={[0, 300]}
+          y={14}
+          easeIn="out-cubic"
           style={{
             fontSize: 90,
             fontWeight: 500,
@@ -65,15 +55,14 @@ export function Scene7_DevTagline() {
             fontFamily: "system-ui, -apple-system, 'Inter', sans-serif",
             letterSpacing: "-0.025em",
             textAlign: "center",
-            opacity: 0,
             whiteSpace: "nowrap",
           }}
         >
           Agents that work like developers do
-        </div>
+        </Reveal>
       </div>
 
-      <TraceLayer sceneStartMs={START_MASTER} enabled={TRACE_MODE} opacity={0.4} />
+      <TraceLayer sceneStartMs={START_MASTER} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
     </Timegroup>
   );
 }

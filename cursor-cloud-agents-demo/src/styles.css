@@ -102,3 +102,198 @@
   opacity: var(--sweep-opacity, 0);
   will-change: transform, left, opacity;
 }
+
+/* ============================================================================
+ * Declarative scene animations (see REFACTOR-PATTERNS.md Part 2b).
+ *
+ * Every scene is its own `<Timegroup mode="fixed">` (src/scenes/), so all delays
+ * below are LOCAL to that scene's own clock — there is no master-ms clock and no
+ * `onFrame`/`addFrameTask` driving any of this. Percentage-based keyframes are
+ * used wherever a single element needs several distinct segments (different
+ * easing curves, instant state toggles) within one fixed-duration animation —
+ * each percentage below is `ms / <scene duration> * 100`, computed once by hand
+ * (see the derivation comments in the corresponding scene file) rather than
+ * per-frame.
+ * ========================================================================= */
+
+/* === Generic one-shot fade, reused across scenes for simple opacity-only cues === */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* === Reveal (see src/components/Reveal.tsx) — declarative fade + translate === */
+@keyframes reveal-in {
+  from { opacity: 0; transform: translate(var(--reveal-x, 0px), var(--reveal-y, 16px)); }
+  to { opacity: 1; transform: translate(0, 0); }
+}
+@keyframes reveal-out {
+  from { opacity: 1; transform: translate(0, 0); }
+  to { opacity: 0; transform: translate(var(--reveal-exit-x, 0px), var(--reveal-exit-y, 0px)); }
+}
+
+/* === Scene 1 — Chatbox (src/scenes/Scene1_Chatbox.tsx) ===
+ * Panel: scaleY 0->1 over 600ms (ease-out-cubic) while opacity 0->1 over 400ms (linear).
+ * Two separate animations (different durations/easings) on the same element. */
+@keyframes scene1-panel-fold-in {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+/* === Scene 2 (zoom-to-dropdown) — src/scenes/Scene2_ZoomToDropdown.tsx ===
+ * Camera: ONE continuous zoom from Scene1's held framing to the dropdown dead-centre,
+ * over the first 1500ms of this 2000ms scene (ease-in-out-cubic), then holds. */
+@keyframes scene2d-camera-zoom {
+  from { transform: scale(1.28) translate(-210px, -118px); }
+  to { transform: scale(2) translate(-268px, -379px); }
+}
+@keyframes scene2d-sidebar-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* === Scene 4 — Create Environment popup (src/scenes/Scene4_CreateEnv.tsx) === */
+@keyframes scene4-panel-in {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 20px)); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+@keyframes scene4-camera-zoom {
+  from { transform: scale(1); }
+  to { transform: scale(2.4); }
+}
+/* Cursor: fades in 500-700ms (own animation), moves 700-1400ms toward the button tip
+ * (1600,980) -> (1258,657), ease-out-cubic. */
+@keyframes scene4-cursor-move {
+  from { left: 1600px; top: 980px; }
+  to { left: 1258px; top: 657px; }
+}
+/* Cursor click-squeeze: instant scale(0.86) 1500-1620ms (60%-64.8% of 2500ms), else scale(1).
+ * Adjacent duplicate-percentage stops produce the instant (non-eased) toggle the original
+ * `if (ms >= 1500 && ms < 1620)` branch had. */
+@keyframes scene4-cursor-squeeze {
+  0%, 59.999% { transform: scale(1); }
+  60% { transform: scale(0.86); }
+  64.8% { transform: scale(0.86); }
+  64.801%, 100% { transform: scale(1); }
+}
+/* Button click: scale 1->0.93 (linear, 60%-63.2%) -> 1.04 (ease-out-cubic, 63.2%-71.2%)
+ * -> 1 (linear, 71.2%-77.6%), matching the original three-segment lerp exactly. */
+@keyframes scene4-btn-scale {
+  0%, 60% { transform: scale(1); animation-timing-function: linear; }
+  63.2% { transform: scale(0.93); animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
+  71.2% { transform: scale(1.04); animation-timing-function: linear; }
+  77.6%, 100% { transform: scale(1); }
+}
+/* Button darkens instantly 1500-1720ms (60%-68.8%), matching the original hard toggle. */
+@keyframes scene4-btn-bg {
+  0%, 60% { background: #000000; }
+  60.001% { background: #1C1C1C; }
+  68.8% { background: #1C1C1C; }
+  68.801%, 100% { background: #000000; }
+}
+@keyframes scene4-ripple {
+  from { transform: translate(-50%, -50%) scale(0); opacity: 0.5; }
+  to { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
+}
+
+/* === Scene 5 — Checklist (src/scenes/Scene5_Checklist.tsx) ===
+ * Per-item state machine baked into fixed percentage stops of the 2500ms scene.
+ * Pending dashed-circle: visible from 0ms until the item leaves the "pending" state —
+ * item 0 at SPIN_START=200ms (8%, since it starts spinning), items 1-3 at their own
+ * RESOLVE_WHITE[i] (46%/56%/66%, since they skip the spinner entirely) — then instantly
+ * hidden for the rest of the scene. */
+@keyframes checklist-pending-0 { 0%, 7.999% { opacity: 1; } 8%, 100% { opacity: 0; } }
+@keyframes checklist-pending-1 { 0%, 45.999% { opacity: 1; } 46%, 100% { opacity: 0; } }
+@keyframes checklist-pending-2 { 0%, 55.999% { opacity: 1; } 56%, 100% { opacity: 0; } }
+@keyframes checklist-pending-3 { 0%, 65.999% { opacity: 1; } 66%, 100% { opacity: 0; } }
+/* Spinner (item 0 only): continuous rotation, visible only 200-850ms (8%-34%). */
+@keyframes checklist-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes checklist-spinner-vis-0 {
+  0%, 7.999% { opacity: 0; }
+  8%, 33.999% { opacity: 1; }
+  34%, 100% { opacity: 0; }
+}
+/* White check: fades in linearly from RESOLVE_WHITE[i], reaching `checkTAtGreen` opacity
+ * right as RESOLVE_GREEN[i] hits (where the original state machine switches formula —
+ * this is a genuine discontinuity in the source it's faithfully reproducing), then falls
+ * to 0 by RESOLVE_GREEN[i]+100ms. */
+@keyframes checklist-check-0 {
+  0%, 34% { opacity: 0; }
+  38% { opacity: 0.5; }
+  38.001% { opacity: 1; }
+  42%, 100% { opacity: 0; }
+}
+@keyframes checklist-check-1 {
+  0%, 46% { opacity: 0; }
+  48% { opacity: 0.25; }
+  48.001% { opacity: 1; }
+  52%, 100% { opacity: 0; }
+}
+@keyframes checklist-check-2 {
+  0%, 56% { opacity: 0; }
+  58% { opacity: 0.25; }
+  58.001% { opacity: 1; }
+  62%, 100% { opacity: 0; }
+}
+@keyframes checklist-check-3 {
+  0%, 66% { opacity: 0; }
+  68% { opacity: 0.25; }
+  68.001% { opacity: 1; }
+  72%, 100% { opacity: 0; }
+}
+/* Text: dims until the item becomes active (spinning, or white-check for items that
+ * never spin), then instantly white and stays white. */
+@keyframes checklist-text-0 { 0%, 7.999% { color: rgba(255,255,255,0.35); } 8%, 100% { color: #FFFFFF; } }
+@keyframes checklist-text-1 { 0%, 45.999% { color: rgba(255,255,255,0.35); } 46%, 100% { color: #FFFFFF; } }
+@keyframes checklist-text-2 { 0%, 55.999% { color: rgba(255,255,255,0.35); } 56%, 100% { color: #FFFFFF; } }
+@keyframes checklist-text-3 { 0%, 65.999% { color: rgba(255,255,255,0.35); } 66%, 100% { color: #FFFFFF; } }
+
+/* === Scene 6 — Folded panels / paper-stack (src/scenes/Scene6_FoldedPanels.tsx) ===
+ * All percentages are of this scene's 5000ms duration. */
+@keyframes scene6-unified-window {
+  0% { opacity: 0; animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
+  12% { opacity: 1; animation-timing-function: linear; }
+  19.999% { opacity: 1; }
+  20% { opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes scene6-left-card {
+  0%, 19.999% { opacity: 0; transform: translate(320px, 140px); }
+  20% { opacity: 1; transform: translate(320px, 140px); animation-timing-function: cubic-bezier(0.65,0,0.35,1); }
+  56% { transform: translate(640px, 140px); animation-timing-function: linear; }
+  84% { transform: translate(640px, 140px); animation-timing-function: cubic-bezier(0.32,0,0.67,0); }
+  100% { transform: translate(2840px, 140px); opacity: 1; }
+}
+@keyframes scene6-right-card {
+  0%, 19.999% { opacity: 0; transform: translate(840px, 140px); }
+  20% { opacity: 1; transform: translate(840px, 140px); animation-timing-function: cubic-bezier(0.65,0,0.35,1); }
+  56% { transform: translate(580px, 140px); animation-timing-function: linear; }
+  84% { transform: translate(580px, 140px); animation-timing-function: cubic-bezier(0.32,0,0.67,0); }
+  100% { transform: translate(2780px, 140px); opacity: 1; }
+}
+@keyframes scene6-green-panel {
+  0%, 18% { opacity: 0; transform: translate(400px, 418px) scale(0.9); animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
+  26% { opacity: 1; transform: translate(400px, 418px) scale(1); animation-timing-function: linear; }
+  84% { transform: translate(400px, 418px) scale(1); animation-timing-function: cubic-bezier(0.32,0,0.67,0); }
+  100% { transform: translate(-680px, 418px) scale(1); opacity: 1; }
+}
+@keyframes scene6-tests-card {
+  0%, 56% { opacity: 0; transform: translate(0px, 20px); animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
+  63% { opacity: 1; transform: translate(0px, 0px); animation-timing-function: linear; }
+  84% { transform: translate(0px, 0px); animation-timing-function: cubic-bezier(0.32,0,0.67,0); }
+  100% { transform: translate(2200px, 0px); opacity: 1; }
+}
+@keyframes scene6-aws-card {
+  0%, 60% { opacity: 0; transform: translate(0px, 20px); animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
+  67% { opacity: 1; transform: translate(0px, 0px); animation-timing-function: linear; }
+  84% { transform: translate(0px, 0px); animation-timing-function: cubic-bezier(0.32,0,0.67,0); }
+  100% { transform: translate(2200px, 0px); opacity: 1; }
+}
+
+/* === Scene 8 — Cube logo outro (src/scenes/Scene8_CubeLogo.tsx) === */
+@keyframes scene8-cube-scale-in {
+  from { transform: scale(0.8); }
+  to { transform: scale(1); }
+}

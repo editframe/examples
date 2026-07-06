@@ -4,38 +4,20 @@
  * FIX 4: Text reduced to ~86px (was 120px) — still 2 lines, centered, weight 400
  * White background, black text
  */
-import React, { useRef, useCallback } from "react";
+import React from "react";
 import { Timegroup } from "@editframe/react";
-import { track, lerp } from "../components/helpers";
+import { Reveal } from "../components/Reveal";
 import { TraceLayer } from "../components/TraceLayer";
-import { TRACE_MODE } from "../constants";
+import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 
 const DURATION = 2000;
 const START_MASTER = 4500;
 
 export function Scene3_Tagline() {
-  const line1Ref = useRef<HTMLDivElement>(null);
-  const line2Ref = useRef<HTMLDivElement>(null);
-
-  const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    const fadeT = track(ms, 0, 300);
-    const translateY = lerp(16, 0, fadeT);
-
-    if (line1Ref.current) {
-      line1Ref.current.style.opacity = String(lerp(0, 1, fadeT));
-      line1Ref.current.style.transform = `translateY(${translateY}px)`;
-    }
-    if (line2Ref.current) {
-      line2Ref.current.style.opacity = String(lerp(0, 1, fadeT));
-      line2Ref.current.style.transform = `translateY(${translateY}px)`;
-    }
-  }, []);
-
   return (
     <Timegroup
       mode="fixed"
       duration="2s"
-      onFrame={onFrame as any}
       className="absolute inset-0"
       style={{ position: "absolute", inset: 0, width: 1920, height: 1080 }}
     >
@@ -65,8 +47,9 @@ export function Scene3_Tagline() {
         }}
       >
         {/* FIX 4: Reduced to ~86px (was 120px) */}
-        <div
-          ref={line1Ref}
+        <Reveal
+          enter={[0, 300]}
+          y={16}
           style={{
             fontSize: 86,
             fontWeight: 400,
@@ -74,14 +57,14 @@ export function Scene3_Tagline() {
             lineHeight: 1.22,
             textAlign: "center",
             letterSpacing: "-0.02em",
-            opacity: 0,
             whiteSpace: "nowrap",
           }}
         >
           Agents are only as useful
-        </div>
-        <div
-          ref={line2Ref}
+        </Reveal>
+        <Reveal
+          enter={[0, 300]}
+          y={16}
           style={{
             fontSize: 86,
             fontWeight: 400,
@@ -89,15 +72,14 @@ export function Scene3_Tagline() {
             lineHeight: 1.22,
             textAlign: "center",
             letterSpacing: "-0.02em",
-            opacity: 0,
             whiteSpace: "nowrap",
           }}
         >
           as their environment.
-        </div>
+        </Reveal>
       </div>
 
-      <TraceLayer sceneStartMs={START_MASTER} enabled={TRACE_MODE} opacity={0.4} />
+      <TraceLayer sceneStartMs={START_MASTER} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
     </Timegroup>
   );
 }

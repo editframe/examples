@@ -9,29 +9,15 @@
  * White triangle on TOP face only: points="12,30 88,30 50,50" (apex at center of top face)
  * White background, smooth scale+fade entrance
  */
-import React, { useRef, useCallback } from "react";
-import { Timegroup } from "@editframe/react";
-import { lerp, clamp } from "../components/helpers";
+import React from "react";
+import { Timegroup, Image } from "@editframe/react";
 import { TraceLayer } from "../components/TraceLayer";
-import { TRACE_MODE } from "../constants";
-import { cursorLogoDataUri } from "../assets/cursor-logo";
+import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 
 const DURATION = 1500;
 const START_MASTER = 23000; // Scene7 ends at 21000+2000=23000ms
 
 export function Scene8_CubeLogo() {
-  const cubeRef = useRef<HTMLDivElement>(null);
-
-  const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    const fadeT = clamp(ms / 600);
-    const scaleT = clamp(ms / 700);
-    const scaleE = 1 - Math.pow(1 - scaleT, 3);
-    if (cubeRef.current) {
-      cubeRef.current.style.opacity = String(lerp(0, 1, fadeT));
-      cubeRef.current.style.transform = `scale(${lerp(0.8, 1, scaleE)})`;
-    }
-  }, []);
-
   // Cursor isometric cube — verified-correct geometry
   // viewBox is 100x100 for easy percentage points
   // Top face: 50,8 → 88,30 → 50,50 → 12,30 (diamond)
@@ -45,7 +31,6 @@ export function Scene8_CubeLogo() {
     <Timegroup
       mode="fixed"
       duration="1.5s"
-      onFrame={onFrame as any}
       className="absolute inset-0"
       style={{ position: "absolute", inset: 0, width: 1920, height: 1080 }}
     >
@@ -66,15 +51,17 @@ export function Scene8_CubeLogo() {
         }}
       >
         <div
-          ref={cubeRef}
           style={{
-            opacity: 0,
             transformOrigin: "center center",
+            animation: [
+              "fade-in 600ms linear both",
+              "scene8-cube-scale-in 700ms cubic-bezier(0.33,1,0.68,1) both",
+            ].join(", "),
           }}
         >
           {/* User-supplied Cursor logo PNG (CURSOR LOGO.png from Downloads) */}
-          <img
-            src={cursorLogoDataUri}
+          <Image
+            src="/assets/cursor-logo.png"
             alt="Cursor"
             width={SIZE}
             height={SIZE}
@@ -83,7 +70,7 @@ export function Scene8_CubeLogo() {
         </div>
       </div>
 
-      <TraceLayer sceneStartMs={START_MASTER} enabled={TRACE_MODE} opacity={0.4} />
+      <TraceLayer sceneStartMs={START_MASTER} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
     </Timegroup>
   );
 }

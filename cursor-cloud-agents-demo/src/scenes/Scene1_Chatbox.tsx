@@ -14,12 +14,10 @@
  *   - Input box below chips: placeholder "Build, fix, explore your codebase..."
  *     with "+ Composer 2" button bottom-left and black circular send button bottom-right
  */
-import React, { useRef, useCallback } from "react";
-import { Timegroup } from "@editframe/react";
-import { lerp, clamp } from "../components/helpers";
+import React from "react";
+import { Timegroup, Image } from "@editframe/react";
 import { TraceLayer } from "../components/TraceLayer";
-import { TRACE_MODE } from "../constants";
-import { gradientBgV5 } from "../assets/gradient-bg-v5";
+import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 
 const DURATION = 2500;
 
@@ -43,38 +41,17 @@ const CAM_TX = -210;
 const CAM_TY = -118;
 
 export function Scene1_Chatbox() {
-  const panelRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
-
-  const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    // Panel folds in: scaleY 0 → 1 (0–600ms), opacity 0 → 1 (0–400ms)
-    const foldT = clamp(ms / 600);
-    const foldEased = 1 - Math.pow(1 - foldT, 3);
-    const fadeT = clamp(ms / 400);
-
-    if (panelRef.current) {
-      panelRef.current.style.transform = `scaleY(${lerp(0, 1, foldEased)})`;
-      panelRef.current.style.opacity = String(lerp(0, 1, fadeT));
-    }
-    // Inner content fades in after fold
-    const innerT = clamp((ms - 450) / 500);
-    if (innerRef.current) {
-      innerRef.current.style.opacity = String(lerp(0, 1, innerT));
-    }
-  }, []);
-
   return (
     <Timegroup
       mode="fixed"
       duration="2.5s"
-      onFrame={onFrame as any}
       className="absolute inset-0"
       style={{ position: "absolute", inset: 0, width: 1920, height: 1080 }}
     >
       {/* Gradient background */}
       {!TRACE_MODE && (
-        <img
-          src={gradientBgV5}
+        <Image
+          src="/assets/gradient-bg-v5.png"
           style={{
             position: "absolute",
             inset: 0,
@@ -101,12 +78,10 @@ export function Scene1_Chatbox() {
       >
       {/* Chat window — absolute at (WIN_LEFT, WIN_TOP) = centred in 1920×1080 */}
       <div
-        ref={panelRef}
         style={{
           position: "absolute",
           left: WIN_LEFT,
           top: WIN_TOP,
-          transform: "scaleY(0)",
           transformOrigin: "top center",
           width: WIN_W,
           height: WIN_H,
@@ -115,10 +90,13 @@ export function Scene1_Chatbox() {
           boxShadow: "0 32px 80px rgba(0,0,0,0.28), 0 8px 24px rgba(0,0,0,0.12)",
           zIndex: 10,
           overflow: "hidden",
-          opacity: 0,
           fontFamily: "system-ui, -apple-system, 'SF Pro Display', 'Inter', sans-serif",
           display: "flex",
           flexDirection: "column",
+          animation: [
+            "scene1-panel-fold-in 600ms cubic-bezier(0.33,1,0.68,1) both",
+            "fade-in 400ms linear both",
+          ].join(", "),
         }}
       >
         {/* Web app title bar — NO traffic-light dots */}
@@ -150,12 +128,11 @@ export function Scene1_Chatbox() {
 
         {/* Window body: sidebar + main content */}
         <div
-          ref={innerRef}
           style={{
             display: "flex",
             flex: 1,
-            opacity: 0,
             overflow: "hidden",
+            animation: "fade-in 500ms 450ms linear both",
           }}
         >
           {/* LEFT SIDEBAR — narrow, ~220px */}
@@ -416,7 +393,7 @@ export function Scene1_Chatbox() {
       </div>
       </div>{/* camera rig */}
 
-      <TraceLayer sceneStartMs={0} enabled={TRACE_MODE} opacity={0.4} />
+      <TraceLayer sceneStartMs={0} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
     </Timegroup>
   );
 }

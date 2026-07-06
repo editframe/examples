@@ -18,11 +18,10 @@
  *                green-gradient panel slides LEFT to middle-left position
  *   4200–5000ms: Everything slides RIGHT off frame (exit to Scene7)
  */
-import React, { useRef, useCallback } from "react";
+import React from "react";
 import { Timegroup } from "@editframe/react";
-import { lerp, clamp } from "../components/helpers";
 import { TraceLayer } from "../components/TraceLayer";
-import { TRACE_MODE } from "../constants";
+import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 
 const DURATION = 5000;
 // Scene5 is now 2500ms (was 7000ms), so Scene5 ends at 9000+2500=11500ms
@@ -32,21 +31,14 @@ const START_MASTER = 11500;
 // Reference shows window spanning ~1250px wide, FULL height with shared tab bar
 const WIN_W = 1280;
 const WIN_H = 800;
-const WIN_LEFT = (1920 - WIN_W) / 2; // 320
-const WIN_TOP = (1080 - WIN_H) / 2;  // 140
+// WIN_LEFT = (1920-WIN_W)/2 = 320, WIN_TOP = (1080-WIN_H)/2 = 140 — baked directly
+// into the `scene6-unified-window` / `scene6-left-card` / `scene6-right-card`
+// @keyframes (styles.css).
 
 // Left panel width within the unified window
 const LEFT_PANEL_W = 520;
 // Right panel fills the rest
 const RIGHT_PANEL_W = WIN_W - LEFT_PANEL_W; // 760
-
-// Ease functions
-function easeOutCubic(t: number): number {
-  return 1 - Math.pow(1 - t, 3);
-}
-function easeInOutCubic(t: number): number {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
 
 // Light code block — pnpm commands with syntax colors
 function CodeBlock() {
@@ -235,103 +227,18 @@ function AwsCard() {
   );
 }
 
+// CHOREOGRAPHY (all baked into `scene6-*` @keyframes, styles.css, as percentages
+// of this scene's 5000ms duration — see each rule for the derivation):
+//   Phase 1 (0-600ms):    unified window fades in (ease-out-cubic), holds to 1000ms
+//   Phase 2 (1000ms):     unified window instantly hidden — paper-stack cards take over
+//   Phase 2 (1000-2800ms): left/right cards slide from the unified position to the
+//                          stacked position (ease-in-out-cubic, matches STACK_DUR=1800ms)
+//   Green panel (900-1300ms): fades + scales in (0.9->1, ease-out-cubic) at its held position
+//   Floating cards (2800-3150ms / 3000-3350ms): tests/aws cards fade + slide up
+//   Exit (4200-5000ms):   everything (except the green panel) slides right off-frame,
+//                          the green panel slides LEFT off-frame — both ease-in-cubic
+// STACKED_CENTER_X = (1920-RIGHT_PANEL_W)/2 = 580, STACKED_LEFT_X = 580+60 = 640.
 export function Scene6_FoldedPanels() {
-  // Phase 1 (0–1000ms): unified window shown as ONE element — no gap by construction
-  const unifiedWindowRef = useRef<HTMLDivElement>(null);
-  // Phase 2+ (1000ms+): paper-stack: TWO separate cards animated independently
-  const leftCardRef = useRef<HTMLDivElement>(null);
-  const rightCardRef = useRef<HTMLDivElement>(null);
-  const greenPanelRef = useRef<HTMLDivElement>(null);
-  const testsCardRef = useRef<HTMLDivElement>(null);
-  const awsCardRef = useRef<HTMLDivElement>(null);
-
-  const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    // Phase 1: 0–600ms — UNIFIED window fades in as one element (no gap)
-    const fadeT = clamp(ms / 600);
-    const fadeE = easeOutCubic(fadeT);
-
-    // Paper-stack starts at 1000ms
-    const STACK_START = 1000;
-    const STACK_DUR = 1800;
-    const stackT = clamp((ms - STACK_START) / STACK_DUR);
-    const stackE = easeInOutCubic(stackT);
-    const stackStarted = ms >= STACK_START;
-
-    // UNIFIED WINDOW: visible 0–1000ms (one continuous window), then hidden
-    if (unifiedWindowRef.current) {
-      unifiedWindowRef.current.style.opacity = stackStarted ? "0" : String(fadeE);
-    }
-
-    // Phase 2: exit offset for everything
-    const EXIT_START = 4200;
-    const EXIT_DUR = 800;
-    const exitT = clamp((ms - EXIT_START) / EXIT_DUR);
-    const exitE = exitT * exitT * exitT;
-    const exitOffset = lerp(0, 2200, exitE);
-
-    // LEFT card: appears at STACK_START, starts at WIN_LEFT, slides right to stacked pos
-    const LEFT_INIT_X = WIN_LEFT;
-    const STACKED_CENTER_X = (1920 - RIGHT_PANEL_W) / 2; // 580
-    const STACKED_LEFT_X = STACKED_CENTER_X + 60; // 640
-    const leftX = lerp(LEFT_INIT_X, STACKED_LEFT_X, stackE);
-
-    // RIGHT card: appears at STACK_START, starts adjacent to left, slides left to center
-    const RIGHT_INIT_X = WIN_LEFT + LEFT_PANEL_W; // 840
-    const rightX = lerp(RIGHT_INIT_X, STACKED_CENTER_X, stackE);
-
-    // LEFT card — hidden before stack starts
-    if (leftCardRef.current) {
-      leftCardRef.current.style.opacity = stackStarted ? "1" : "0";
-      leftCardRef.current.style.transform = `translateX(${leftX + exitOffset}px) translateY(${WIN_TOP}px)`;
-      leftCardRef.current.style.zIndex = "5";
-    }
-
-    // RIGHT card — hidden before stack starts
-    if (rightCardRef.current) {
-      rightCardRef.current.style.opacity = stackStarted ? "1" : "0";
-      rightCardRef.current.style.transform = `translateX(${rightX + exitOffset}px) translateY(${WIN_TOP}px)`;
-      rightCardRef.current.style.zIndex = "10";
-    }
-
-    // Green gradient panel:
-    // Appears at 900ms, then during 3200–4200ms slides LEFT to middle-left position
-    // Initial position: center-left of frame (left of the stacked cards)
-    // Middle-left target: shifts left, less than the other panels
-    const THUMB_IN_START = 900;
-    const thumbT = clamp((ms - THUMB_IN_START) / 400);
-    const thumbE = easeOutCubic(thumbT);
-
-    // Reference (_ref_14s/15s/16s): green panel sits center-LEFT, OVERLAPPING
-    // the main window's left edge, vertically centred (centre ≈ 620, 543). It
-    // holds steady through the whole beat, then on EXIT slides LEFT off-frame.
-    // User verbatim: "it should START AT THAT POSITION AND THEN SLIDE TO THE
-    // LEFT" (NOT right — the old code flew it rightward with the exit).
-    const THUMB_BASE_X = 400;
-    const THUMB_BASE_Y = 418;
-    const greenExitX = lerp(0, -1080, exitE); // exit → slide LEFT off-frame
-
-    if (greenPanelRef.current) {
-      greenPanelRef.current.style.opacity = String(thumbT > 0 ? lerp(0, 1, thumbE) : 0);
-      greenPanelRef.current.style.transform = `translateX(${THUMB_BASE_X + greenExitX}px) translateY(${THUMB_BASE_Y}px) scale(${lerp(0.9, 1, thumbE)})`;
-      greenPanelRef.current.style.zIndex = "15"; // ON TOP of the main window
-    }
-
-    // Floating cards: pop up at ~2800–3200ms
-    const FLOAT_START = 2800;
-    const testsT = clamp((ms - FLOAT_START) / 350);
-    const testsE = easeOutCubic(testsT);
-    if (testsCardRef.current) {
-      testsCardRef.current.style.opacity = String(testsE);
-      testsCardRef.current.style.transform = `translate(${exitOffset}px, ${lerp(20, 0, testsE)}px)`;
-    }
-
-    const awsT = clamp((ms - (FLOAT_START + 200)) / 350);
-    const awsE = easeOutCubic(awsT);
-    if (awsCardRef.current) {
-      awsCardRef.current.style.opacity = String(awsE);
-      awsCardRef.current.style.transform = `translate(${exitOffset}px, ${lerp(20, 0, awsE)}px)`;
-    }
-  }, []);
 
   // UNIFIED WINDOW — ONE continuous window for the initial two-panel beat (no gap)
   function UnifiedWindowInner() {
@@ -619,7 +526,6 @@ export function Scene6_FoldedPanels() {
     <Timegroup
       mode="fixed"
       duration="5s"
-      onFrame={onFrame as any}
       className="absolute inset-0"
       style={{ position: "absolute", inset: 0, width: 1920, height: 1080 }}
     >
@@ -652,16 +558,16 @@ export function Scene6_FoldedPanels() {
         cursor.com/agents
       </div>
 
-      {/* UNIFIED WINDOW — ONE continuous window, shown 0–1000ms only */}
+      {/* UNIFIED WINDOW — ONE continuous window, shown 0–1000ms only. Position is
+          static (320,140) — only opacity is animated (fade in, then instant hide). */}
       <div
-        ref={unifiedWindowRef}
         style={{
           position: "absolute",
           top: 0,
           left: 0,
-          opacity: 0,
           zIndex: 7,
-          transform: `translateX(${WIN_LEFT}px) translateY(${WIN_TOP}px)`,
+          transform: "translateX(320px) translateY(140px)",
+          animation: "scene6-unified-window 5000ms linear both",
         }}
       >
         <UnifiedWindowInner />
@@ -669,14 +575,13 @@ export function Scene6_FoldedPanels() {
 
       {/* LEFT card — extracted left panel, animated independently during stack */}
       <div
-        ref={leftCardRef}
         style={{
           position: "absolute",
           top: 0,
           left: 0,
-          opacity: 0,
           zIndex: 5,
           transformOrigin: "top left",
+          animation: "scene6-left-card 5000ms linear both",
         }}
       >
         <LeftCardExtract />
@@ -684,14 +589,13 @@ export function Scene6_FoldedPanels() {
 
       {/* RIGHT card — extracted right panel, animated independently during stack */}
       <div
-        ref={rightCardRef}
         style={{
           position: "absolute",
           top: 0,
           left: 0,
-          opacity: 0,
           zIndex: 10,
           transformOrigin: "top left",
+          animation: "scene6-right-card 5000ms linear both",
         }}
       >
         <RightCardExtract />
@@ -699,14 +603,13 @@ export function Scene6_FoldedPanels() {
 
       {/* Green gradient panel with UI inside — center-left, slides left */}
       <div
-        ref={greenPanelRef}
         style={{
           position: "absolute",
           top: 0,
           left: 0,
-          opacity: 0,
-          zIndex: 8,
+          zIndex: 15,
           transformOrigin: "top left",
+          animation: "scene6-green-panel 5000ms linear both",
         }}
       >
         <GreenGradientPanel />
@@ -715,13 +618,12 @@ export function Scene6_FoldedPanels() {
       {/* Floating card — Run backend tests. Reference: upper-RIGHT, OVERLAPPING
           the main window's right edge (left edge ≈ 1180, at code-block height). */}
       <div
-        ref={testsCardRef}
         style={{
           position: "absolute",
           top: 300,
           left: 1180,
-          opacity: 0,
           zIndex: 20,
+          animation: "scene6-tests-card 5000ms linear both",
         }}
       >
         <TestsCard />
@@ -730,19 +632,18 @@ export function Scene6_FoldedPanels() {
       {/* Floating card — AWS opened. Reference: lower-RIGHT, OVERLAPPING the
           main window's right edge (left edge ≈ 1095, below the tests card). */}
       <div
-        ref={awsCardRef}
         style={{
           position: "absolute",
           top: 648,
           left: 1095,
-          opacity: 0,
           zIndex: 20,
+          animation: "scene6-aws-card 5000ms linear both",
         }}
       >
         <AwsCard />
       </div>
 
-      <TraceLayer sceneStartMs={START_MASTER} enabled={TRACE_MODE} opacity={0.4} />
+      <TraceLayer sceneStartMs={START_MASTER} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
     </Timegroup>
   );
 }

@@ -21,12 +21,11 @@
  *   "anysphere/core-ui" chip ~140px wide → chip center x ≈ 703
  *   Chips center y ≈ 195+690-177 = 708
  */
-import React, { useRef, useCallback } from "react";
-import { Timegroup } from "@editframe/react";
-import { lerp, clamp } from "../components/helpers";
+import React from "react";
+import { Timegroup, Image } from "@editframe/react";
+import { Reveal } from "../components/Reveal";
 import { TraceLayer } from "../components/TraceLayer";
-import { TRACE_MODE } from "../constants";
-import { gradientBgV5 } from "../assets/gradient-bg-v5";
+import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 
 const DURATION = 2000;
 const START_MASTER = 2500;
@@ -102,74 +101,26 @@ const SIDEBAR_W = 220;
 // before). The horizontal translate barely changes (the chatbox column ≈ the
 // dropdown column), so the camera "stays put" horizontally and just pushes in
 // + pans down to follow the dropdown — exactly what the reference does.
-const DROPDOWN_CX = 748;  // dropdown horizontal centre (layout)
-const DROPDOWN_CY = 649;  // chips+dropdown group centre (layout)
-// Scene1 held framing — MUST equal Scene1_Chatbox's camera constants:
-const CAM_Z_START  = 1.28;   // ROUND-8f: must equal Scene1's frame-filling framing
-const CAM_TX_START = -210;
-const CAM_TY_START = -118;
+// DROPDOWN_CX/CY = 748/649 (dropdown + chips-group centre, layout coords).
+// Scene1 held framing (MUST equal Scene1_Chatbox's camera constants):
+//   CAM_Z_START=1.28 CAM_TX_START=-210 CAM_TY_START=-118
 // End framing — dropdown dead-centre, slightly more zoomed:
-const CAM_Z_END  = 2.0;
-const CAM_TX_END = 960 / 2.0 - DROPDOWN_CX;  // -268
-const CAM_TY_END = 540 / 2.0 - DROPDOWN_CY;  // -379
-const ZOOM_DUR = 1500;
+//   CAM_Z_END=2.0 CAM_TX_END=960/2-748=-268 CAM_TY_END=540/2-649=-379
+// These are baked directly into the `scene2d-camera-zoom` @keyframes (styles.css) —
+// see that rule for the literal values this derivation produces.
 
 export function Scene2_ZoomToDropdown() {
-  const zoomWrapRef = useRef<HTMLDivElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const whiteOverlayRef = useRef<HTMLDivElement>(null);
-  const sidebarRef = useRef<HTMLDivElement>(null);
-
-  const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    // ONE continuous zoom from Scene1's held framing → dropdown dead-centre.
-    // No snap at the 2.5s boundary (starts at Scene1's exact transform); the
-    // horizontal translate barely moves so the camera reads as "fixed" while it
-    // pushes in and pans down to follow the dropdown.
-    const zp = clamp(ms / ZOOM_DUR);
-    const ze = zp < 0.5 ? 4 * zp * zp * zp : 1 - Math.pow(-2 * zp + 2, 3) / 2; // inOutCubic
-    const finalScale = lerp(CAM_Z_START, CAM_Z_END, ze);
-    const tx = lerp(CAM_TX_START, CAM_TX_END, ze);
-    const ty = lerp(CAM_TY_START, CAM_TY_END, ze);
-
-    if (zoomWrapRef.current) {
-      zoomWrapRef.current.style.transformOrigin = `0px 0px`;
-      zoomWrapRef.current.style.transform = `scale(${finalScale}) translate(${tx}px, ${ty}px)`;
-    }
-
-    // Dropdown fades in 650→950ms
-    const dropT = clamp((ms - 650) / 300);
-    const dropE = 1 - Math.pow(1 - dropT, 3);
-    if (dropdownRef.current) {
-      dropdownRef.current.style.opacity = String(lerp(0, 1, dropE));
-      dropdownRef.current.style.transform = `translateY(${lerp(-6, 0, dropE)}px)`;
-    }
-
-    // Sidebar fades out 0→500ms — reference shows no sidebar during dropdown zoom
-    const sidebarT = clamp(ms / 500);
-    const sidebarE = sidebarT * sidebarT;
-    if (sidebarRef.current) {
-      sidebarRef.current.style.opacity = String(lerp(1, 0, sidebarE));
-    }
-
-    // White overlay: 1700→2000ms
-    const whiteT = clamp((ms - 1700) / 300);
-    if (whiteOverlayRef.current) {
-      whiteOverlayRef.current.style.opacity = String(lerp(0, 1, whiteT));
-    }
-  }, []);
-
   return (
     <Timegroup
       mode="fixed"
       duration="2s"
-      onFrame={onFrame as any}
       className="absolute inset-0"
       style={{ position: "absolute", inset: 0, width: 1920, height: 1080 }}
     >
       {/* Gradient bg */}
       {!TRACE_MODE && (
-        <img
-          src={gradientBgV5}
+        <Image
+          src="/assets/gradient-bg-v5.png"
           style={{
             position: "absolute",
             inset: 0,
@@ -181,9 +132,9 @@ export function Scene2_ZoomToDropdown() {
         />
       )}
 
-      {/* Zoom wrapper */}
+      {/* Zoom wrapper — ONE continuous zoom from Scene1's held framing → dropdown
+          dead-centre (no snap at the 2.5s boundary: starts at Scene1's exact transform). */}
       <div
-        ref={zoomWrapRef}
         style={{
           position: "absolute",
           left: 0,
@@ -192,7 +143,7 @@ export function Scene2_ZoomToDropdown() {
           height: 1080,
           zIndex: 10,
           transformOrigin: `0px 0px`,
-          transform: `scale(${CAM_Z_START}) translate(${CAM_TX_START}px, ${CAM_TY_START}px)`,
+          animation: "scene2d-camera-zoom 1500ms cubic-bezier(0.65,0,0.35,1) both",
         }}
       >
         {/* Chat window — same structure as Scene1 (updated dimensions, no traffic lights) */}
@@ -235,7 +186,6 @@ export function Scene2_ZoomToDropdown() {
           <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
             {/* SIDEBAR — fades out during zoom (ref: reference video has no sidebar during zoom) */}
             <div
-              ref={sidebarRef}
               style={{
                 width: SIDEBAR_W,
                 borderRight: "1px solid #EBEBEB",
@@ -243,6 +193,7 @@ export function Scene2_ZoomToDropdown() {
                 display: "flex",
                 flexDirection: "column",
                 flexShrink: 0,
+                animation: "scene2d-sidebar-fade-out 500ms cubic-bezier(0.11,0,0.5,0) both",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px 12px", borderBottom: "1px solid #EBEBEB" }}>
@@ -305,9 +256,10 @@ export function Scene2_ZoomToDropdown() {
                       <path d="M2 4l4 4 4-4" stroke="#999" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
 
-                    {/* DROPDOWN — absolute positioned below this chip */}
-                    <div
-                      ref={dropdownRef}
+                    {/* DROPDOWN — absolute positioned below this chip, fades in 650-950ms */}
+                    <Reveal
+                      enter={[650, 950]}
+                      y={-6}
                       style={{
                         position: "absolute",
                         left: 0,
@@ -319,7 +271,6 @@ export function Scene2_ZoomToDropdown() {
                         border: "1px solid #E8E8E8",
                         zIndex: 50,
                         overflow: "hidden",
-                        opacity: 0,
                         transformOrigin: "top left",
                       }}
                     >
@@ -384,7 +335,7 @@ export function Scene2_ZoomToDropdown() {
                         </svg>
                         Add Environment
                       </div>
-                    </div>
+                    </Reveal>
                   </div>
 
                   {/* main chip */}
@@ -434,18 +385,17 @@ export function Scene2_ZoomToDropdown() {
 
       {/* White overlay — transition to Scene 3 */}
       <div
-        ref={whiteOverlayRef}
         style={{
           position: "absolute",
           inset: 0,
           background: "#FFFFFF",
           zIndex: 100,
-          opacity: 0,
           pointerEvents: "none",
+          animation: "fade-in 300ms 1700ms linear both",
         }}
       />
 
-      <TraceLayer sceneStartMs={START_MASTER} enabled={TRACE_MODE} opacity={0.4} />
+      <TraceLayer sceneStartMs={START_MASTER} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
     </Timegroup>
   );
 }
