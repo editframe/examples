@@ -1,7 +1,7 @@
 /**
- * OLIPOP retro motion-graphics primitives — pure SVG/CSS, no per-frame logic inside.
- * Animation is driven from Video.tsx by mutating refs/transforms on the wrappers.
- * These render the *static art*; Video.tsx makes it ALIVE.
+ * OLIPOP retro motion-graphics primitives — pure SVG, no per-frame logic inside.
+ * These render the *static art*; each scene in src/scenes/ animates them with plain CSS
+ * `@keyframes` (wrapping divs handle rotation/scale/opacity — see styles.css).
  */
 import React from "react";
 
@@ -60,50 +60,6 @@ export const Rings: React.FC<{
   </g>
 );
 
-// ── UNDULATING WAVE BAND ── stacked sine ribbons (retro water/landscape)
-export const WaveBand: React.FC<{
-  width: number;
-  colors: string[];
-  amp?: number;
-  baseY?: number;
-  bandH?: number;
-}> = ({ width, colors, amp = 26, baseY = 0, bandH = 46 }) => {
-  const path = (y: number) => {
-    const seg = width / 4;
-    return (
-      `M -40 ${y} ` +
-      `C ${seg * 0.5} ${y - amp}, ${seg * 1.5} ${y + amp}, ${seg * 2} ${y} ` +
-      `C ${seg * 2.5} ${y - amp}, ${seg * 3.5} ${y + amp}, ${seg * 4 + 40} ${y} ` +
-      `L ${width + 40} 2200 L -40 2200 Z`
-    );
-  };
-  return (
-    <g>
-      {colors.map((c, i) => (
-        <path key={i} d={path(baseY + i * bandH)} fill={c} />
-      ))}
-    </g>
-  );
-};
-
-// ── SCALLOP EDGE ── a row of half-circles (retro card / awning edge)
-export const Scallop: React.FC<{
-  width: number;
-  fill: string;
-  r?: number;
-  y?: number;
-  flip?: boolean;
-}> = ({ width, fill, r = 26, y = 0, flip = false }) => {
-  const n = Math.ceil(width / (r * 2)) + 1;
-  let d = `M 0 ${flip ? y : y + r} `;
-  for (let i = 0; i < n; i++) {
-    const cx = i * r * 2 + r;
-    d += `A ${r} ${r} 0 0 ${flip ? 0 : 1} ${cx + r} ${flip ? y : y + r} `;
-  }
-  d += flip ? `L ${width} ${y - r} L 0 ${y - r} Z` : `L ${width} ${y + r + 40} L 0 ${y + r + 40} Z`;
-  return <path d={d} fill={fill} />;
-};
-
 // ── STAR (4-point sparkle / twinkle) ──
 export const Star: React.FC<{ size?: number; fill: string }> = ({ size = 40, fill }) => {
   const h = size / 2;
@@ -144,17 +100,4 @@ export const PalmEmblem: React.FC<{ size?: number; ink: string; sun: string }> =
       </g>
     ))}
   </svg>
-);
-
-// ── single rising BUBBLE (positioned + animated by parent) ──
-export const Bubble: React.FC<{ size: number; color: string }> = ({ size, color }) => (
-  <div
-    style={{
-      width: size,
-      height: size,
-      borderRadius: "50%",
-      background: `radial-gradient(circle at 32% 30%, rgba(255,255,255,0.9), ${color} 70%)`,
-      boxShadow: `0 0 ${size * 0.5}px ${color}66`,
-    }}
-  />
 );

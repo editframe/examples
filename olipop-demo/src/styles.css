@@ -6,3 +6,289 @@
 
 html, body, #root { height: 100%; margin: 0; padding: 0; }
 * { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+/* === Shared (used across multiple scenes + components/Reveal.tsx) === */
+@keyframes spin-cw {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes spin-ccw {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(var(--reveal-y, 20px)); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes reveal-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(var(--reveal-exit-y, 0px)); }
+}
+/* Whole-video ambient camera breathing (see Video.tsx). Approximates the original's three
+   independent sine waves on incommensurate periods with one clean loop — combining those
+   exactly isn't expressible as a single CSS keyframes cycle, and it's subtle background
+   ambience, not a focal element. */
+@keyframes camera-drift {
+  0%   { transform: translate(0px, 5px) scale(1); }
+  25%  { transform: translate(6px, 0px) scale(1.004); }
+  50%  { transform: translate(0px, -5px) scale(1); }
+  75%  { transform: translate(-6px, 0px) scale(0.998); }
+  100% { transform: translate(0px, 5px) scale(1); }
+}
+
+/* === Hook scene (src/scenes/Hook.tsx) === */
+@keyframes hook-burst-in {
+  from { opacity: 0; transform: scale(0.4); }
+  to   { opacity: 1; transform: scale(1.05); }
+}
+@keyframes hook-stars-twinkle {
+  from { opacity: 0.55; transform: scale(0.9); }
+  to   { opacity: 1;    transform: scale(1.06); }
+}
+@keyframes hook-mask-wipe {
+  from { transform: translateY(110%); }
+  to   { transform: translateY(0); }
+}
+@keyframes hook-logo-pop {
+  from { opacity: 0; transform: scale(0.86); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes hook-tag-bounce {
+  from { opacity: 0; transform: translateY(56px) rotate(-3deg); }
+  to   { opacity: 1; transform: translateY(0)    rotate(-2deg); }
+}
+@keyframes hook-wipe-out {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+
+/* === Hero scene (src/scenes/Hero.tsx) === */
+@keyframes hero-burst-in {
+  from { opacity: 0; transform: scale(0.6); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes hero-burst-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.015); }
+}
+@keyframes hero-rings-in {
+  from { opacity: 0;    transform: scale(0.7); }
+  to   { opacity: 0.85; transform: scale(1); }
+}
+@keyframes hero-rings-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.06); }
+}
+/* Bubbles' horizontal wobble is folded into the same rise-cycle period as the vertical
+   rise (rather than the original's separate, unrelated 900ms-period drift) — a reasonable
+   simplification for ambient background particles. --bubble-x is set per-instance. */
+@keyframes bubble-rise {
+  0%   { opacity: 0;    transform: translate(var(--bubble-x), 420px); }
+  25%  { transform: translate(calc(var(--bubble-x) + 9px), 190px); }
+  50%  { opacity: 0.85; transform: translate(var(--bubble-x), -60px); }
+  75%  { transform: translate(calc(var(--bubble-x) - 9px), -300px); }
+  100% { opacity: 0;    transform: translate(var(--bubble-x), -540px); }
+}
+@keyframes hero-shadow-in {
+  from { opacity: 0;   transform: scaleX(0.5); }
+  to   { opacity: 0.4; transform: scaleX(1); }
+}
+@keyframes hero-shadow-breathe {
+  0%, 100% { transform: scaleX(1); }
+  50%      { transform: scaleX(0.94); }
+}
+@keyframes hero-can-push-in {
+  from { opacity: 0; transform: translateY(120px) scale(0.62); }
+  to   { opacity: 1; transform: translateY(0)      scale(1); }
+}
+@keyframes hero-can-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-9px); }
+}
+@keyframes hero-spec-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes hero-spec-sweep {
+  0%   { opacity: 0.25; transform: translateX(-120px) rotate(18deg); }
+  50%  { opacity: 0.65; transform: translateX(120px)  rotate(18deg); }
+  100% { opacity: 0.25; transform: translateX(-120px) rotate(18deg); }
+}
+@keyframes hero-wipe-out {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+/* === Well scene (src/scenes/Well.tsx) === */
+@keyframes well-frame-in {
+  from { opacity: 0; transform: translateY(46px) scale(0.9); }
+  to   { opacity: 1; transform: translateY(0)     scale(1); }
+}
+@keyframes well-frame-out {
+  from { transform: translateY(0)     scale(1); }
+  to   { transform: translateY(-30px) scale(0.94); }
+}
+@keyframes well-star-twinkle {
+  from { transform: scale(0.9); }
+  to   { transform: scale(1.08); }
+}
+@keyframes rec-blink {
+  0%, 50%    { opacity: 1; }
+  50.01%, 100% { opacity: 0.25; }
+}
+
+/* === Swap scene (src/scenes/Swap.tsx) === */
+@keyframes swap-exit-fade {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes swap-burst-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes swap-title-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(-30px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@keyframes swap-old-in {
+  from { opacity: 0; transform: translateX(-460px) rotate(-6deg); }
+  to   { opacity: 1; transform: translateX(0)       rotate(-3deg); }
+}
+/* Only desaturates (filter), doesn't also dim opacity like the original's combined
+   multiplier — keeping this filter-only avoids fighting swap-old-in for the opacity
+   property, and the grayscale alone still reads clearly as "this option lost". */
+@keyframes swap-old-dim {
+  from { filter: grayscale(0); }
+  to   { filter: grayscale(0.6); }
+}
+@keyframes strike-draw {
+  from { stroke-dashoffset: 420; }
+  to   { stroke-dashoffset: 0; }
+}
+@keyframes swap-arrow-in {
+  from { opacity: 0; transform: scale(0.3); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes swap-arrow-pulse {
+  from { transform: scale(1); }
+  to   { transform: scale(1.05); }
+}
+@keyframes swap-new-in {
+  from { opacity: 0; transform: translateX(460px) rotate(6deg); }
+  to   { opacity: 1; transform: translateX(0)      rotate(3deg); }
+}
+@keyframes stat-chip-in {
+  from { opacity: 0; transform: translateY(30px) scale(0.7); }
+  to   { opacity: 1; transform: translateY(0)     scale(1); }
+}
+
+/* === Rainbow scene (src/scenes/Rainbow.tsx) === */
+/* Background color-block hard-cuts to the next flavor's color at each card's own start
+   time (970/1510/2050/2590/3130/3670ms of the scene's 4850ms total), then to teal once the
+   grid collapse begins (3730ms) — doubled stops create an instant cut instead of a smooth
+   color interpolation, matching the original's discrete dataset-driven swaps. */
+@keyframes rainbow-bg-cycle {
+  0%        { background: #E8503A; }
+  20.0000%  { background: #E8503A; }
+  31.1340%  { background: #E8503A; }
+  31.1341%  { background: #F2B705; }
+  42.2680%  { background: #F2B705; }
+  42.2681%  { background: #7FB23C; }
+  53.4021%  { background: #7FB23C; }
+  53.4022%  { background: #C7402E; }
+  64.5361%  { background: #C7402E; }
+  64.5362%  { background: #D81E63; }
+  75.6701%  { background: #D81E63; }
+  75.6702%  { background: #6B4226; }
+  76.9072%  { background: #6B4226; }
+  76.9073%  { background: #14433D; }
+  100%      { background: #14433D; }
+}
+/* One shared timeline per flavor card: pop in (spring), hold, fade+drift out — a single
+   self-contained keyframes block (not separate enter/exit animations) so there's nothing
+   for flavor-grid-in to fight with once the grid collapse takes over. Per-keyframe
+   `animation-timing-function` switches the easing mid-timeline (spring in, cubic out). */
+@keyframes flavor-cycle {
+  0%    { opacity: 0; transform: translate(-50%,-50%) translateY(60px) scale(0.78) rotate(-7deg); animation-timing-function: cubic-bezier(0.34,1.56,0.64,1); }
+  37.5% { opacity: 1; transform: translate(-50%,-50%) translateY(0)    scale(1)    rotate(0deg); }
+  67.5% { opacity: 1; transform: translate(-50%,-50%) translateY(0)    scale(1)    rotate(0deg); animation-timing-function: cubic-bezier(0.32,0,0.67,0); }
+  100%  { opacity: 0; transform: translate(-50%,-50%) translateY(-80px) scale(0.9) rotate(6deg); }
+}
+@keyframes flavor-grid-in {
+  from { opacity: 1; transform: translate(-50%,-50%); }
+  to   { opacity: 1; transform: translate(calc(-50% + var(--grid-x)), calc(-50% + var(--grid-y))) scale(0.42) rotate(var(--grid-rot)); }
+}
+@keyframes flavor-label-cycle {
+  0%      { opacity: 0; transform: translateX(-50%) translateY(28px); animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
+  41.8182% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  70.9091% { opacity: 1; transform: translateX(-50%) translateY(0); animation-timing-function: cubic-bezier(0.32,0,0.67,0); }
+  100%    { opacity: 0; transform: translateX(-50%) translateY(0); }
+}
+@keyframes flavor-label-hide {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* === Offer scene (src/scenes/Offer.tsx) === */
+@keyframes offer-burst-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes offer-title-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(-30px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@keyframes offer-shadow-in {
+  from { opacity: 0;   transform: scaleX(0.5); }
+  to   { opacity: 0.4; transform: scaleX(1); }
+}
+@keyframes offer-pack-in {
+  from { opacity: 0; transform: translate(-50%,-50%) translateY(90px) scale(0.7); }
+  to   { opacity: 1; transform: translate(-50%,-50%) translateY(0)    scale(1); }
+}
+@keyframes offer-pack-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-7px); }
+}
+@keyframes offer-sub-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes offer-sub-wipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0% 0 0); }
+}
+
+/* === Cta scene (src/scenes/Cta.tsx) === */
+@keyframes cta-resolve-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes cta-burst-settle {
+  from { transform: scale(1.3); }
+  to   { transform: scale(1); }
+}
+@keyframes cta-rings-in {
+  from { opacity: 0;    transform: scale(0.5); }
+  to   { opacity: 0.78; transform: scale(1); }
+}
+@keyframes cta-rings-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.04); }
+}
+@keyframes cta-star-pop {
+  from { opacity: 0; transform: scale(0.3); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes cta-star-twinkle {
+  from { opacity: 0.4; transform: scale(0.85); }
+  to   { opacity: 1;   transform: scale(1.15); }
+}
+@keyframes cta-logo-in {
+  from { opacity: 0; transform: translate(-50%,-50%) translateY(60px) scale(0.6); }
+  to   { opacity: 1; transform: translate(-50%,-50%) translateY(0)    scale(1); }
+}
+@keyframes cta-logo-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}

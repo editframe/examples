@@ -125,15 +125,27 @@ grotesque sans) handles tracked caps and body. Tokens are the source of truth in
 ├── output/
 │   └── demo.mp4               ← final shipped render (well composited + audio)
 └── src/
-    ├── Video.tsx              ← composition root (20s, 7 beats, fixed Timegroup)
+    ├── Video.tsx              ← composition root: outer Timegroup (contain) + the
+    │                            sequence of the 7 scenes below + AmbientField
     ├── main.tsx
-    ├── constants.ts           ← canonical brand tokens + master beat timings
-    ├── styles.css
-    ├── assets.ts              ← base64-inlined can/pack/poster images (Editframe inlines assets)
-    ├── assets/                ← source can/pack/poster art (raw PNG + optimized WebP cache)
+    ├── constants.ts           ← canonical brand tokens + SCENES (per-scene durations,
+    │                            derived from the shared crossfade overlap)
+    ├── styles.css             ← fonts, base reset, every scene's @keyframes
+    ├── assets/                ← can/pack/poster art (raw PNG + optimized WebP, referenced
+    │                            directly via <Image src="/assets/opt/...">)
+    ├── scenes/                ← one file per beat, each its own <Timegroup mode="fixed">
+    │   ├── Hook.tsx
+    │   ├── Hero.tsx
+    │   ├── Well.tsx
+    │   ├── Swap.tsx
+    │   ├── Rainbow.tsx
+    │   ├── Offer.tsx
+    │   └── Cta.tsx
     └── components/
-        ├── retro.tsx          ← Sunburst, Rings, WaveBand, Scallop, Star, PalmEmblem, Bubble
-        └── helpers.ts         ← track, lerp, clamp, easings (outBack, easeOutCubic…)
+        ├── retro.tsx          ← Sunburst, Rings, Star, PalmEmblem (static SVG art)
+        ├── Reveal.tsx         ← reusable fade + float-in/out entrance, driven by CSS
+        │                        @keyframes instead of a per-frame ref mutation
+        └── AmbientField.tsx   ← whole-video print grain + vignette (outside the camera-drift wrapper)
 ```
 
 ---
@@ -149,8 +161,9 @@ bash composite-well.sh
 bash add-audio.sh
 ```
 
-1. **Swap the story** — each beat lives in `src/Video.tsx`, gated by the master ms
-   constants in `src/constants.ts`. Edit a beat's timing window and its `onFrame` body.
+1. **Swap the story** — each beat is its own file under `src/scenes/`, with its own local
+   clock (see `SCENES` in `src/constants.ts` for durations). Edit a scene's CSS
+   `@keyframes` in `src/styles.css` or its `<Reveal>` timing to change what it does.
 2. **Rebrand** — replace the tokens in `src/constants.ts` (seafoam, teal, coral, cream,
    fonts). Never read pure `#000` or drop shadows on text.
 3. **Re-skin the well** — drop a new clip at `assets/well-video.mp4` and a matching
