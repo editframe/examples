@@ -39,3 +39,93 @@
   }
   * { box-sizing: border-box; }
 }
+
+/* === Reveal (see src/components/Reveal.tsx) — declarative fade + translate/scale === */
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translate(var(--reveal-x, 0px), var(--reveal-y, 20px)) scale(var(--reveal-scale-from, 1));
+  }
+  to { opacity: 1; transform: translate(0, 0) scale(1); }
+}
+@keyframes reveal-out {
+  from { opacity: 1; transform: translate(0, 0) scale(1); }
+  to {
+    opacity: 0;
+    transform: translate(var(--reveal-exit-x, 0px), var(--reveal-exit-y, 0px)) scale(var(--reveal-exit-scale, 1));
+  }
+}
+
+/* === Shared solid-color scene-transition wash (see Sfx/transition overlays in each scene) === */
+@keyframes wash-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* === SceneA (src/scenes/SceneA_FigmaWindow.tsx) === */
+/* Camera rig — one continuous multi-hold pan/zoom across the whole 10s scene. Every
+   moving segment in the original per-frame version used the same ease-in-out-cubic
+   curve, so a single `animation-timing-function` covers every stop. */
+@keyframes scenea-camera {
+  0%   { transform: translate(0px, 0px) scale(0.92); }
+  15%  { transform: translate(0px, 0px) scale(1); }
+  35%  { transform: translate(0px, 0px) scale(1); }
+  45%  { transform: translate(760px, 120px) scale(1.5); }
+  55%  { transform: translate(760px, 120px) scale(1.5); }
+  68%  { transform: translate(-680px, 200px) scale(1.6); }
+  80%  { transform: translate(-680px, 200px) scale(1.6); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+@keyframes scenea-topbar-in {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+@keyframes scenea-left-in {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+@keyframes scenea-right-in {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+@keyframes scenea-mockup-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.94); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes scenea-layer-in {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* === SceneB (src/scenes/SceneB_AgentPrompt.tsx) === */
+@keyframes sceneb-camera {
+  0%   { transform: scale(1); }
+  75%  { transform: scale(1); }
+  91.6667% { transform: scale(1.08); }
+  100% { transform: scale(1.08); }
+}
+
+/* === SceneBprime (src/scenes/SceneBprime_OnboardingGeneration.tsx) === */
+/* Camera pan across 4 mockups — every segment uses the same ease-in-out-cubic curve. */
+@keyframes sceneb-prime-camera {
+  0%      { transform: translate(380px, 0px) scale(1.05); }
+  14.5455% { transform: translate(360px, 0px) scale(1.08); }
+  29.0909% { transform: translate(120px, 0px) scale(1.08); }
+  43.6364% { transform: translate(-120px, 0px) scale(1.08); }
+  58.1818% { transform: translate(-360px, 0px) scale(1.08); }
+  80%     { transform: translate(0px, 0px) scale(1); }
+  100%    { transform: translate(0px, 0px) scale(1); }
+}
+
+/* === SceneC (src/scenes/SceneC_ThenGoDeep.tsx) === */
+@keyframes scenec-camera {
+  0%       { transform: scale(1); }
+  87.931%  { transform: scale(1); }
+  100%     { transform: scale(1.06); }
+}
+
+/* === SceneD (src/scenes/SceneD_LogoCard.tsx) === */
+@keyframes scened-wrap-bob {
+  0%, 100% { transform: translate(-50%, -50%); }
+  50%      { transform: translate(-50%, calc(-50% + 1.2px)); }
+}

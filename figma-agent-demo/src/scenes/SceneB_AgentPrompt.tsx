@@ -1,8 +1,8 @@
 import React, { useCallback, useRef } from "react";
 import { Timegroup } from "@editframe/react";
-import { eases } from "animejs";
+import { Reveal } from "../components/Reveal";
 import { Sfx } from "../components/Sfx";
-import { clamp, lerp, track, typewriter } from "../components/helpers";
+import { clamp, lerp, typewriter } from "../components/helpers";
 
 /**
  * SceneB — Agent prompt close-up (6s).
@@ -28,6 +28,16 @@ import { clamp, lerp, track, typewriter } from "../components/helpers";
  *   0–4.5s   scale 1.0, static
  *   4.5–6s   scale 1.08, slight drift to suggest "submission released" beat
  *
+ * Camera, spark icon, prompt box, and the transition wash are all fully
+ * declarative CSS. The cursor sweep + click bump + submit-button squish stay
+ * as a small scene-scoped `addFrameTask`, kept together (rather than split
+ * into independent CSS keyframes) because they're all keyed off the exact
+ * same click timestamp (4300ms) and re-deriving that coupling as separately
+ * timed keyframes risks the click/squish/pulse drifting out of sync without
+ * a render pass to verify — see REFACTOR-PATTERNS.md Part 2b, priority 5.
+ * The prompt-text typewriter is also kept here since CSS cannot mutate text
+ * content over time.
+ *
  * Cursor target math (cursor TIP):
  *   Submit button center = (1240, 612) in 1920×1080 rig.
  *   Cursor SVG anchor is at top-left, TIP offset is ~(4, 2) from anchor.
@@ -43,12 +53,6 @@ const INTER: React.CSSProperties = {
 const PROMPT_TEXT = "Hey Figma, can you create different layouts for this onboarding flow?";
 
 // Submit button rendered position (matches the JSX layout below).
-// Prompt box: 1100px wide, centered horizontally → left edge ≈ (1920-1100)/2 = 410
-// top: 360, height: 320. Bottom row submit button center:
-//   x = 410 + 1100 - 60 = 1450 ... but we keep prompt at left:50%, translate.
-// Easier: place cursor relative to prompt-box absolute center.
-// We'll compute targets after layout: prompt left-edge at 410, top at 380.
-// Submit button is in bottom-right of prompt, ~60px from right edge, ~50px from bottom.
 // Submit center: (410 + 1100 - 70, 380 + 320 - 60) = (1440, 640).
 // Cursor TIP offset (4, 2) from SVG top-left.
 const SUBMIT_CX = 1440;
@@ -57,7 +61,6 @@ const TIP_DX = 4;
 const TIP_DY = 2;
 
 // Cursor enters from bottom-right corner, sweeps to submit button.
-type Pt = [number, number];
 const cursorAt = (ms: number): { x: number; y: number; vis: boolean; click: number } => {
   if (ms < 3600) return { x: 2000, y: 1100, vis: false, click: 0 };
   if (ms < 4200) {
@@ -81,43 +84,14 @@ const cursorAt = (ms: number): { x: number; y: number; vis: boolean; click: numb
 };
 
 export const SceneB_AgentPrompt: React.FC = () => {
-  const cameraRef = useRef<HTMLDivElement>(null);
-  const sparkRef = useRef<HTMLDivElement>(null);
-  const promptRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const submitRef = useRef<HTMLDivElement>(null);
   const pulseRef = useRef<HTMLDivElement>(null);
-  const transitionRef = useRef<HTMLDivElement>(null);
 
   const handleFrame = useCallback(
     ({ ownCurrentTimeMs }: { ownCurrentTimeMs: number }) => {
       const ms = ownCurrentTimeMs;
-
-      // Camera (slight push after submit)
-      let s = 1.0;
-      if (ms < 4500) s = 1.0;
-      else if (ms < 5500) s = lerp(1.0, 1.08, eases.outCubic(clamp((ms - 4500) / 1000)));
-      else s = 1.08;
-      if (cameraRef.current) {
-        cameraRef.current.style.transform = `scale(${s})`;
-      }
-
-      // Spark icon + prompt scale-in
-      const inP = track(ms, 0, 500, eases.outBack(1.7));
-      if (sparkRef.current) {
-        sparkRef.current.style.opacity = String(inP);
-        sparkRef.current.style.transform = `scale(${lerp(0.85, 1, inP)})`;
-      }
-      if (promptRef.current) {
-        const outP = track(ms, 5400, 5800, eases.inCubic);
-        const op = inP * (1 - outP);
-        const ty = lerp(20, 0, inP);
-        const sc = lerp(0.96, 1, inP);
-        promptRef.current.style.opacity = String(op);
-        // Plain translate + scale — element is centered via margin offsets.
-        promptRef.current.style.transform = `translate(0px, ${ty}px) scale(${sc})`;
-      }
 
       // Typewriter (full text reveals around 3.4s, leaving time for cursor)
       if (textRef.current) {
@@ -145,12 +119,6 @@ export const SceneB_AgentPrompt: React.FC = () => {
           pulseRef.current.style.opacity = "0";
         }
       }
-
-      // Transition flash to SceneC (white)
-      if (transitionRef.current) {
-        const t = track(ms, 5700, 6000, eases.outCubic);
-        transitionRef.current.style.opacity = String(t);
-      }
     },
     []
   );
@@ -171,28 +139,29 @@ export const SceneB_AgentPrompt: React.FC = () => {
 
       {/* White wash out */}
       <div
-        ref={transitionRef}
         style={{
           position: "absolute",
           inset: 0,
           background: "#FFFFFF",
-          opacity: 0,
           zIndex: 40,
+          animation: "wash-in 300ms 5700ms cubic-bezier(0.33,1,0.68,1) both",
         }}
       />
 
       <div
-        ref={cameraRef}
         style={{
           position: "absolute",
           inset: 0,
           transformOrigin: "50% 50%",
-          willChange: "transform",
+          animation: "sceneb-camera 6000ms cubic-bezier(0.33,1,0.68,1) both",
         }}
       >
         {/* Spark icon (peg-091314, blue rounded square with sparkle) */}
-        <div
-          ref={sparkRef}
+        <Reveal
+          enter={[0, 500]}
+          y={0}
+          scaleFrom={0.85}
+          easeIn="out-back"
           style={{
             position: "absolute",
             left: 250,
@@ -205,35 +174,36 @@ export const SceneB_AgentPrompt: React.FC = () => {
             alignItems: "center",
             justifyContent: "center",
             boxShadow: "0 14px 32px rgba(13,153,255,0.30)",
-            opacity: 0,
-            willChange: "transform, opacity",
           }}
         >
           <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
             <path d="M12 3 L13.5 9.5 L20 11 L13.5 12.5 L12 19 L10.5 12.5 L4 11 L10.5 9.5 Z" fill="#FFFFFF" />
             <path d="M19 3 L19.7 5.3 L22 6 L19.7 6.7 L19 9 L18.3 6.7 L16 6 L18.3 5.3 Z" fill="#FFFFFF" />
           </svg>
-        </div>
+        </Reveal>
 
-        {/* Prompt box — centered via margin offsets (avoid calc() in transform) */}
-        <div
-          ref={promptRef}
+        {/* Prompt box — centered via margin offsets (avoid calc() in transform).
+            Shares the spark icon's outBack entrance easing/timing (both driven
+            by the same `inP` ramp in the original per-frame version). */}
+        <Reveal
+          enter={[0, 500]}
+          exit={[5400, 5800]}
+          y={20}
+          scaleFrom={0.96}
+          easeIn="out-back"
           style={{
             position: "absolute",
             left: "50%",
             top: "50%",
             marginLeft: -550,
             marginTop: -160,
-            transform: "translate(0px, 20px) scale(0.96)",
             width: 1100,
             background: "#FFFFFF",
             borderRadius: 28,
             padding: "44px 50px 32px",
             boxShadow:
               "0 30px 70px rgba(20, 24, 36, 0.18), 0 0 0 1px rgba(0,0,0,0.04)",
-            opacity: 0,
             ...INTER,
-            willChange: "transform, opacity",
           }}
         >
           <div
@@ -326,7 +296,7 @@ export const SceneB_AgentPrompt: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </Reveal>
 
         {/* Cursor click pulse */}
         <div

@@ -1,8 +1,8 @@
 import React, { useCallback, useRef } from "react";
 import { Timegroup } from "@editframe/react";
-import { eases } from "animejs";
+import { Reveal } from "../components/Reveal";
 import { Sfx } from "../components/Sfx";
-import { clamp, lerp, track, typewriter } from "../components/helpers";
+import { clamp, lerp, typewriter } from "../components/helpers";
 
 /**
  * SceneA — Figma window (10s).
@@ -27,20 +27,33 @@ import { clamp, lerp, track, typewriter } from "../components/helpers";
  * Camera magnitudes (brand cap relaxed to 2.5x for this video):
  *   t=0     scale 0.92, settle
  *   t=1.5   scale 1.0
- *   t=2.5   scale 2.0, tx=0,  ty=+260 (frame the Book Details header top)
+ *   t=2.5   scale 2.0, tx=0,  ty=+260 (frame the Book Details header top) [see note below]
  *   t=5     scale 1.6,  tx=-560, ty=+60 (frame right-panel Fill area)
  *   t=8     scale 1.0,  tx=0,  ty=0 (wide release)
  *   t=10    fade to next scene
  *
- * Transform math (rig is 1920×1080, origin 50% 50%):
- *   screen(px,py) = (960 + s*(px-960) + tx, 540 + s*(py-540) + ty)
- *   To center a point P at (960,540): tx = -s*(px-960), ty = -s*(py-540)
+ * NOTE: the camera magnitudes actually implemented (see `scenea-camera` in
+ * styles.css) were re-tuned so the cursor's clicks land on visible targets —
+ * see the click-target derivation comments further down. The values above are
+ * the original design intent; the shipped numbers are 1.5/1.5/1.0→3.5/1.0/tx0
+ * →4.5/1.5/tx760,ty120→5.5(hold)→6.8/1.6/tx-680,ty200→8.0(hold)→10/1.0/tx0.
  *
- *   Mockup TOP target P=(960, 280)   → tx=0, ty = -1.6 * (280-540) = +416
- *      (we use ty=+260 with scale 2.0 to leave the book details header
- *      slightly above center, framing the selection handles)
- *   Right-panel Fill target P=(1700, 480) → at s=1.6 tx=-1.6*740=-1184
- *      (clamp to -560 so the swatch sits right of center, not at edge)
+ * Camera + panel/mockup/badge/stagger animations are all fully declarative CSS
+ * (see `scenea-*` keyframes in styles.css and the `Reveal` usages below). Two
+ * things are kept as a small scene-scoped `addFrameTask`:
+ *   1. The file-name typewriter — CSS cannot mutate text content over time.
+ *   2. The cursor sweep + both click "consequences" (Progress Card row
+ *      selection, Fill swatch → color-picker → hue-drag → button recolor,
+ *      including the Fill hex text swap). These stay together because
+ *      they're all keyed off the exact same two click timestamps
+ *      (4600ms, 7000ms) and re-deriving that coupling as independently-timed
+ *      CSS keyframes risks the click/selection/color-swap drifting out of
+ *      sync without a render pass to verify (REFACTOR-PATTERNS.md Part 2b,
+ *      priority 5). The Fill hex text swap in particular cannot be pure CSS
+ *      at all (text content), so this callback isn't avoidable, only
+ *      minimizable — everything that COULD move to CSS without that
+ *      dependency (camera, panels, mockup, stagger, tooltip, exporting pill)
+ *      has been.
  */
 
 const INTER: React.CSSProperties = {
@@ -77,129 +90,63 @@ const PAGES = [
   "Handoff",
 ];
 
-const camEase = (t: number) => {
+// Layer-row entrance stagger — computed once from array index (priority-2
+// pattern from REFACTOR-PATTERNS.md Part 2b), not a per-frame `.forEach`.
+const LAYER_STAGGER_START = 1500;
+const LAYER_STAGGER_STEP = 160;
+const LAYER_STAGGER_DUR = 460;
+
+// ── CURSOR (clicks land on real UI targets) ──
+// CSS coords (pre-camera-transform). The cursor lives INSIDE the camera
+// rig so it scales/translates with the panel under it.
+//
+// Click 1 — Progress Card row in LEFT panel:
+//   target = (100, 384) [design] → re-measured to (80, 461), see below.
+//   t=1.0s   enter from bottom-left  (200, 980)
+//   t=4.3s   land on row              (80, 461)
+//   t=4.6s   CLICK pulse fires        → row gets blue selection highlight
+//   t=4.6–5.4s hold on row
+//
+// Click 2 — Fill swatch in RIGHT panel:
+//   target = (1627, 433)
+//   t=5.4–6.7s travel from row toward swatch (curved through middle)
+//   t=6.7s   land on swatch
+//   t=7.0s   CLICK pulse fires        → color picker pops + CTA colors change
+//   t=7.0–8.4s hold on swatch
+//   t=8.4–9.2s exit downward, fade out
+//
+// EMPIRICAL CALIBRATION (re-measured from rendered frames): the real CSS y of
+// the Progress Card row is ~461, not the design's ~384 — the hand-counted
+// layer-row y-base under-estimated the vertical padding before the Layers
+// list (tabs + Pages section + borders all stack taller than assumed).
+const PROGRESS_X = 80, PROGRESS_Y = 461;
+const SWATCH_X = 1627, SWATCH_Y = 433;
+// Hue-bar drag coords (in CSS, derived from picker geometry):
+//   picker_left ≈ SWATCH_X - 188 = 1439
+//   hue bar y: picker_top + 111 = (SWATCH_Y + 30) + 111 = 574
+//   green (80%): 1451 + 156*0.8 = 1576   purple (50%): 1451 + 156*0.5 = 1529
+const HUE_GREEN_X = 1576, HUE_PURPLE_X = 1529, HUE_Y = 574;
+
+const cameEase = (t: number) => {
   const x = clamp(t);
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 };
-const camLerp = (
-  ms: number,
-  startMs: number,
-  endMs: number,
-  from: number,
-  to: number
-) => lerp(from, to, camEase(clamp((ms - startMs) / (endMs - startMs))));
 
 export const SceneA_FigmaWindow: React.FC = () => {
-  const cameraRef = useRef<HTMLDivElement>(null);
-  const topBarRef = useRef<HTMLDivElement>(null);
-  const leftRef = useRef<HTMLDivElement>(null);
-  const rightRef = useRef<HTMLDivElement>(null);
   const fileNameRef = useRef<HTMLSpanElement>(null);
-  const mockupRef = useRef<HTMLDivElement>(null);
-  const handlesRef = useRef<HTMLDivElement>(null);
-  const layerRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const tooltipRef = useRef<HTMLDivElement>(null);
-  const exportingRef = useRef<HTMLDivElement>(null);
-  const transitionRef = useRef<HTMLDivElement>(null);
+  const progressLayerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const cursorPulseRef = useRef<HTMLDivElement>(null);
-  // Layer selection state — "Progress Card" gets highlighted when cursor
-  // clicks the row at t=4.6s (peg-091222 selected-layer treatment).
-  const progressLayerRef = useRef<HTMLDivElement>(null);
-  // Fill swatch + color picker — color picker pops on click at t=7.0s.
   const colorPickerRef = useRef<HTMLDivElement>(null);
   const hueDotRef = useRef<HTMLDivElement>(null);
-  // Mockup CTA buttons — colors change after Fill swatch click.
-  const addToLibBtnRef = useRef<HTMLDivElement>(null);
-  const readBtnRef = useRef<HTMLDivElement>(null);
   const fillSwatchRef = useRef<HTMLDivElement>(null);
   const fillHexRef = useRef<HTMLSpanElement>(null);
+  const addToLibBtnRef = useRef<HTMLDivElement>(null);
+  const readBtnRef = useRef<HTMLDivElement>(null);
 
   const handleFrame = useCallback(
     ({ ownCurrentTimeMs }: { ownCurrentTimeMs: number }) => {
       const ms = ownCurrentTimeMs;
-
-      // ── CAMERA ──
-      // Recut so cursor clicks land on visible targets:
-      //   0–1.5s   wide settle (scale 0.92 → 1.0)
-      //   1.5–3.5s hold wide while file name types + mockup builds
-      //   3.5–4.5s push toward LEFT PANEL (cursor approaches Progress Card row)
-      //              scale 1.5, tx=+360 (shift left panel toward center),
-      //              ty=-40 (lift layer rows toward middle)
-      //   4.5–5.5s hold on left panel — click happens at 4.6s, selection appears
-      //   5.5–6.8s pan to RIGHT PANEL Fill swatch
-      //              scale 1.6, tx=-680, ty=+80
-      //   6.8–8.0s hold on Fill swatch — click at 7.0s, color picker pops
-      //   8.0–10.0s pull back to wide, fade out
-      // Transform math: a point P=(px,py) in CSS coords maps to
-      //   screen = (960 + s*(px-960) + tx, 540 + s*(py-540) + ty)
-      // To center P at viewport center:
-      //   tx = -s*(px-960), ty = -s*(py-540)
-      // Left panel Progress Card row: P≈(100, 384). At s=1.5:
-      //   tx = -1.5*(100-960) = +1290 (too far — clip to keep mockup visible)
-      //   ty = -1.5*(384-540) = +234
-      //   We compromise tx=+760, ty=+180 (row sits left-of-center, readable)
-      // Right panel Fill swatch:    P≈(1627, 376). At s=1.6:
-      //   tx = -1.6*(1627-960) = -1067
-      //   ty = -1.6*(376-540) = +262
-      //   Compromise tx=-680, ty=+200 (swatch right-of-center, picker fits)
-      let s = 1,
-        tx = 0,
-        ty = 0;
-      if (ms < 1500) {
-        s = camLerp(ms, 0, 1500, 0.92, 1.0);
-      } else if (ms < 3500) {
-        s = 1.0;
-      } else if (ms < 4500) {
-        s = camLerp(ms, 3500, 4500, 1.0, 1.5);
-        tx = camLerp(ms, 3500, 4500, 0, 760);
-        ty = camLerp(ms, 3500, 4500, 0, 120);
-      } else if (ms < 5500) {
-        s = 1.5;
-        tx = 760;
-        ty = 120;
-      } else if (ms < 6800) {
-        s = camLerp(ms, 5500, 6800, 1.5, 1.6);
-        tx = camLerp(ms, 5500, 6800, 760, -680);
-        ty = camLerp(ms, 5500, 6800, 120, 200);
-      } else if (ms < 8000) {
-        s = 1.6;
-        tx = -680;
-        ty = 200;
-        s += Math.sin((ms - 6800) / 600) * 0.004;
-      } else if (ms < 10000) {
-        s = camLerp(ms, 8000, 10000, 1.6, 1.0);
-        tx = camLerp(ms, 8000, 10000, -680, 0);
-        ty = camLerp(ms, 8000, 10000, 200, 0);
-      }
-      if (cameraRef.current) {
-        cameraRef.current.style.transform = `translate(${tx}px, ${ty}px) scale(${s})`;
-      }
-
-      // Top bar drop
-      const topP = track(ms, 0, 600, eases.outQuart);
-      if (topBarRef.current)
-        topBarRef.current.style.transform = `translateY(${lerp(
-          -100,
-          0,
-          topP
-        )}%)`;
-
-      // Side panels slide
-      const leftP = track(ms, 80, 800, eases.outQuart);
-      if (leftRef.current)
-        leftRef.current.style.transform = `translateX(${lerp(
-          -100,
-          0,
-          leftP
-        )}%)`;
-      const rightP = track(ms, 160, 900, eases.outQuart);
-      if (rightRef.current)
-        rightRef.current.style.transform = `translateX(${lerp(
-          100,
-          0,
-          rightP
-        )}%)`;
 
       // File name typewriter
       if (fileNameRef.current) {
@@ -208,160 +155,39 @@ export const SceneA_FigmaWindow: React.FC = () => {
           fileNameRef.current.textContent = t;
       }
 
-      // Mockup fade-in
-      const mP = track(ms, 700, 1900, eases.outCubic);
-      if (mockupRef.current) {
-        mockupRef.current.style.opacity = String(mP);
-        mockupRef.current.style.transform = `translate(-50%, -50%) scale(${lerp(
-          0.94,
-          1,
-          mP
-        )})`;
-      }
-      if (handlesRef.current) {
-        const hP = track(ms, 1700, 2300, eases.outCubic);
-        handlesRef.current.style.opacity = String(hP);
-      }
-
-      // Layer stagger
-      const ls0 = 1500;
-      layerRefs.current.forEach((el, i) => {
-        if (!el) return;
-        const p = track(ms, ls0 + i * 160, ls0 + i * 160 + 460, eases.outQuart);
-        el.style.opacity = String(p);
-        el.style.transform = `translateX(${lerp(-10, 0, p)}px)`;
-      });
-
-      // Auto-layout tooltip (peg-092718) — pops while camera is on right panel
-      // Subtle, doesn't compete with color picker.
-      if (tooltipRef.current) {
-        const inP = track(ms, 6500, 6800, eases.outCubic);
-        const outP = track(ms, 7800, 8100, eases.inCubic);
-        const op = inP * (1 - outP) * 0.7;
-        tooltipRef.current.style.opacity = String(op);
-        tooltipRef.current.style.transform = `translateY(${lerp(6, 0, inP)}px)`;
-      }
-
-      // exporting pill on pull-back
-      if (exportingRef.current) {
-        const inP = track(ms, 8800, 9100, eases.outCubic);
-        const outP = track(ms, 9700, 9950, eases.inCubic);
-        const op = inP * (1 - outP);
-        exportingRef.current.style.opacity = String(op);
-        exportingRef.current.style.transform = `translateY(${lerp(
-          8,
-          0,
-          inP
-        )}px)`;
-      }
-
-      // Transition flash to next scene
-      if (transitionRef.current) {
-        const t = track(ms, 9700, 10000, eases.outCubic);
-        transitionRef.current.style.opacity = String(t);
-      }
-
-      // ── CURSOR (clicks now land on real UI targets) ──
-      // CSS coords (pre-camera-transform). The cursor lives INSIDE the camera
-      // rig so it scales/translates with the panel under it.
-      //
-      // Click 1 — Progress Card row in LEFT panel:
-      //   target = (100, 384)
-      //   t=1.0s   enter from bottom-left  (200, 980)
-      //   t=4.3s   land on row              (100, 384)
-      //   t=4.6s   CLICK pulse fires        → row gets blue selection highlight
-      //   t=4.6–5.4s hold on row
-      //
-      // Click 2 — Fill swatch in RIGHT panel:
-      //   target = (1627, 376)
-      //   t=5.4–6.7s travel from row toward swatch (curved through middle)
-      //   t=6.7s   land on swatch
-      //   t=7.0s   CLICK pulse fires        → color picker pops + CTA colors change
-      //   t=7.0–8.4s hold on swatch
-      //   t=8.4–9.2s exit downward, fade out
-      // Cursor lives INSIDE the camera rig (see JSX below), so cursor coords
-      // and target coords share the SAME pre-camera CSS space. No viewport
-      // math needed — pure layout coords. The TIP of the cursor SVG is at
-      // local (3, 2) of the SVG path (the `M3 2 ...` start point), and we
-      // translate the cursor div by (cx-4, cy-2) so the tip lands on (cx, cy).
-      //
-      // Re-measured targets from the actual DOM stack:
-      //   LEFT PANEL: x=0..280, top=48
-      //     Tabs header: 48 → ~88 (padding 12 + text 14 + padding bottom)
-      //     Pages label: ~88 → ~110
-      //     6 PAGES rows × ~22px: ~110 → ~242
-      //     Layers label (padding 16 top + 12 bottom + text): ~242 → ~282
-      //     Layer rows × 22px: row i center ≈ 282 + i*22 + 11
-      //       i=3 (Progress Card) → center y ≈ 282 + 66 + 11 = 359
-      //       row x-padding-left = 22 + indent*14 = 22 + 14 = 36
-      //       Click on the row icon/text → x ≈ 80 (middle of row text)
-      //
-      //   RIGHT PANEL: x=1600..1920, top=48
-      //     Design tabs: 48 → ~88
-      //     Alignment row: ~88 → ~134
-      //     Position header + grid: ~134 → ~210
-      //     Layout header + grid: ~210 → ~286
-      //     Auto-layout header + row: ~286 → ~358
-      //     Fill SectionHeader: ~358 → ~396 (padding 10+6 + text)
-      //     Fill row (padding 6 top): swatch (22 tall) center ≈ 396 + 6 + 11 = 413
-      //     Swatch x: rightPanel.left(1600) + padding-left(16) + swatch-w/2(11) = 1627
-      // EMPIRICAL CALIBRATION (re-measured from rendered frames):
-      //   Click 2 (Fill swatch) at (1627, 376) was already pixel-perfect in v7
-      //   under the v7 camera (ty=200). Kept those values.
-      //   Click 1 (Progress Card) at v7's (100, 384) hit the "Image" row —
-      //   off by ~100px in CSS y. Inverse-transformed the actual rendered
-      //   Progress Card position back to CSS coords:
-      //     CSS_y = (visible_screen_y - 540 - ty)/s + 540
-      //           = (642 - 540 - 220)/1.5 + 540 ≈ 461
-      //   So the real CSS y of the Progress Card row is ~461, not ~384.
-      //   Reason: my hand-counted layer-row y-base under-estimated the
-      //   vertical padding before the Layers list (tabs + Pages section +
-      //   borders all stack taller than I assumed).
-      const PROGRESS_X = 80, PROGRESS_Y = 461;
-      const SWATCH_X = 1627, SWATCH_Y = 433;
-      // Hue-bar drag coords (in CSS, derived from picker geometry):
-      //   picker_left ≈ SWATCH_X - 188 = 1439
-      //   hue bar x: picker_left + 12 → picker_left + 168 = 1451 → 1607
-      //   hue bar y: picker_top + 111 = (SWATCH_Y + 30) + 111 = 574
-      //   green (80%): 1451 + 156*0.8 = 1576
-      //   purple (50%): 1451 + 156*0.5 = 1529
-      const HUE_GREEN_X = 1576, HUE_PURPLE_X = 1529, HUE_Y = 574;
+      // ── CURSOR ──
       if (cursorRef.current) {
         let cx = 200, cy = 980, op = 0;
         if (ms < 1000) {
           op = 0;
         } else if (ms < 4300) {
-          // Travel from bottom-left to Progress Card row
           const t = clamp((ms - 1000) / 3300);
-          const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+          const e = cameEase(t);
           cx = lerp(200, PROGRESS_X, e);
           cy = lerp(980, PROGRESS_Y, e);
           op = clamp((ms - 1000) / 250);
         } else if (ms < 5400) {
           cx = PROGRESS_X; cy = PROGRESS_Y; op = 1;
         } else if (ms < 6700) {
-          // Travel diagonally to right-panel Fill swatch through middle-canvas
           const t = clamp((ms - 5400) / 1300);
-          const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+          const e = cameEase(t);
           cx = lerp(PROGRESS_X, SWATCH_X, e);
           cy = lerp(PROGRESS_Y, SWATCH_Y, e);
           op = 1;
         } else if (ms < 7100) {
-          // Hold on Fill swatch (click fires at 7000ms; picker opens)
           cx = SWATCH_X; cy = SWATCH_Y; op = 1;
         } else if (ms < 7300) {
-          // Snap into picker hue bar at green position
           const t = clamp((ms - 7100) / 200);
-          cx = lerp(SWATCH_X, HUE_GREEN_X, eases.outCubic(t));
-          cy = lerp(SWATCH_Y, HUE_Y, eases.outCubic(t));
+          const e = 1 - Math.pow(1 - t, 3); // outCubic
+          cx = lerp(SWATCH_X, HUE_GREEN_X, e);
+          cy = lerp(SWATCH_Y, HUE_Y, e);
           op = 1;
         } else if (ms < 7900) {
-          // DRAG left across hue bar: green → purple
           const t = clamp((ms - 7300) / 600);
-          cx = lerp(HUE_GREEN_X, HUE_PURPLE_X, eases.inOutCubic(t));
+          const e = cameEase(t); // inOutCubic
+          cx = lerp(HUE_GREEN_X, HUE_PURPLE_X, e);
           cy = HUE_Y; op = 1;
         } else if (ms < 8400) {
-          // Hold at purple end of hue bar
           cx = HUE_PURPLE_X; cy = HUE_Y; op = 1;
         } else {
           const t = clamp((ms - 8400) / 800);
@@ -389,11 +215,9 @@ export const SceneA_FigmaWindow: React.FC = () => {
       }
 
       // ── CLICK 1 CONSEQUENCE: Progress Card row gains Figma selection blue ──
-      // At t >= 4600ms, the row transitions to selected styling (peg-091222 treatment).
       if (progressLayerRef.current) {
         const sel = clamp((ms - 4600) / 260);
         const row = progressLayerRef.current;
-        // background blue tint
         row.style.background = sel > 0
           ? `rgba(13,153,255,${0.14 * sel})`
           : "transparent";
@@ -410,27 +234,22 @@ export const SceneA_FigmaWindow: React.FC = () => {
       }
 
       // ── CLICK 2 CONSEQUENCE: color picker pops + Fill changes from green to purple ──
-      // v15: cursor visibly DRAGS the hue dot from green→purple inside the picker.
-      // Picker pops at 7000ms, cursor lands on hue bar at 7300ms (green end),
-      // drags to purple 7300-7900ms. Hue dot + swatch color track cursor position.
       if (ms >= 7000) {
-        const popP = clamp((ms - 7000) / 250);   // picker pop-in (0→1 over 250ms)
-        // Color picker reveal
+        const popP = clamp((ms - 7000) / 250);
         if (colorPickerRef.current) {
-          const fadeOut = track(ms, 8200, 8500, eases.inCubic);
-          const op = popP * (1 - fadeOut);
+          const fadeOut = clamp((ms - 8200) / 300);
+          const easedFadeOut = fadeOut * fadeOut * fadeOut; // inCubic
+          const op = popP * (1 - easedFadeOut);
           colorPickerRef.current.style.opacity = String(op);
           colorPickerRef.current.style.transform = `translateY(${lerp(8, 0, popP)}px)`;
         }
 
-        // Hue-dot drag: green (80%) → purple (50%) tracks cursor drag 7300-7900.
         const dragP = clamp((ms - 7300) / 600);
-        const dotPct = lerp(80, 50, dragP); // hue bar % position
+        const dotPct = lerp(80, 50, dragP);
         if (hueDotRef.current) {
           hueDotRef.current.style.left = `${dotPct}%`;
         }
 
-        // Swatch + hex update during drag. At dotPct=50 we are at purple.
         const isPurple = dragP > 0.5;
         if (fillSwatchRef.current) {
           fillSwatchRef.current.style.background = isPurple ? "#A259FF" : "#0ACF83";
@@ -463,16 +282,15 @@ export const SceneA_FigmaWindow: React.FC = () => {
       {/* Lavender canvas — peg-matched #B7C3CC */}
       <div style={{ position: "absolute", inset: 0, background: "#B7C3CC" }} />
 
-      {/* White transition flash to SceneB */}
+      {/* Cross-dissolve to SceneB's own (same-colored) canvas */}
       <div
-        ref={transitionRef}
         style={{
           position: "absolute",
           inset: 0,
           background: "#B7C3CC",
-          opacity: 0,
           zIndex: 40,
           pointerEvents: "none",
+          animation: "wash-in 300ms 9700ms cubic-bezier(0.33,1,0.68,1) both",
         }}
       />
 
@@ -483,17 +301,15 @@ export const SceneA_FigmaWindow: React.FC = () => {
 
       {/* ===== CAMERA RIG ===== */}
       <div
-        ref={cameraRef}
         style={{
           position: "absolute",
           inset: 0,
           transformOrigin: "50% 50%",
-          willChange: "transform",
+          animation: "scenea-camera 10000ms cubic-bezier(0.65,0,0.35,1) both",
         }}
       >
         {/* ===== TOP BAR ===== */}
         <div
-          ref={topBarRef}
           style={{
             position: "absolute",
             top: 0,
@@ -509,7 +325,7 @@ export const SceneA_FigmaWindow: React.FC = () => {
             ...INTER,
             fontSize: 13,
             color: "#1E1E1E",
-            willChange: "transform",
+            animation: "scenea-topbar-in 600ms cubic-bezier(0.25,1,0.5,1) both",
           }}
         >
           <svg
@@ -592,7 +408,6 @@ export const SceneA_FigmaWindow: React.FC = () => {
 
         {/* ===== LEFT PANEL ===== */}
         <div
-          ref={leftRef}
           style={{
             position: "absolute",
             left: 0,
@@ -605,7 +420,7 @@ export const SceneA_FigmaWindow: React.FC = () => {
             ...INTER,
             fontSize: 13,
             zIndex: 5,
-            willChange: "transform",
+            animation: "scenea-left-in 720ms 80ms cubic-bezier(0.25,1,0.5,1) both",
           }}
         >
           <div
@@ -673,13 +488,9 @@ export const SceneA_FigmaWindow: React.FC = () => {
             return (
               <div
                 key={l.name}
-                ref={(el) => {
-                  layerRefs.current[i] = el;
-                  if (isProgressCard) progressLayerRef.current = el;
-                }}
+                ref={isProgressCard ? progressLayerRef : undefined}
                 style={{
                   padding: `5px 18px 5px ${22 + l.indent * 14}px`,
-                  opacity: 0,
                   display: "flex",
                   alignItems: "center",
                   gap: 8,
@@ -688,18 +499,10 @@ export const SceneA_FigmaWindow: React.FC = () => {
                   fontWeight: 400,
                   borderLeft: "2px solid transparent",
                   marginLeft: 0,
-                  // Custom data attr so handleFrame can find/style this row.
-                  ...(isProgressCard ? { "data-row": "progress-card" } : {}),
+                  animation: `scenea-layer-in ${LAYER_STAGGER_DUR}ms ${LAYER_STAGGER_START + i * LAYER_STAGGER_STEP}ms cubic-bezier(0.25,1,0.5,1) backwards`,
                 }}
               >
-                <span
-                  style={{
-                    fontSize: 11,
-                    color: "#757575",
-                  }}
-                >
-                  {l.icon}
-                </span>
+                <span style={{ fontSize: 11, color: "#757575" }}>{l.icon}</span>
                 <span>{l.name}</span>
               </div>
             );
@@ -708,7 +511,6 @@ export const SceneA_FigmaWindow: React.FC = () => {
 
         {/* ===== RIGHT PANEL ===== */}
         <div
-          ref={rightRef}
           style={{
             position: "absolute",
             right: 0,
@@ -721,7 +523,7 @@ export const SceneA_FigmaWindow: React.FC = () => {
             ...INTER,
             fontSize: 12,
             zIndex: 5,
-            willChange: "transform",
+            animation: "scenea-right-in 740ms 160ms cubic-bezier(0.25,1,0.5,1) both",
           }}
         >
           {/* Design / Prototype tabs */}
@@ -840,27 +642,26 @@ export const SceneA_FigmaWindow: React.FC = () => {
                 {s}
               </div>
             ))}
-            {/* Tooltip — fades in on camera-pan to right */}
-            <div
-              ref={tooltipRef}
-              style={{
-                position: "absolute",
-                right: 6,
-                top: 32,
-                background: "#1E1E1E",
-                color: "#FFFFFF",
-                padding: "6px 10px",
-                borderRadius: 6,
-                fontSize: 11,
-                fontWeight: 500,
-                whiteSpace: "nowrap",
-                opacity: 0,
-                zIndex: 8,
-                boxShadow: "0 6px 14px rgba(0,0,0,0.2)",
-                willChange: "transform, opacity",
-              }}
-            >
-              Toggle automatic positioning
+            {/* Tooltip — fades in on camera-pan to right, capped at 70% opacity */}
+            <div style={{ position: "absolute", right: 6, top: 32, opacity: 0.7 }}>
+              <Reveal
+                enter={[6500, 6800]}
+                exit={[7800, 8100]}
+                y={6}
+                style={{
+                  background: "#1E1E1E",
+                  color: "#FFFFFF",
+                  padding: "6px 10px",
+                  borderRadius: 6,
+                  fontSize: 11,
+                  fontWeight: 500,
+                  whiteSpace: "nowrap",
+                  zIndex: 8,
+                  boxShadow: "0 6px 14px rgba(0,0,0,0.2)",
+                }}
+              >
+                Toggle automatic positioning
+              </Reveal>
             </div>
           </div>
 
@@ -1177,24 +978,23 @@ export const SceneA_FigmaWindow: React.FC = () => {
             }}
           >
             <span style={{ color: "#757575" }}>Ready to export</span>
-            <div
-              ref={exportingRef}
-              style={{
-                position: "absolute",
-                right: 16,
-                bottom: -24,
-                background: "#0D99FF",
-                color: "#fff",
-                padding: "3px 10px",
-                borderRadius: 999,
-                fontSize: 11,
-                fontWeight: 600,
-                opacity: 0,
-                boxShadow: "0 4px 10px rgba(13,153,255,0.4)",
-                willChange: "opacity, transform",
-              }}
-            >
-              exporting…
+            <div style={{ position: "absolute", right: 16, bottom: -24 }}>
+              <Reveal
+                enter={[8800, 9100]}
+                exit={[9700, 9950]}
+                y={8}
+                style={{
+                  background: "#0D99FF",
+                  color: "#fff",
+                  padding: "3px 10px",
+                  borderRadius: 999,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  boxShadow: "0 4px 10px rgba(13,153,255,0.4)",
+                }}
+              >
+                exporting…
+              </Reveal>
             </div>
           </div>
         </div>
@@ -1217,13 +1017,10 @@ export const SceneA_FigmaWindow: React.FC = () => {
         </div>
 
         <div
-          ref={mockupRef}
           style={{
             position: "absolute",
             left: "50%",
             top: "50%",
-            transform: "translate(-50%, -50%) scale(0.94)",
-            opacity: 0,
             width: 380,
             height: 740,
             background: "#FFFFFF",
@@ -1233,6 +1030,7 @@ export const SceneA_FigmaWindow: React.FC = () => {
             overflow: "hidden",
             ...INTER,
             zIndex: 2,
+            animation: "scenea-mockup-in 1200ms 700ms cubic-bezier(0.33,1,0.68,1) both",
           }}
         >
           {/* iOS status bar */}
@@ -1415,7 +1213,6 @@ export const SceneA_FigmaWindow: React.FC = () => {
 
         {/* Selection handles — blue dots around mockup (peg-091306) */}
         <div
-          ref={handlesRef}
           style={{
             position: "absolute",
             left: "50%",
@@ -1424,8 +1221,8 @@ export const SceneA_FigmaWindow: React.FC = () => {
             height: 760,
             transform: "translate(-50%, -50%)",
             pointerEvents: "none",
-            opacity: 0,
             zIndex: 3,
+            animation: "wash-in 600ms 1700ms cubic-bezier(0.33,1,0.68,1) both",
           }}
         >
           {[

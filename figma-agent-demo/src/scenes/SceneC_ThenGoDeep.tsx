@@ -1,11 +1,11 @@
 import React, { useCallback, useRef } from "react";
 import { Timegroup } from "@editframe/react";
-import { eases } from "animejs";
+import { Reveal } from "../components/Reveal";
 import { Sfx } from "../components/Sfx";
-import { clamp, lerp, track, typewriter } from "../components/helpers";
+import { typewriter } from "../components/helpers";
 
 /**
- * SceneC — "Then go deep" hero (4.5s).
+ * SceneC — "Then go deep" hero (5.8s).
  *
  * Direct peg replica:
  *   PEG-091344: white background, large headline "Then go deep" upper-left,
@@ -14,15 +14,16 @@ import { clamp, lerp, track, typewriter } from "../components/helpers";
  *               How should I"), avatar circle bottom-right.
  *
  * Motion plan:
- *   0–0.6s   headline word-by-word reveal (translateY 20 → 0, opacity 0→1)
- *   0.8–1.2s Bookworm pill flies in from right (translateX 60 → 0)
- *   1.4–3.4s gray chat bubble fades in then types
- *   3.4–3.8s avatar pops in (scale 0.6 → 1, opacity 0→1)
- *   3.8–4.3s gentle camera push (1.0 → 1.06)
- *   4.2–4.5s fade to dark (#1E1E1E) for SceneD
+ *   0–0.7s   headline reveal (translateY 20 → 0, opacity 0→1)
+ *   0.8–1.3s Bookworm pill flies in from right (translateX 60 → 0)
+ *   1.4–1.8s gray chat input box fades in, then types
+ *   5.1–5.8s gentle camera push (1.0 → 1.06)
+ *   5.5–5.8s fade to dark (#1E1E1E) for SceneD
  *
- * Camera magnitudes:
- *   1.0 baseline → 1.06 push, no translate
+ * All of this is fully declarative CSS except the chat-input typewriter text,
+ * which is kept as a small scene-scoped `addFrameTask` — CSS cannot mutate an
+ * element's text content over time, so this one effect is genuinely
+ * irreducible to CSS (see the `css-animations`/`composition` skills).
  */
 
 const INTER: React.CSSProperties = {
@@ -34,54 +35,15 @@ const INTER: React.CSSProperties = {
 const CHAT_TEXT = "I'm trying to retain new users. How should I structure the activation flow?";
 
 export const SceneC_ThenGoDeep: React.FC = () => {
-  const cameraRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLDivElement>(null);
-  const pillRef = useRef<HTMLDivElement>(null);
-  const bubbleRef = useRef<HTMLDivElement>(null);
   const chatTextRef = useRef<HTMLSpanElement>(null);
-  const fadeRef = useRef<HTMLDivElement>(null);
 
   const handleFrame = useCallback(
     ({ ownCurrentTimeMs }: { ownCurrentTimeMs: number }) => {
       const ms = ownCurrentTimeMs;
-
-      // Camera push
-      let s = 1.0;
-      if (ms > 5100) s = lerp(1.0, 1.06, eases.outCubic(clamp((ms - 5100) / 700)));
-      if (cameraRef.current)
-        cameraRef.current.style.transform = `scale(${s})`;
-
-      const hP = track(ms, 0, 700, eases.outCubic);
-      if (headlineRef.current) {
-        headlineRef.current.style.opacity = String(hP);
-        headlineRef.current.style.transform = `translateY(${lerp(20, 0, hP)}px)`;
-      }
-
-      const pP = track(ms, 800, 1300, eases.outCubic);
-      if (pillRef.current) {
-        pillRef.current.style.opacity = String(pP);
-        pillRef.current.style.transform = `translateX(${lerp(60, 0, pP)}px)`;
-      }
-
-      const bP = track(ms, 1400, 1800, eases.outCubic);
-      if (bubbleRef.current) {
-        bubbleRef.current.style.opacity = String(bP);
-        bubbleRef.current.style.transform = `translateY(${lerp(12, 0, bP)}px)`;
-      }
       if (chatTextRef.current) {
-        // typewriter(ms, start, DURATION, text) — dur was wrongly set to the
-        // END time (4400) which meant typing took 4400ms from 1800ms start
-        // and never finished before the scene cut. Correct: dur=2900ms so
-        // typing completes at ms=4700, well before fade at 5500.
         const t = typewriter(ms, 1800, 2900, CHAT_TEXT);
         if (chatTextRef.current.textContent !== t)
           chatTextRef.current.textContent = t;
-      }
-
-      // Fade to dark for SceneD
-      if (fadeRef.current) {
-        const f = track(ms, 5500, 5800, eases.outCubic);
-        fadeRef.current.style.opacity = String(f);
       }
     },
     []
@@ -100,29 +62,29 @@ export const SceneC_ThenGoDeep: React.FC = () => {
       <Sfx cue="pop" at={0.95} dur={0.4} volume={0.26} />
       <Sfx cue="plop" at={1.5} dur={0.4} volume={0.22} />
 
+      {/* Fade to dark for SceneD */}
       <div
-        ref={fadeRef}
         style={{
           position: "absolute",
           inset: 0,
           background: "#1E1E1E",
-          opacity: 0,
           zIndex: 40,
+          animation: "wash-in 300ms 5500ms cubic-bezier(0.33,1,0.68,1) both",
         }}
       />
 
       <div
-        ref={cameraRef}
         style={{
           position: "absolute",
           inset: 0,
           transformOrigin: "50% 50%",
-          willChange: "transform",
+          animation: "scenec-camera 5800ms cubic-bezier(0.33,1,0.68,1) both",
         }}
       >
-        {/* Headline — moved down for better vertical balance, less top-heavy */}
-        <div
-          ref={headlineRef}
+        {/* Headline */}
+        <Reveal
+          enter={[0, 700]}
+          y={20}
           style={{
             position: "absolute",
             left: 120,
@@ -133,16 +95,16 @@ export const SceneC_ThenGoDeep: React.FC = () => {
             fontWeight: 600,
             letterSpacing: "-0.035em",
             lineHeight: 1.0,
-            opacity: 0,
-            willChange: "transform, opacity",
           }}
         >
           Then go deep
-        </div>
+        </Reveal>
 
         {/* Bookworm pill (right side, mid-upper) */}
-        <div
-          ref={pillRef}
+        <Reveal
+          enter={[800, 1300]}
+          x={60}
+          y={0}
           style={{
             position: "absolute",
             right: 220,
@@ -154,12 +116,10 @@ export const SceneC_ThenGoDeep: React.FC = () => {
             display: "flex",
             alignItems: "center",
             gap: 14,
-            opacity: 0,
             ...INTER,
             fontSize: 44,
             fontWeight: 600,
             letterSpacing: "-0.015em",
-            willChange: "transform, opacity",
           }}
         >
           <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
@@ -171,13 +131,14 @@ export const SceneC_ThenGoDeep: React.FC = () => {
             />
           </svg>
           Bookworm
-        </div>
+        </Reveal>
 
         {/* Chat INPUT box — clearly a text-input field so the viewer reads it
             as "user is typing" not "AI replied". Full-width across bottom,
             white pill with subtle border + paper-plane send button. */}
-        <div
-          ref={bubbleRef}
+        <Reveal
+          enter={[1400, 1800]}
+          y={12}
           style={{
             position: "absolute",
             left: 220,
@@ -192,13 +153,11 @@ export const SceneC_ThenGoDeep: React.FC = () => {
             display: "flex",
             alignItems: "center",
             gap: 18,
-            opacity: 0,
             ...INTER,
             fontSize: 36,
             fontWeight: 400,
             letterSpacing: "-0.012em",
             lineHeight: 1.3,
-            willChange: "transform, opacity",
           }}
         >
           <span style={{ flex: 1 }}>
@@ -237,7 +196,7 @@ export const SceneC_ThenGoDeep: React.FC = () => {
               />
             </svg>
           </div>
-        </div>
+        </Reveal>
       </div>
     </Timegroup>
   );

@@ -1,8 +1,7 @@
 import React, { useCallback, useRef } from "react";
 import { Timegroup } from "@editframe/react";
-import { eases } from "animejs";
+import { Reveal } from "../components/Reveal";
 import { Sfx } from "../components/Sfx";
-import { clamp, lerp, track } from "../components/helpers";
 
 /**
  * SceneBprime — Figma generating the onboarding flow (5.5s).
@@ -49,6 +48,11 @@ import { clamp, lerp, track } from "../components/helpers";
  *   2.4–3.2s   pan to mockup 4      (tx=-360)
  *   3.2–4.4s   pull back wide       (scale 1.0, tx=0)
  *   4.4–5.5s   hold wide
+ *
+ * Fully declarative — the only text-content mutation left (the animated
+ * "…" status dots) is a small scene-scoped `addFrameTask`, since CSS cannot
+ * change an element's text over time. Everything else (camera, mockup +
+ * arrow stagger, status pill reveal, transition wash) is CSS.
  */
 
 const INTER: React.CSSProperties = {
@@ -57,116 +61,31 @@ const INTER: React.CSSProperties = {
   fontFeatureSettings: "'cv11', 'ss01', 'ss03'",
 };
 
-const camEase = (t: number) => {
-  const x = clamp(t);
-  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
-};
-const camLerp = (
-  ms: number,
-  startMs: number,
-  endMs: number,
-  from: number,
-  to: number
-) => lerp(from, to, camEase(clamp((ms - startMs) / (endMs - startMs))));
-
-// Mockup config — each step gets its own visual.
+// Mockup config — each step gets its own visual + its own stagger delay.
 const STEPS = [
-  {
-    title: "Welcome",
-    accent: "#0ACF83", // Figma green
-    appearAt: 600,
-  },
-  {
-    title: "Choose topics",
-    accent: "#A259FF", // Figma purple
-    appearAt: 1400,
-  },
-  {
-    title: "Set preferences",
-    accent: "#1ABCFE", // Figma cyan
-    appearAt: 2200,
-  },
-  {
-    title: "You're in",
-    accent: "#FF7262", // Figma coral
-    appearAt: 3000,
-  },
+  { title: "Welcome", accent: "#0ACF83", appearAt: 600 },
+  { title: "Choose topics", accent: "#A259FF", appearAt: 1400 },
+  { title: "Set preferences", accent: "#1ABCFE", appearAt: 2200 },
+  { title: "You're in", accent: "#FF7262", appearAt: 3000 },
 ];
 
+// Connecting arrows between consecutive mockups — index-based stagger.
+const ARROW_STAGGER = 120;
+const ARROW_START = 3800;
+const ARROW_DUR = 300;
+
 export const SceneBprime_OnboardingGeneration: React.FC = () => {
-  const cameraRef = useRef<HTMLDivElement>(null);
-  const statusPillRef = useRef<HTMLDivElement>(null);
   const statusDotsRef = useRef<HTMLSpanElement>(null);
-  const mockupRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const arrowRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const transitionRef = useRef<HTMLDivElement>(null);
 
   const handleFrame = useCallback(
     ({ ownCurrentTimeMs }: { ownCurrentTimeMs: number }) => {
       const ms = ownCurrentTimeMs;
-
-      // ── CAMERA ──
-      let s = 1.0,
-        tx = 0,
-        ty = 0;
-      if (ms < 800) {
-        s = camLerp(ms, 0, 800, 1.05, 1.08);
-        tx = camLerp(ms, 0, 800, 380, 360);
-      } else if (ms < 1600) {
-        s = 1.08;
-        tx = camLerp(ms, 800, 1600, 360, 120);
-      } else if (ms < 2400) {
-        s = 1.08;
-        tx = camLerp(ms, 1600, 2400, 120, -120);
-      } else if (ms < 3200) {
-        s = 1.08;
-        tx = camLerp(ms, 2400, 3200, -120, -360);
-      } else if (ms < 4400) {
-        s = camLerp(ms, 3200, 4400, 1.08, 1.0);
-        tx = camLerp(ms, 3200, 4400, -360, 0);
-      } else {
-        s = 1.0;
-        tx = 0;
-      }
-      if (cameraRef.current) {
-        cameraRef.current.style.transform = `translate(${tx}px, ${ty}px) scale(${s})`;
-      }
-
-      // Status pill fade-in
-      const sp = track(ms, 100, 600, eases.outCubic);
-      if (statusPillRef.current) {
-        statusPillRef.current.style.opacity = String(sp);
-        statusPillRef.current.style.transform = `translateY(${lerp(-8, 0, sp)}px)`;
-      }
       // Animated dots in the status pill: "." "‥" "…" loop
       if (statusDotsRef.current) {
         const frame = Math.floor(ms / 320) % 4;
         const dots = ["", ".", "..", "..."][frame];
         if (statusDotsRef.current.textContent !== dots)
           statusDotsRef.current.textContent = dots;
-      }
-
-      // Mockups generate one by one — skeleton → real fill.
-      STEPS.forEach((step, i) => {
-        const el = mockupRefs.current[i];
-        if (!el) return;
-        const start = step.appearAt;
-        const p = track(ms, start, start + 500, eases.outBack(1.4));
-        el.style.opacity = String(p);
-        el.style.transform = `translateY(${lerp(20, 0, p)}px) scale(${lerp(0.92, 1, p)})`;
-      });
-
-      // Connecting arrows between consecutive mockups — appear after all mockups land.
-      arrowRefs.current.forEach((el, i) => {
-        if (!el) return;
-        const p = track(ms, 3800 + i * 120, 4100 + i * 120, eases.outCubic);
-        el.style.opacity = String(p * 0.8);
-      });
-
-      // Transition flash to SceneC (white)
-      if (transitionRef.current) {
-        const t = track(ms, 5200, 5500, eases.outCubic);
-        transitionRef.current.style.opacity = String(t);
       }
     },
     []
@@ -200,28 +119,27 @@ export const SceneBprime_OnboardingGeneration: React.FC = () => {
 
       {/* White wash out */}
       <div
-        ref={transitionRef}
         style={{
           position: "absolute",
           inset: 0,
           background: "#FFFFFF",
-          opacity: 0,
           zIndex: 40,
+          animation: "wash-in 300ms 5200ms cubic-bezier(0.33,1,0.68,1) both",
         }}
       />
 
       <div
-        ref={cameraRef}
         style={{
           position: "absolute",
           inset: 0,
           transformOrigin: "50% 50%",
-          willChange: "transform",
+          animation: "sceneb-prime-camera 5500ms cubic-bezier(0.65,0,0.35,1) both",
         }}
       >
         {/* ===== STATUS PILL (upper-left) ===== */}
-        <div
-          ref={statusPillRef}
+        <Reveal
+          enter={[100, 600]}
+          y={-8}
           style={{
             position: "absolute",
             left: 80,
@@ -234,11 +152,9 @@ export const SceneBprime_OnboardingGeneration: React.FC = () => {
             borderRadius: 999,
             boxShadow:
               "0 12px 28px rgba(20,24,36,0.14), 0 0 0 1px rgba(255,255,255,0.5)",
-            opacity: 0,
             ...INTER,
             zIndex: 5,
             backdropFilter: "blur(8px)",
-            willChange: "transform, opacity",
           }}
         >
           {/* Sparkle icon */}
@@ -274,7 +190,7 @@ export const SceneBprime_OnboardingGeneration: React.FC = () => {
               style={{ display: "inline-block", width: 24, textAlign: "left" }}
             ></span>
           </span>
-        </div>
+        </Reveal>
 
         {/* ===== ARROWS connecting mockups ===== */}
         {[0, 1, 2].map((i) => {
@@ -284,36 +200,37 @@ export const SceneBprime_OnboardingGeneration: React.FC = () => {
           return (
             <div
               key={i}
-              ref={(el) => {
-                arrowRefs.current[i] = el;
-              }}
               style={{
                 position: "absolute",
                 left: x,
                 top: y - 4,
                 width: 36,
                 height: 8,
-                opacity: 0,
                 zIndex: 3,
-                willChange: "opacity",
+                opacity: 0.8,
               }}
             >
-              <svg width="36" height="8" viewBox="0 0 36 8" fill="none">
-                <path
-                  d="M0 4 H30"
-                  stroke="#1E1E1E"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M28 1 L32 4 L28 7"
-                  stroke="#1E1E1E"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill="none"
-                />
-              </svg>
+              <Reveal
+                enter={[ARROW_START + i * ARROW_STAGGER, ARROW_START + i * ARROW_STAGGER + ARROW_DUR]}
+                y={0}
+              >
+                <svg width="36" height="8" viewBox="0 0 36 8" fill="none">
+                  <path
+                    d="M0 4 H30"
+                    stroke="#1E1E1E"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M28 1 L32 4 L28 7"
+                    stroke="#1E1E1E"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    fill="none"
+                  />
+                </svg>
+              </Reveal>
             </div>
           );
         })}
@@ -322,11 +239,12 @@ export const SceneBprime_OnboardingGeneration: React.FC = () => {
         {STEPS.map((step, i) => {
           const left = ROW_LEFT + i * (MOCKUP_W + GAP);
           return (
-            <div
+            <Reveal
               key={step.title}
-              ref={(el) => {
-                mockupRefs.current[i] = el;
-              }}
+              enter={[step.appearAt, step.appearAt + 500]}
+              y={20}
+              scaleFrom={0.92}
+              easeIn="out-back"
               style={{
                 position: "absolute",
                 left,
@@ -338,14 +256,12 @@ export const SceneBprime_OnboardingGeneration: React.FC = () => {
                 boxShadow:
                   "0 0 0 1px #E5E5E5, 0 22px 50px rgba(0,0,0,0.10)",
                 overflow: "hidden",
-                opacity: 0,
                 ...INTER,
                 zIndex: 4,
-                willChange: "transform, opacity",
               }}
             >
               <OnboardingScreen step={step} index={i} />
-            </div>
+            </Reveal>
           );
         })}
       </div>
