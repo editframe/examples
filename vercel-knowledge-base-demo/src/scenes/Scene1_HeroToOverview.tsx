@@ -1,6 +1,16 @@
 /**
  * Scene1_HeroToOverview — Merged Scene 1 + 2 + 3
- * Master: 0–10000ms (10s total)
+ * Master: 0–12000ms (12s local — see `DURATION` below)
+ *
+ * This scene keeps a scoped `onFrame` (per REFACTOR-PATTERNS.md Part 2b, bullet 5):
+ * the camera dolly, the 6-flick scroll, the cursor pathing through the dropdown,
+ * and the dropdown/list state swaps are all reads of the SAME `ms` clock and
+ * branch on the SAME set of time windows (e.g. the cursor's path depends on
+ * `CLICK_BTN_TIME`/`CURSOR_AT_SANDBOX`, which also drive the dropdown highlight
+ * and the button/chip swap). Splitting only some of these into CSS while leaving
+ * the rest in JS would require keeping both systems in sync by hand and offers
+ * no reduction in complexity, so the whole scene stays one procedural unit —
+ * still scoped to this one scene's own `Timegroup`, not a root-level switchboard.
  *
  * Timeline:
  *   0–1000ms:    Close-up on Knowledge Base hero (scale 1.4×)
@@ -370,7 +380,7 @@ export function Scene1_HeroToOverview() {
   return (
     <Timegroup
       mode="fixed"
-      duration="12s"
+      duration={`${DURATION}ms`}
       onFrame={onFrame as any}
       style={{ position: 'absolute', inset: 0, background: '#141414' }}
     >
@@ -987,5 +997,3 @@ export function Scene1_HeroToOverview() {
     </Timegroup>
   );
 }
-
-Scene1_HeroToOverview.duration = DURATION;

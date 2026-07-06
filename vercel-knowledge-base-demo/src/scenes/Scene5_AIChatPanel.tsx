@@ -1,6 +1,17 @@
 /**
  * Scene 5 — Article + AI Chat panel side-by-side
- * Master: 14500–28000ms  (13500ms duration)
+ * Master: 16500–30000ms  (13500ms local — see `DURATION` below)
+ *
+ * This scene keeps a scoped `onFrame` (per REFACTOR-PATTERNS.md Part 2b, bullet 5)
+ * for two reasons that are each independently irreducible to CSS:
+ *  (1) the typewriter effect and the AI response stream progressively rebuild
+ *      `innerHTML` from a slice of a JS string — CSS keyframes cannot generate
+ *      dynamic markup from text content, only animate existing DOM/CSS properties;
+ *  (2) the camera dolly is a single multi-phase state machine (7 phases, each
+ *      re-using the previous phase's end state as its own start state) shared
+ *      with the panel slide-in and several discrete UI toggles keyed off the
+ *      same `ms` clock. As in Scene1, splitting only part of this into CSS
+ *      would mean keeping two timing systems in sync by hand for no benefit.
  *
  * FIX 8: Zoom-in at ~17s targets the AI chat BOX precisely (not black void).
  *   The chat panel is 340px wide, positioned at x=1520–1860 of the browser content.
@@ -77,7 +88,7 @@ import { track, lerp, typewriter } from "../components/helpers";
 import { eases } from "animejs";
 
 const DURATION = 13500;
-const SCENE_START = 14500;
+const SCENE_START = 16500;
 
 const TYPED_MESSAGE = "walk me through setting up sandbox";
 
@@ -480,7 +491,7 @@ export function Scene5_AIChatPanel() {
   return (
     <Timegroup
       mode="fixed"
-      duration="13.5s"
+      duration={`${DURATION}ms`}
       onFrame={onFrame as any}
       style={{ position: 'absolute', inset: 0, background: '#141414' }}
     >
@@ -820,5 +831,3 @@ export function Scene5_AIChatPanel() {
     </Timegroup>
   );
 }
-
-Scene5_AIChatPanel.duration = DURATION;

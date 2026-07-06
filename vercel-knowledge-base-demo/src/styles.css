@@ -45,3 +45,21 @@
     box-sizing: border-box;
   }
 }
+
+/* === Scene4_ArticlePage (src/scenes/Scene4_ArticlePage.tsx) ===
+   Percent stops mirror the scene's original scene-local ms marks over its
+   4500ms total duration (600/1800/2600/3600 -> 13.33/40/57.78/80%).
+   cubic-bezier(0.65,0,0.35,1) is the standard easeInOutCubic equivalent. */
+@keyframes scene4-scroll {
+  0%      { transform: translateY(0); }
+  13.333% { transform: translateY(0); animation-timing-function: cubic-bezier(0.65,0,0.35,1); }
+  40%     { transform: translateY(-1200px); }
+  57.778% { transform: translateY(-1200px); animation-timing-function: cubic-bezier(0.65,0,0.35,1); }
+  80%     { transform: translateY(0); }
+  100%    { transform: translateY(0); }
+}
+@keyframes scene4-cursor-drift {
+  0%      { left: 960px; top: 300px; animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
+  88.889% { left: 940px; top: 380px; }
+  100%    { left: 940px; top: 380px; }
+}

@@ -1,99 +1,50 @@
 /**
  * Scene 4 — Article page: "How to safely run AI generated code in your application"
- * Master: 10000–14500ms (4500ms local)
+ * Master: 12000–16500ms (4500ms local)
  *
  * FIX 3: Scroll DOWN fast (accelerating), show lots of content for ~2s,
- *   then scroll ALL THE WAY BACK UP fast to the title. Chat begins at ~17s
- *   (master), so this scene ends at 14500ms and Scene5 starts — back at the top.
+ *   then scroll ALL THE WAY BACK UP fast to the title. Chat begins right after,
+ *   so this scene ends back at the top for a clean cut into Scene5.
  *
- * Timing (scene-local ms):
- *   0–600ms:    Hold at top (article title visible)
- *   600–1800ms: Fast scroll DOWN (inOutCubic) — shows article body
- *   1800–2600ms: Hold at bottom
- *   2600–3600ms: Fast scroll BACK UP (inOutCubic) — returns to title
- *   3600–4500ms: Hold at top again
+ * Every element here is a deterministic function of the scene's own local time
+ * with no cross-element interdependency, so — unlike Scene1/Scene5 — the whole
+ * scene converts cleanly to plain CSS `@keyframes` (see `styles.css`): a single
+ * scroll animation (down / hold / up / hold, `scene4-scroll`) and a single
+ * cursor-drift animation (`scene4-cursor-drift`). The camera scale never
+ * changes, so it's a static style rather than an animation.
+ *
+ * Timing (scene-local ms, mirrored as % keyframe stops of 4500ms total):
+ *   0–600ms (0–13.3%):     Hold at top (article title visible)
+ *   600–1800ms (13.3–40%): Fast scroll DOWN (inOutCubic) — shows article body
+ *   1800–2600ms (40–57.8%): Hold at bottom
+ *   2600–3600ms (57.8–80%): Fast scroll BACK UP (inOutCubic) — returns to title
+ *   3600–4500ms (80–100%): Hold at top again
  */
-import React, { useCallback, useRef } from "react";
+import React from "react";
 import { Timegroup } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
-import { track, lerp } from "../components/helpers";
-import { eases } from "animejs";
 
 const DURATION = 4500;
-const SCENE_START = 10000;
-
-// Scroll timing
-const SCROLL_DOWN_START  = 600;
-const SCROLL_DOWN_END    = 1800;
-const SCROLL_HOLD_END    = 2600;
-const SCROLL_UP_START    = 2600;
-const SCROLL_UP_END      = 3600;
-
-// Large scroll distance to show lots of article content
-const SCROLL_DISTANCE = 1200;
+const SCENE_START = 12000;
 
 export function Scene4_ArticlePage() {
-  const cursorRef  = useRef<HTMLDivElement>(null);
-  const scrollRef  = useRef<HTMLDivElement>(null);
-  const cameraRef  = useRef<HTMLDivElement>(null);
-
-  const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    // Scale 1.55× centered on the article column
-    if (cameraRef.current) {
-      cameraRef.current.style.transformOrigin = '50% 38%';
-      cameraRef.current.style.transform = `scale(1.55)`;
-    }
-
-    // Scroll: fast DOWN then fast BACK UP
-    if (scrollRef.current) {
-      let scrollY = 0;
-
-      if (ms <= SCROLL_DOWN_START) {
-        scrollY = 0;
-      } else if (ms <= SCROLL_DOWN_END) {
-        // Fast scroll down — inOutCubic for natural feel
-        const t = track(ms, SCROLL_DOWN_START, SCROLL_DOWN_END, eases.inOutCubic);
-        scrollY = lerp(0, SCROLL_DISTANCE, t);
-      } else if (ms <= SCROLL_HOLD_END) {
-        scrollY = SCROLL_DISTANCE;
-      } else if (ms <= SCROLL_UP_END) {
-        // Fast scroll back up
-        const t = track(ms, SCROLL_UP_START, SCROLL_UP_END, eases.inOutCubic);
-        scrollY = lerp(SCROLL_DISTANCE, 0, t);
-      } else {
-        scrollY = 0;
-      }
-
-      scrollRef.current.style.transform = `translateY(${-scrollY}px)`;
-    }
-
-    // Orb cursor: drifts gently
-    if (cursorRef.current) {
-      const cx = lerp(960, 940, track(ms, 0, 4000));
-      const cy = lerp(300, 380, track(ms, 0, 4000));
-      cursorRef.current.style.left = `${cx}px`;
-      cursorRef.current.style.top = `${cy}px`;
-    }
-  }, []);
-
   return (
     <Timegroup
       mode="fixed"
-      duration="4.5s"
-      onFrame={onFrame as any}
+      duration={`${DURATION}ms`}
       style={{ position: 'absolute', inset: 0, background: '#141414' }}
     >
       <TraceLayer sceneStartMs={SCENE_START} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
 
-      {/* Camera rig */}
+      {/* Camera rig — scale is constant (1.55×), so this is a static style, not an animation */}
       <div
-        ref={cameraRef}
         style={{
           position: 'absolute',
           inset: 0,
           zIndex: 1,
-          willChange: 'transform',
+          transformOrigin: '50% 38%',
+          transform: 'scale(1.55)',
         }}
       >
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -151,11 +102,10 @@ export function Scene4_ArticlePage() {
             {/* Article content */}
             <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
               <div
-                ref={scrollRef}
                 style={{
                   position: 'absolute',
                   top: 0, left: 0, right: 0,
-                  willChange: 'transform',
+                  animation: 'scene4-scroll 4500ms both',
                 }}
               >
                 <div style={{
@@ -354,9 +304,8 @@ export function Scene4_ArticlePage() {
           </div>
         </div>
 
-        {/* Gray orb cursor */}
+        {/* Gray orb cursor — drifts gently from (960,300) to (940,380), then holds */}
         <div
-          ref={cursorRef}
           style={{
             position: 'absolute',
             width: 28,
@@ -367,15 +316,11 @@ export function Scene4_ArticlePage() {
             boxShadow: '0 0 8px rgba(255,255,255,0.2)',
             opacity: 0.9,
             zIndex: 20,
-            left: 960,
-            top: 300,
             pointerEvents: 'none',
-            willChange: 'transform',
+            animation: 'scene4-cursor-drift 4500ms both',
           }}
         />
       </div>
     </Timegroup>
   );
 }
-
-Scene4_ArticlePage.duration = DURATION;
