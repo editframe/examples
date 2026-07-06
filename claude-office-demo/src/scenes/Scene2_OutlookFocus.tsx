@@ -179,7 +179,7 @@ export function Scene2_OutlookFocus() {
         offset={`${POP_PRESS_START}ms`}
         sourceIn="0.6s"
         duration="0.3s"
-        volume={2.2}
+        volume={1}
       />
     </Timegroup>
   );

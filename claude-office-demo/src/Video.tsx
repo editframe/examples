@@ -23,7 +23,8 @@ const TOTAL_MS = 24500;
 
 export const Video: React.FC = () => (
   <Timegroup
-    mode="sequence"
+    mode="contain"
+    workbench
     className="relative w-full h-full overflow-hidden"
     style={{
       width: 1920,
@@ -31,14 +32,18 @@ export const Video: React.FC = () => (
       background: "#EFECE3",
     }}
   >
-    <Scene1_IconsIntro />
-    <Scene2_OutlookFocus />
-    <Scene3_OutlookChromeAndType />
-    <Scene4_Thinking />
-    <Scene5_ResponseAndScroll />
+    <Timegroup mode="sequence" className="absolute w-full h-full">
+      <Scene1_IconsIntro />
+      <Scene2_OutlookFocus />
+      <Scene3_OutlookChromeAndType />
+      <Scene4_Thinking />
+      <Scene5_ResponseAndScroll />
+    </Timegroup>
 
     {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the
-        composition's total runtime regardless of the source file's own length. */}
+        composition's total runtime regardless of the source file's own length. Sibling of
+        the sequence (not a child of it) so it spans the whole timeline as a background
+        track instead of being treated as an extra sequential scene. */}
     <Audio src="/assets/music-bed.mp3" volume={1} duration={`${TOTAL_MS}ms`} />
   </Timegroup>
 );

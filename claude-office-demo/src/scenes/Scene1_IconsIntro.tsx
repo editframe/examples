@@ -145,16 +145,16 @@ export function Scene1_IconsIntro() {
       <CreamBackdrop variant="dark" />
 
       <div ref={outlookRef} style={iconWrap(OUTLOOK_LEFT)}>
-        <Image src="/assets/outlook-icon.png" alt="Outlook" style={imgStyle} />
+        <Image src="/assets/outlook-icon.png" style={imgStyle} />
       </div>
       <div ref={wordRef} style={iconWrap(WORD_LEFT)}>
-        <Image src="/assets/word-icon.png" alt="Word" style={imgStyle} />
+        <Image src="/assets/word-icon.png" style={imgStyle} />
       </div>
       <div ref={excelRef} style={iconWrap(EXCEL_LEFT)}>
-        <Image src="/assets/excel-icon.png" alt="Excel" style={imgStyle} />
+        <Image src="/assets/excel-icon.png" style={imgStyle} />
       </div>
       <div ref={ppRef} style={iconWrap(PP_LEFT)}>
-        <Image src="/assets/powerpoint-icon.png" alt="PowerPoint" style={imgStyle} />
+        <Image src="/assets/powerpoint-icon.png" style={imgStyle} />
       </div>
 
       {/* Headline — TWO LINES, bigger, more gap below icons (#13) */}
