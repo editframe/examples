@@ -47,3 +47,163 @@
 }
 
 html, body, #root { height: 100%; margin: 0; padding: 0; }
+
+/* === Reveal (see src/components/Reveal.tsx) — declarative fade + float-up/out === */
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(var(--reveal-y, 20px)); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes reveal-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(var(--reveal-exit-y, 0px)); }
+}
+
+/* === Global chrome (src/components/AmbientField.tsx, CutFlash.tsx, Video.tsx) === */
+@keyframes drift-wobble {
+  from { transform: translate(0, 0); }
+  to { transform: translate(9px, 7px); }
+}
+@keyframes grain-flicker {
+  from { opacity: 0.02; }
+  to { opacity: 0.08; }
+}
+@keyframes cut-flash {
+  0% { opacity: 0; }
+  15% { opacity: 0.7; }
+  100% { opacity: 0; }
+}
+
+/* === Cover scene (src/scenes/Cover.tsx) === */
+@keyframes cover-exit {
+  from { transform: translateY(0) scale(1); }
+  to { transform: translateY(-50px) scale(1.04); }
+}
+@keyframes cover-mast-in {
+  from { transform: translateY(-18px); }
+  to { transform: translateY(0); }
+}
+@keyframes cover-fash-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes cover-fash-slam {
+  from { transform: translateY(-180px) scaleY(1.22); }
+  to { transform: translateY(0) scaleY(1); }
+}
+@keyframes cover-fash-pan {
+  from { background-position: center 54%; }
+  to { background-position: center 66%; }
+}
+@keyframes cover-ion-in {
+  from { opacity: 0; letter-spacing: 2px; }
+  to { opacity: 1; letter-spacing: 18px; }
+}
+@keyframes cover-nova-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes cover-nova-slam {
+  from { transform: translateY(220px) scaleY(1.25); }
+  to { transform: translateY(0) scaleY(1); }
+}
+@keyframes cover-nova-pan {
+  from { background-position: center 68%; }
+  to { background-position: center 54%; }
+}
+@keyframes cover-sub-in {
+  from { opacity: 0; clip-path: inset(0 100% 0 0); }
+  to { opacity: 1; clip-path: inset(0 0% 0 0); }
+}
+@keyframes cover-tag-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes cover-tag-slam {
+  from { transform: rotate(-22deg) scale(0.5); }
+  to { transform: rotate(-8deg) scale(1); }
+}
+@keyframes cover-bar-in {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* === SwingRack scene (src/scenes/SwingRack.tsx) === */
+@keyframes swingrack-head-in {
+  from { opacity: 0; transform: translateY(-26px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes swingrack-rail-in {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes swingrack-tag-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes swingrack-tag-drop {
+  from { transform: translateY(-760px); }
+  to { transform: translateY(0); }
+}
+@keyframes swingrack-tag-sway {
+  0% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+  100% { transform: rotate(-4deg); }
+}
+
+/* === FanToEdit scene (src/scenes/FanToEdit.tsx) === */
+@keyframes fan-stage-drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(7px); }
+}
+@keyframes fan-stage-breathe {
+  from { transform: translateY(0); }
+  to { transform: translateY(5px); }
+}
+@keyframes fan-rule-in {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* === SpecStack scene (src/scenes/SpecStack.tsx) === */
+@keyframes spec-band-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes spec-band-rise {
+  from { transform: translateY(70px); }
+  to { transform: translateY(0); }
+}
+
+/* === Outro scene (src/scenes/Outro.tsx) === */
+@keyframes outro-fash-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes outro-fash-slide {
+  from { transform: translateX(-180px); }
+  to { transform: translateX(0); }
+}
+@keyframes outro-fash-pan {
+  from { background-position: center 14%; }
+  to { background-position: center 24%; }
+}
+@keyframes outro-nova-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes outro-nova-slide {
+  from { transform: translateX(180px); }
+  to { transform: translateX(0); }
+}
+@keyframes outro-nova-pan {
+  from { background-position: center 28%; }
+  to { background-position: center 16%; }
+}
+@keyframes outro-under-in {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes outro-url-in {
+  from { opacity: 0; letter-spacing: 2px; }
+  to { opacity: 1; letter-spacing: 12px; }
+}

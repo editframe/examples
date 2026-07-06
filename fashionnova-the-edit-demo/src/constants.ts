@@ -1,40 +1,53 @@
 /**
- * FASHION NOVA — 9:16 social ad · brand kit (tokens only — each CONCEPT designs its own
- * structure/beats; this file only locks palette, type, clock, and the asset roster).
- * 1080x1920 @ 30fps, ONE fixed Timegroup (25000ms). ms = ownCurrentTimeMs.
+ * FASHION NOVA — "The Edit" · 9:16 social ad · master constants.
+ * 1080x1920 @ 30fps. Five scenes, each its own `<Timegroup mode="fixed">`, sequenced
+ * with a shared `overlap` (see SCENES below) — no single master-ms clock.
+ * Brand: stark black & white, MONOCHROME/SILVER accents only (no yellow/magenta).
  */
-export const DURATION_MS = 25000;
+export const DURATION_MS = 25000; // sum(SCENES.*.duration) - 4*OVERLAP_MS
 export const FPS = 30;
 export const W = 1080;
 export const H = 1920;
 
-// ── PALETTE (stark, high-contrast, bold) ──
-export const BLACK = "#000000";      // THE brand color
-export const WHITE = "#FFFFFF";
-export const OFF_WHITE = "#F6F4F1";
-export const INK = "#111111";
-export const GREY = "#8A8A8A";
-export const LINE = "#E2DED7";
-export const YELLOW = "#FFE600";     // loud %OFF / NEW slam accent
-export const MAGENTA = "#FF1FA0";    // glam "Nova Babe" accent (use deliberately)
+// ── PALETTE (stark, high-contrast, monochrome) ──
+export const BLACK = "#000000"; // THE brand color — grounds, type
+export const WHITE = "#FFFFFF"; // surfaces, card fills, primary type on dark
+export const OFF_WHITE = "#F6F4F1"; // paper / magazine-page ground (TEX_PAPER)
+export const INK = "#111111"; // near-black body text
+export const GREY = "#8A8A8A"; // muted secondary text
+
+// mono accent scale — replaces all yellow/magenta from the old kinetic-type draft
+export const SILVER = "#C9CDD2";
+export const SILVER_GRAD = "linear-gradient(180deg,#F2F4F6 0%,#C9CDD2 45%,#9AA0A6 100%)";
 
 // ── TYPE (Montserrat = Proxima Nova substitute, embedded in styles.css; weights 400-900) ──
 export const MONT = "'Montserrat', 'Proxima Nova', system-ui, sans-serif";
 
 export const PRICE = "$39.99";
-export const SALE = "UP TO 80% OFF";
 
-// ── ASSET ROSTER (all in assets.ts, base64; ALL vetted classy + watermark-clean) ──
-// LOOKS (real FN on-model, fully clothed):
-//   DRESS_1 / DRESS_2 / DRESS_3 — black maxi dress (the hero piece), 3 angles
-//   ED01  — purple long-sleeve bodycon (most-covered look)
-//   ED07  — white tailored blazer (NOVA LUXE)
-//   ED10  — cream cowl-neck/halter top (LUXE)
-//   ED11  — white halter maxi gown (LUXE, floor-length)
-//   ED15  — lifestyle / on-court look
-//   ED14  — gold drop earrings (accessory cut-in for "shop the look" detail)
-// EDITORIAL TEXTURES (abstract, no people/text — use as designed backgrounds / transition fills):
-//   TEX_PAPER     — warm off-white pressed-paper grain (magazine page)
-//   TEX_INK       — glossy black liquid ink on white (premium fluid transition)
-//   TEX_COLLAGE   — torn cream/black/yellow paper collage (editorial zine bg)
-//   TEX_LIGHTLEAK — warm butter-yellow→cream light-leak haze
+/**
+ * ── SCENES ──
+ * Each beat is its own `<Timegroup mode="fixed">`, sequenced by the root
+ * `<Timegroup mode="sequence" overlap={OVERLAP_MS}>` in `Video.tsx`. There is no
+ * master clock read anywhere — every scene animates against its OWN local time
+ * (plain CSS keyframe delays / `--ef-transition-*`), which is what makes the
+ * per-scene components declarative instead of one big `onFrame` switchboard.
+ *
+ * `OVERLAP_MS` of shared time exists at every scene boundary — during it, the
+ * outgoing scene plays the tail of its own duration (`--ef-transition-out-start`)
+ * while the incoming scene plays the head of its own. `duration` below already
+ * accounts for that: every scene after the first is `nominal + OVERLAP_MS` so its
+ * own "solo" screen time still matches the original cut. Net result: the 5
+ * durations minus 4 overlaps sum to exactly `DURATION_MS`.
+ */
+export const OVERLAP_MS = 300;
+
+export const SCENES = {
+  cover: { duration: 4000, label: "see-through FASHION/NOVA wordmark, ink bleeds through, silver tag" },
+  swingRack: { duration: 5300, label: "swing-tickets drop onto the rack, SHOP THE LOOK" },
+  fanToEdit: { duration: 5800, label: "card-deck flies in → fans → deals into THE EDIT grid" },
+  specStack: { duration: 5300, label: "full-frame dress-spec infographic, FINAL HOURS" },
+  outro: { duration: 5800, label: "image-filled FASHION NOVA lockup + URL" },
+} as const;
+
+export type SceneName = keyof typeof SCENES;

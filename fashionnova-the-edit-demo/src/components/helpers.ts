@@ -1,3 +1,10 @@
+/**
+ * Only used by `scenes/FanToEdit.tsx`'s one deliberate `addFrameTask` exception (the
+ * fly-in → fan → deal card choreography — see the comment there for why that one stayed
+ * imperative). Every other scene in this composition is plain CSS; nothing else in
+ * `src/` should need these.
+ */
+
 /** Clamp v to [lo, hi] (default 0..1) */
 export const clamp = (v: number, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v));
 
@@ -24,9 +31,6 @@ export const outBack = (t: number, overshoot = 1.7): number => {
 
 /** Ease out cubic */
 export const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
-
-/** Ease in cubic */
-export const easeInCubic = (t: number) => t * t * t;
 
 /** Ease in-out quad */
 export const easeInOutQuad = (t: number) =>

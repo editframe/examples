@@ -66,7 +66,7 @@ All audio is cleared for commercial use → see [`CREDITS.md`](CREDITS.md).
 
 ## Brand
 
-Fashion Nova is a **black & white brand** (theme `#000000`, no fixed accent color). Every *built* graphic — type, swing-tags, %OFF chips, spec bands, marks — is rendered black / white / grey / **silver**; the real on-model look photos and the `TEX_INK` keep their natural color. Oversized UPPERCASE Montserrat carries the type. Source of truth: `src/constants.ts` (palette) + `src/Video.tsx` (the silver accent scale). Text never reads pure `#000` flat against pure black.
+Fashion Nova is a **black & white brand** (theme `#000000`, no fixed accent color). Every *built* graphic — type, swing-tags, %OFF chips, spec bands, marks — is rendered black / white / grey / **silver**; the real on-model look photos and the `TEX_INK` keep their natural color. Oversized UPPERCASE Montserrat carries the type. Source of truth: `src/constants.ts` (palette, including the silver accent scale). Text never reads pure `#000` flat against pure black.
 
 | Token | Hex | Use |
 |---|---|---|
@@ -104,14 +104,25 @@ Fashion Nova is a **black & white brand** (theme `#000000`, no fixed accent colo
 ├── output/
 │   └── demo.mp4                        ← final shipped render (music muxed)
 └── src/
-    ├── Video.tsx                       ← composition root (25s, 5 scenes, ONE Timegroup)
+    ├── Video.tsx                       ← composition root — one sequence of 5 scene Timegroups
     ├── main.tsx                        ← TimelineRoot mount
-    ├── constants.ts                    ← canonical palette / type / clock tokens
-    ├── styles.css                      ← Montserrat @font-face + Tailwind
-    ├── assets.ts                       ← base64 look photos + editorial textures
-    ├── assets/                         ← source jpg looks, textures, Montserrat woff2
+    ├── constants.ts                    ← palette / type / SCENES durations + overlap
+    ├── styles.css                      ← Montserrat @font-face + all @keyframes + Tailwind
+    ├── assets/                         ← look photos, textures, Montserrat woff2 (real files, no base64)
+    ├── scenes/                         ← one file per scene, each its own <Timegroup mode="fixed">
+    │   ├── Cover.tsx                   ← wordmark + silver tag
+    │   ├── SwingRack.tsx               ← swing-tickets drop onto the rack
+    │   ├── FanToEdit.tsx               ← card-deck flies in → fans → deals into THE EDIT grid
+    │   ├── SpecStack.tsx               ← full-frame dress-spec infographic
+    │   └── Outro.tsx                   ← image-filled FASHION NOVA lockup
     └── components/
-        └── helpers.ts                  ← track, lerp, clamp, easing helpers (outBack…)
+        ├── Reveal.tsx                  ← declarative fade/float-up enter+exit
+        ├── Hud.tsx                     ← corner marks, progress bar, live frame counter
+        ├── AmbientField.tsx            ← whole-video grain
+        ├── CutFlash.tsx                ← scene-cut white flash
+        ├── RegMark.tsx / Barcode.tsx   ← shared static HUD chrome
+        ├── textStyles.ts               ← type-as-window / image-fill style helpers
+        └── helpers.ts                  ← track/lerp/clamp/easing — used only by FanToEdit's one addFrameTask
 ```
 
 ---
@@ -126,9 +137,9 @@ NO_COLOR=1 FORCE_COLOR=0 npm run render
 bash add-music.sh
 ```
 
-1. **Swap the story** — all five scenes live in `src/Video.tsx` as one fixed 25000ms `<Timegroup>` driven by `onFrame`; retune a scene's `ms` window or its animation logic to re-cut a beat.
-2. **Rebrand** — edit the palette/type tokens in `src/constants.ts` and the silver accent scale at the top of `src/Video.tsx`. Keep built graphics mono; let real photos keep their color.
-3. **Swap the looks** — replace the base64 entries in `src/assets.ts` (source jpgs live in `src/assets/`).
+1. **Swap the story** — each scene lives in its own file under `src/scenes/`, as its own `<Timegroup mode="fixed">` animated declaratively with CSS (`@keyframes` in `styles.css`, `Reveal` for one-shot callouts); retune a scene's local-ms delays or its `@keyframes` to re-cut a beat. `src/constants.ts` (`SCENES`) documents each scene's duration and the shared crossfade `overlap`.
+2. **Rebrand** — edit the palette/type/silver-accent tokens in `src/constants.ts`. Keep built graphics mono; let real photos keep their color.
+3. **Swap the looks** — replace the jpg/png files in `src/assets/` (referenced via `<Image src="/assets/...">` in the relevant scene file).
 4. **Re-time the audio** — drop a new track in `audio/` and update the filename + fades in `add-music.sh` (log it in [`CREDITS.md`](CREDITS.md)).
 5. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render`, then `bash add-music.sh`.
 
