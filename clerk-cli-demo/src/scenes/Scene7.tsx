@@ -84,7 +84,7 @@ export function Scene7() {
         >
           {/* Logo row: symbol + wordmark */}
           <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 40 }}>
-            <Image src="/assets/clerk-symbol.svg" alt="Clerk" style={{ width: 120, height: 120, display: "block" }} />
+            <Image src="/assets/clerk-symbol.svg" style={{ width: 120, height: 120, display: "block" }} />
             <span
               style={{
                 fontFamily: fonts.sans,

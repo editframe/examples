@@ -248,8 +248,8 @@ export function SceneTerminal() {
       )}
 
       {/* Camera wrapper — applies zoom + pan via the `terminal-camera` keyframes.
-          --cam-*-x/-y/-s feed the same TX_*/TY_*/S_* constants derived above into
-          the CSS custom properties styles.css's keyframes reference. */}
+          The --cam-(a|b|d|e)-(x|y|s) custom properties feed the TX/TY/S constants
+          derived above into the CSS keyframes in styles.css. */}
       <div
         style={
           {
