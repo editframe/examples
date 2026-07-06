@@ -12,7 +12,7 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `audio/music-bed.mp3`
+### `src/assets/music-bed.mp3`
 
 | | |
 |---|---|
@@ -24,13 +24,13 @@ document so downstream forkers can verify provenance.
 | **Attribution required** | ❌ No (credit appreciated) |
 | **Redistribution** | ✅ Permitted as part of derivative work |
 
-A slow-burn cinematic bed that underscores the editorial security-finding narrative without competing with the headline. Replace freely with anything from Pixabay, [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/) — keep the filename `music-bed.mp3` or update `add-sfx-v11.sh` accordingly.
+A slow-burn cinematic bed that underscores the editorial security-finding narrative without competing with the headline. Replace freely with anything from Pixabay, [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/) — keep the filename `music-bed.mp3` or update the `MUSIC` constant in `src/Video.tsx` accordingly.
 
 ---
 
 ## SFX
 
-### `audio/click-hd-loud.mp3`
+### `src/assets/click-hd-loud.mp3`
 
 | | |
 |---|---|
@@ -45,9 +45,8 @@ A slow-burn cinematic bed that underscores the editorial security-finding narrat
 
 ## Want to swap audio?
 
-1. Drop your replacement file in `audio/` (match filename or update `add-sfx-v11.sh`).
+1. Drop your replacement file in `src/assets/` (match filename or update the `MUSIC` constant in `src/Video.tsx` / the `src` on the relevant `<Audio>` element).
 2. Update the corresponding row above with source + license info.
-3. Re-run `bash add-sfx-v11.sh`.
 
 For 100% safe royalty-free sources:
 

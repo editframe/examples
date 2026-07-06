@@ -1,11 +1,14 @@
 import React from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import Scene1_Headline from "./scenes/Scene1_Headline";
 import Scene2_ClaudeWindow from "./scenes/Scene2_ClaudeWindow";
 import Scene3_Findings from "./scenes/Scene3_Findings";
 import Scene4_PRPatch from "./scenes/Scene4_PRPatch";
 import Scene5_Logo from "./scenes/Scene5_Logo";
 import { claude } from "./brand";
+
+const MUSIC = "/assets/music-bed.mp3";
+const DURATION_MS = 19000; // 3800 + 2200 + 5000 + 5000 + 3000 (scene durations, no overlap)
 
 /**
  * Claude Security — v5 TOTAL SCRAP REBUILD
@@ -43,6 +46,9 @@ export const Video: React.FC = () => {
       <Scene3_Findings />
       <Scene4_PRPatch />
       <Scene5_Logo />
+      {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the
+          composition's total runtime regardless of the source file's own length. */}
+      <Audio src={MUSIC} volume={1} duration={`${DURATION_MS}ms`} />
     </Timegroup>
   );
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { PaperBackground } from "../components/PaperBackground";
 import { Sfx } from "../components/Sfx";
 import { Reveal } from "../components/Reveal";
@@ -208,6 +208,14 @@ export const Scene2_ClaudeWindow: React.FC = () => {
       <PaperBackground />
       <Sfx cue="reveal" at={0.1} dur={0.8} volume={0.06} />
       <Sfx cue="plop" at={1.2} dur={0.3} volume={0.05} />
+      {/* Cursor click on the Security row — fires at EXACTLY master 5.0s.
+          Scene1 is 3800ms, so scene-local offset is 1200ms (3800 + 1200 = 5000). */}
+      <Audio
+        src="/assets/click-hd-loud.mp3"
+        offset="1.2s"
+        duration="1.5s"
+        volume={0.45}
+      />
 
       {/* Center container — flex centers the window in the 1920×1080 viewport. */}
       <div

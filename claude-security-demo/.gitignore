@@ -7,21 +7,12 @@ dist/
 .vite/
 .turbo/
 
-# Render artifacts — intermediates only
-# (output/demo.mp4 IS committed: it's the final shipped video)
-output/qa*/
-output/verify*/
-output/_*/
-output/demo-raw.mp4
-output/demo-test.mp4
-output/demo-silent.mp4
-output/demo-final-music.mp4
-output/demo-final-sfx.mp4
-output/demo-final-raw.mp4
-output/demo-final.mp4
-output/demo-final-v*.mp4
-output/*.png
-output/*.jpg
+# Editframe local asset cache (transcoded media under src/assets)
+src/assets/.cache/
+
+# Render artifacts — the repo commits ONLY output/demo.mp4 (final, with audio)
+output/*
+!output/demo.mp4
 output.mp4
 frames/
 _refframes/

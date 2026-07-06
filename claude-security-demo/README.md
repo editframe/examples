@@ -11,9 +11,8 @@ A 19-second editorial product demo announcing Claude's security public beta, wit
 ```bash
 npm install
 npm run render
-bash add-sfx-v11.sh        # mux music + SFX
 ```
 
 The rendered video is saved to `output/`.
 
-Audio files live in `audio/` and are fully cleared for commercial use — see [CREDITS.md](CREDITS.md) for license details.
+Audio files live in `src/assets/` and are fully cleared for commercial use — see [CREDITS.md](CREDITS.md) for license details.
