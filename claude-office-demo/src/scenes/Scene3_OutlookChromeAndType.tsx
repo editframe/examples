@@ -1,6 +1,6 @@
 /**
- * Scene3_OutlookChromeAndType — 7500ms
- * Master timeline: 6500ms → 14000ms
+ * Scene3_OutlookChromeAndType — 6500ms
+ * Master timeline: 6500ms → 13000ms
  *
  * Beat 1 (0–1300ms):    Unified Outlook+Claude window fades in.
  * Beat 2 (1300–3000ms): FIX 5: ORANGE GLOW — radial-gradient at 0.55 opacity center (OBVIOUS).
@@ -16,7 +16,7 @@
  *        Default state until user types.
  */
 import React, { useCallback, useRef } from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { CreamBackdrop } from "../components/CreamBackdrop";
 import { track, lerp, clamp } from "../components/helpers";
 import { eases } from "animejs";
@@ -607,6 +607,23 @@ export function Scene3_OutlookChromeAndType() {
           <MacCursorSvg size={52} />
         </div>
       </div>
+
+      {/* Prompt typewriter keystrokes (local 3000ms / master 9500ms) */}
+      <Audio
+        src="/assets/sfx/keyboard.wav"
+        offset={`${TYPE_START}ms`}
+        duration="1.4s"
+        volume={0.7}
+      />
+
+      {/* Send-button click (local 5900ms / master 12400ms) */}
+      <Audio
+        src="/assets/sfx/click.mp3"
+        offset={`${CLICK_START}ms`}
+        sourceIn="0.6s"
+        duration="0.3s"
+        volume={2.2}
+      />
     </Timegroup>
   );
 }

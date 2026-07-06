@@ -9,8 +9,7 @@
   "type": "module",
   "scripts": {
     "start": "editframe preview",
-    "inline-assets": "node scripts/inline-assets.mjs",
-    "render": "node scripts/inline-assets.mjs && editframe render -o output/demo-silent.mp4"
+    "render": "editframe render -o output/demo.mp4"
   },
   "dependencies": {
     "@editframe/cli": "0.54.0",

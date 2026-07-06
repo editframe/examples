@@ -12,7 +12,7 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `audio/music.mp3`
+### `src/assets/music-bed.mp3`
 
 | | |
 |---|---|
@@ -23,15 +23,13 @@ document so downstream forkers can verify provenance.
 | **Attribution required** | ❌ No (credit appreciated) |
 | **Redistribution** | ✅ Permitted as part of derivative work |
 
-A calm, modern tech-bed that matches the editorial Claude feel — clean, no vocal interference. In the mux it's trimmed to 24.6s, loudnorm'd to −26 LUFS, faded in over 0.4s and out over the last 1.8s. Replace freely with anything from [Pixabay](https://pixabay.com/music/), [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/) — keep the filename `music.mp3` or update `add-audio.sh` accordingly.
-
-> `audio/music_prev_OptimalFlow.mp3` is the original full-length preview of this track, kept for reference. It is not used by `add-audio.sh`.
+A calm, modern tech-bed that matches the editorial Claude feel — clean, no vocal interference. Trimmed to 24.5s, loudnorm'd to −26 LUFS, faded in over 0.4s and out over the last 1.8s, baked in ahead of time (single local `ffmpeg` pass, not applied at render time) and played back as a native `<Audio>` element spanning the whole composition (`src/Video.tsx`). Replace freely with anything from [Pixabay](https://pixabay.com/music/), [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/).
 
 ---
 
 ## SFX
 
-### `audio/keyboard.wav`
+### `src/assets/sfx/keyboard.wav`
 
 | | |
 |---|---|
@@ -40,7 +38,7 @@ A calm, modern tech-bed that matches the editorial Claude feel — clean, no voc
 | **License** | [Pixabay Content License](https://pixabay.com/service/license-summary/) — commercial use cleared |
 | **Used for** | The typed prompt in Scene 3 (1.4s, master `9500ms`) |
 
-### `audio/click.mp3`
+### `src/assets/sfx/click.mp3`
 
 | | |
 |---|---|
@@ -53,9 +51,8 @@ A calm, modern tech-bed that matches the editorial Claude feel — clean, no voc
 
 ## Want to swap audio?
 
-1. Drop your replacement file in `audio/` (match the filename or update `add-audio.sh`).
+1. Drop your replacement file in `src/assets/` (or `src/assets/sfx/` for cues) and update the matching `<Audio src="...">` in `src/Video.tsx` / the relevant scene under `src/scenes/`.
 2. Update the corresponding row above with source + license info.
-3. Re-run `bash add-audio.sh`.
 
 For 100% safe royalty-free sources:
 
