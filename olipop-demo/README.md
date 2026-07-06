@@ -33,15 +33,18 @@ A rotating-sunburst hook lifts the OLIPOP wordmark, a Tropical Punch can pushes 
 
 ```bash
 npm install
-NO_COLOR=1 FORCE_COLOR=0 npm run render    # → output/demo-silent.mp4  (poster in the well)
-bash composite-well.sh                     # → output/demo-composite.mp4  (real clip composited into the well)
-bash add-audio.sh                          # → output/demo.mp4  (music + SFX muxed — the committed final)
+NO_COLOR=1 FORCE_COLOR=0 npm run render    # → output/demo.mp4  (music baked in natively, well footage composited, audio carried through)
 ```
 
-This is the **2-step composite pipeline**: the React render leaves the video well
-**empty** with a poster placeholder; `composite-well.sh` (pure FFmpeg) overlays the
-real OLIPOP retro-animation clip into the exact well rect (`180,640,720,720`, r36)
-during the stationary `5–9s` window; `add-audio.sh` then lays the music bed and SFX.
+The music bed is a native `<Audio>` element on the composition timeline (see
+[`src/Video.tsx`](src/Video.tsx)) — no post-render audio mux script needed. The video
+well is still composited in as a separate FFmpeg pass, chained into the `render` npm
+script: the React render leaves the well **empty** with a poster placeholder
+(`output/demo-silent.mp4`, audio already baked in), and `composite-well.sh` overlays the
+real OLIPOP retro-animation clip into the exact well rect (`180,640,720,720`, r36) during
+the stationary `5–9s` window, carrying the existing audio track straight through
+(`-map 0:a? -c:a copy`) into the final `output/demo.mp4` — pending a native
+CSS-masking replacement for the well-compositing step itself.
 
 > **Windows quirk:** the Editframe CLI's Vite spawn parses ANSI-colored stdout. The
 > `NO_COLOR=1 FORCE_COLOR=0` prefix is required or render init times out. Run the
@@ -67,12 +70,13 @@ during the stationary `5–9s` window; `add-audio.sh` then lays the music bed an
 
 A single music bed runs under the full 20s — loudnorm-normalized with a fade-in at the
 top and a fade-out under the CTA hold. This cut is **music only**; there are no sound
-effects. The mux is reproduced by [`add-audio.sh`](add-audio.sh). See [`CREDITS.md`](CREDITS.md)
-for provenance.
+effects. It's a native `<Audio>` element on the composition timeline (see
+[`src/Video.tsx`](src/Video.tsx)); the fades/normalization are baked into the committed
+asset itself, no runtime mux. See [`CREDITS.md`](CREDITS.md) for provenance.
 
 | Cue | Master ms | Source file |
 |---|---|---|
-| Music bed | 0 – 20000 | `audio/music-bed.mp3` (loudnorm −16, fade-in 0.6s, fade-out 18.5s) |
+| Music bed | 0 – 20000 | `src/assets/music-bed.mp3` (loudnorm −16, fade-in 0.6s, fade-out 18.5s baked in) |
 
 ---
 
@@ -110,8 +114,7 @@ grotesque sans) handles tracked caps and body. Tokens are the source of truth in
 ├── CREDITS.md                 ← audio provenance + brand notes
 ├── brand-rules-olipop.md      ← brand spec (canonical: src/constants.ts)
 ├── .env.example               ← env vars (none required to render)
-├── composite-well.sh          ← STEP 1 — FFmpeg: real clip → the fixed video well
-├── add-audio.sh               ← STEP 2 — FFmpeg: music mux → output/demo.mp4
+├── composite-well.sh          ← FFmpeg: real clip → the fixed video well (video-only pass)
 ├── index.html
 ├── package.json
 ├── package-lock.json
@@ -120,8 +123,6 @@ grotesque sans) handles tracked caps and body. Tokens are the source of truth in
 ├── assets/
 │   ├── well-video.mp4         ← OLIPOP retro-animation composited into the well (5–9s)
 │   └── well-mask.png          ← 720×720 rounded-rect alpha mask for the well
-├── audio/                     ← music bed (commercial-cleared)  (+ audio/README.md)
-│   └── music-bed.mp3
 ├── output/
 │   └── demo.mp4               ← final shipped render (well composited + audio)
 └── src/
@@ -132,7 +133,8 @@ grotesque sans) handles tracked caps and body. Tokens are the source of truth in
     │                            derived from the shared crossfade overlap)
     ├── styles.css             ← fonts, base reset, every scene's @keyframes
     ├── assets/                ← can/pack/poster art (raw PNG + optimized WebP, referenced
-    │                            directly via <Image src="/assets/opt/...">)
+    │                            directly via <Image src="/assets/opt/...">) + music-bed.mp3
+    │                            (fades/normalization baked in, referenced via <Audio>)
     ├── scenes/                ← one file per beat, each its own <Timegroup mode="fixed">
     │   ├── Hook.tsx
     │   ├── Hero.tsx
@@ -157,8 +159,6 @@ git clone https://github.com/editframe/olipop-demo.git
 cd olipop-demo
 npm install
 NO_COLOR=1 FORCE_COLOR=0 npm run render
-bash composite-well.sh
-bash add-audio.sh
 ```
 
 1. **Swap the story** — each beat is its own file under `src/scenes/`, with its own local
@@ -168,10 +168,11 @@ bash add-audio.sh
    fonts). Never read pure `#000` or drop shadows on text.
 3. **Re-skin the well** — drop a new clip at `assets/well-video.mp4` and a matching
    720×720 alpha mask at `assets/well-mask.png`; the well rect stays `180,640,720,720`.
-4. **Swap the music** — drop a replacement `music-bed.mp3` into `audio/` (or update the
-   `MUSIC=` variable in `add-audio.sh`); log it in [`CREDITS.md`](CREDITS.md).
-5. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render`, then `bash composite-well.sh`,
-   then `bash add-audio.sh`.
+4. **Swap the music** — bake fades/normalization into a replacement track locally with
+   FFmpeg (audio-only, no video) and drop it at `src/assets/music-bed.mp3`, then update
+   the `MUSIC` constant in `src/Video.tsx` if you rename it; log it in
+   [`CREDITS.md`](CREDITS.md).
+5. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render` (chains the Editframe render and the well-compositing pass into one command).
 
 ---
 

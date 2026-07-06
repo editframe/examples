@@ -8,15 +8,17 @@
 #
 #   output/demo-silent.mp4  +  assets/well-video.mp4  ->  output/demo-composite.mp4
 #
-# This is the "video-in-frame" beat Jeremy specified. Run STEP 2 (add-audio.sh)
-# after this to mux music + SFX into the final output/demo.mp4.
+# This is the "video-in-frame" beat Jeremy specified. The music bed is already
+# baked into $VIN by the native <Audio> element in the composition (see
+# src/Video.tsx) — this step just needs to carry that audio track through
+# unmodified (-map 0:a? -c:a copy) rather than dropping it.
 set -e
 cd "$(dirname "$0")"
 
 VIN="output/demo-silent.mp4"
 WELL="assets/well-video.mp4"
 MASK="assets/well-mask.png"
-VOUT="output/demo-composite.mp4"
+VOUT="output/demo.mp4"
 
 [ -f "$VIN" ]  || { echo "MISSING $VIN — run 'npm run render' first"; exit 1; }
 [ -f "$WELL" ] || { echo "MISSING $WELL"; exit 1; }
@@ -36,7 +38,7 @@ ffmpeg -y -hide_banner -v error \
     [wv][2:v]alphamerge[wvm];
     [0:v][wvm]overlay=x=${WX}:y=${WY}:enable='between(t,5,9)'[v]
   " \
-  -map "[v]" -an \
+  -map "[v]" -map 0:a? -c:a copy \
   -c:v libx264 -pix_fmt yuv420p -crf 18 -preset medium \
   "$VOUT"
 

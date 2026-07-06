@@ -2,12 +2,13 @@
 
 # Audio Credits
 
-**The music bundled in `audio/` is a production track for this demo; brand & media assets are demo-only.**
+**The music bundled in `src/assets/` is a production track for this demo; brand & media assets are demo-only.**
 Sources documented below. If you replace any file, update this document so
 downstream forkers can verify provenance.
 
 The shipped [`output/demo.mp4`](output/demo.mp4) already has this music baked in;
-[`add-audio.sh`](add-audio.sh) reproduces it from the composited render.
+`src/assets/music-bed.mp3` (referenced natively via `<Audio>` in `src/Video.tsx`) already
+has the fades/normalization baked in.
 
 </div>
 
@@ -15,7 +16,7 @@ The shipped [`output/demo.mp4`](output/demo.mp4) already has this music baked in
 
 ## Music
 
-### `audio/music-bed.mp3`
+### `src/assets/music-bed.mp3`
 
 | | |
 |---|---|
@@ -27,7 +28,9 @@ The shipped [`output/demo.mp4`](output/demo.mp4) already has this music baked in
 This cut is **music only** — there are no sound effects in the 20s timeline.
 Replace freely with any royalty-free track ([Pixabay Music](https://pixabay.com/music/),
 [Free Music Archive](https://freemusicarchive.org/), [Incompetech](https://incompetech.com/music/royalty-free/)) —
-keep the filename `music-bed.mp3` or update [`add-audio.sh`](add-audio.sh).
+bake fades/normalization in locally with FFmpeg (audio-only, no video) before dropping
+the replacement at `src/assets/music-bed.mp3`, or update the `MUSIC` constant in
+`src/Video.tsx` if you rename it.
 
 ---
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { AmbientField } from "./components/AmbientField";
 import { Hook } from "./scenes/Hook";
 import { Hero } from "./scenes/Hero";
@@ -8,11 +8,14 @@ import { Swap } from "./scenes/Swap";
 import { Rainbow } from "./scenes/Rainbow";
 import { Offer } from "./scenes/Offer";
 import { Cta } from "./scenes/Cta";
-import { OVERLAP_MS, TEAL_DEEP } from "./constants";
+import { OVERLAP_MS, DURATION_MS, TEAL_DEEP } from "./constants";
+
+const MUSIC = "/assets/music-bed.mp3";
 
 /**
- * OLIPOP — short-form social ad (9:16). 1080×1920 @ 30fps, 20s, silent (music + the real
- * video-well clip are muxed in afterward by `composite-well.sh` / `add-audio.sh`).
+ * OLIPOP — short-form social ad (9:16). 1080×1920 @ 30fps, 20s. Music bed is a native
+ * `<Audio>` on the timeline; the real video-well clip is still composited in afterward
+ * by `composite-well.sh` (separate video-compositing pass, out of scope here).
  *
  * Seven scenes (see src/scenes/), each its OWN `<Timegroup mode="fixed">`, played by one
  * root `<Timegroup mode="sequence" overlap={OVERLAP_MS}>`. Every scene animates against
@@ -56,5 +59,8 @@ export const Video: React.FC = () => (
     </div>
 
     <AmbientField />
+    {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the
+        composition's total runtime regardless of the source file's own length. */}
+    <Audio src={MUSIC} volume={1} duration={`${DURATION_MS}ms`} />
   </Timegroup>
 );

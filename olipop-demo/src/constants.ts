@@ -10,6 +10,7 @@
 
 export const CANVAS_W = 1080;
 export const CANVAS_H = 1920;
+export const DURATION_MS = 20000;   // 20s total — sum(SCENES.*.duration) - 6*OVERLAP_MS
 
 // ────────────────────────────────────────────────────────────────────────────
 //  BRAND PALETTE  (sampled from real OLIPOP cans + brand world)

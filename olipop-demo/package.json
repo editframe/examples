@@ -10,7 +10,7 @@
   "type": "module",
   "scripts": {
     "start": "editframe preview",
-    "render": "editframe render -o output/demo-silent.mp4"
+    "render": "editframe render -o output/demo-silent.mp4 && bash composite-well.sh"
   },
   "dependencies": {
     "@editframe/cli": "0.54.0",
