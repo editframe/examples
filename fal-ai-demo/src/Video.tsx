@@ -24,7 +24,8 @@ const MUSIC = "/assets/music.mp3";
 
 export const Video: React.FC = () => (
   <Timegroup
-    mode="sequence"
+    mode="contain"
+    workbench
     className="relative overflow-hidden"
     style={{
       width: W,
@@ -32,12 +33,16 @@ export const Video: React.FC = () => (
       position: "relative",
     }}
   >
-    <Scene1 />
-    <Scene2 />
-    <Scene3 />
+    <Timegroup mode="sequence" className="absolute w-full h-full">
+      <Scene1 />
+      <Scene2 />
+      <Scene3 />
+    </Timegroup>
     {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to
         the composition's resolved length. Fade-in/fade-out/loudnorm already baked into
-        the asset itself — see src/assets/music.mp3 provenance in CREDITS.md. */}
+        the asset itself — see src/assets/music.mp3 provenance in CREDITS.md. Sibling of
+        the sequence (not a child of it) so it spans the whole timeline as a background
+        track instead of being treated as an extra sequential scene. */}
     <Audio src={MUSIC} volume={1} duration={`${TOTAL_MS}ms`} />
   </Timegroup>
 );
