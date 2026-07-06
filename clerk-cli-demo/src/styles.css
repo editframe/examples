@@ -39,3 +39,59 @@
     box-sizing: border-box;
   }
 }
+
+/* === Reveal (see src/components/Reveal.tsx) — declarative fade + float-up entrance === */
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(var(--reveal-y, 12px)); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* === Typewriter (see src/components/Typewriter.tsx) — steps() width reveal for monospace text === */
+@keyframes typewriter-reveal {
+  from { width: 0; }
+  to   { width: calc(var(--tw-chars) * 1ch); }
+}
+
+/* === Cursor (see src/components/Cursor.tsx) — infinite blink + one-shot permanent hide === */
+@keyframes cursor-blink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes cursor-hide {
+  to { opacity: 0; }
+}
+
+/* === SceneTerminal (src/scenes/SceneTerminal.tsx) — window fade, height expand, 5-stage camera === */
+@keyframes term-win-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+/* Height expands compact -> full as the rapid-generation burst streams in.
+   --win-h-min/--win-h-max are set inline from the same VISIBLE_HEIGHT_MIN/MAX
+   constants the JSX layout uses, so there's one source of truth for both. */
+@keyframes terminal-window-expand {
+  0%      { height: var(--win-h-min); animation-timing-function: linear; }
+  30.4348% { height: var(--win-h-min); animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
+  45.2174% { height: var(--win-h-max); }
+  100%     { height: var(--win-h-max); }
+}
+/* 5-stage camera choreography (pan/zoom A -> B -> hold -> D -> hold -> E -> hold), converted
+   from a per-frame lerp/track composition to a single fixed-duration keyframe timeline —
+   every stage boundary is a known fraction of SceneTerminal's own 11500ms duration, so no
+   per-frame math is needed. --cam-*-x/-y/-s are set inline from the same TX_*/TY_*/S_*
+   constants the derivation comments in SceneTerminal.tsx explain. */
+@keyframes terminal-camera {
+  0%       { transform: translate(var(--cam-a-x), var(--cam-a-y)) scale(var(--cam-a-s)); animation-timing-function: linear; }
+  26.9565% { transform: translate(var(--cam-a-x), var(--cam-a-y)) scale(var(--cam-a-s)); animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
+  33.0435% { transform: translate(var(--cam-b-x), var(--cam-b-y)) scale(var(--cam-b-s)); animation-timing-function: linear; }
+  43.4783% { transform: translate(var(--cam-b-x), var(--cam-b-y)) scale(var(--cam-b-s)); animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
+  53.9130% { transform: translate(var(--cam-d-x), var(--cam-d-y)) scale(var(--cam-d-s)); animation-timing-function: linear; }
+  67.8261% { transform: translate(var(--cam-d-x), var(--cam-d-y)) scale(var(--cam-d-s)); animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
+  79.1304% { transform: translate(var(--cam-e-x), var(--cam-e-y)) scale(var(--cam-e-s)); }
+  100%     { transform: translate(var(--cam-e-x), var(--cam-e-y)) scale(var(--cam-e-s)); }
+}
+/* One-shot purple glow on the "Clerk has been set up" line only. */
+@keyframes term-line-glow {
+  from { text-shadow: none; }
+  to   { text-shadow: 0 0 10px rgba(124,58,237,0.65); }
+}
