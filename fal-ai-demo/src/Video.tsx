@@ -14,11 +14,13 @@
  * Scene3  11200–14400ms fal logo outro (white, reference-faithful)
  */
 import React from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { Scene1 } from "./scenes/Scene1";
 import { Scene2 } from "./scenes/Scene2";
 import { Scene3 } from "./scenes/Scene3";
-import { W, H } from "./constants";
+import { W, H, TOTAL_MS } from "./constants";
+
+const MUSIC = "/assets/music.mp3";
 
 export const Video: React.FC = () => (
   <Timegroup
@@ -33,5 +35,9 @@ export const Video: React.FC = () => (
     <Scene1 />
     <Scene2 />
     <Scene3 />
+    {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to
+        the composition's resolved length. Fade-in/fade-out/loudnorm already baked into
+        the asset itself — see src/assets/music.mp3 provenance in CREDITS.md. */}
+    <Audio src={MUSIC} volume={1} duration={`${TOTAL_MS}ms`} />
   </Timegroup>
 );

@@ -11,9 +11,9 @@ A 15.1-second product demo introducing fal Assets.
 ```bash
 npm install
 npm run render
-bash add-sfx-v12.sh        # mux music + SFX
 ```
 
-The rendered video is saved to `output/`.
+The rendered video is saved to `output/demo.mp4` in one pass — the music bed plays as a
+native `<Audio>` element on the composition timeline, no post-render mux step.
 
-Audio files live in `audio/` and are fully cleared for commercial use — see [CREDITS.md](CREDITS.md) for license details.
+The audio file lives in `src/assets/` — see [CREDITS.md](CREDITS.md) for license details.
