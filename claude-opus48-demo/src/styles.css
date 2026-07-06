@@ -4,12 +4,10 @@
 :root {
   /* Background (sage) */
   --paper: #BCD2C8;
-  --paper-deep: #B2C9BF;
   --topo: #C7D8CF;
 
   /* Terminal */
   --terminal-bg: #191916;
-  --terminal-bg-deep: #141411;
   --terminal-chrome: #23211F;
   --terminal-border: #2A2926;
   --term-sel-row: #2E2D29;
@@ -23,24 +21,18 @@
   --text-primary: #E6E4DE;
   --text-secondary: #8A8A82;
   --text-dim: #7C7C74;
-  --text-deep-dim: #54544A;
   --term-accent: #F0C674;          /* amber — auto mode on */
 
   /* Claude / accents (kept for back-compat with template components) */
   --claude: #CE6E58;
   --claude-soft: #E08C72;
-  --claude-deep: #A85440;
 
   /* Creature + kites */
   --creature: #CE6E58;
   --creature-eye: #1A1A1A;
   --kite-orange: #E7AA5C;
   --kite-purple: #8276B8;
-  --kite-pink: #E6C4B9;
   --kite-spar: #38291E;
-
-  /* Headlines (faint grey serif) */
-  --headline: #8EA49A;
 
   /* Notification cards */
   --card-white: #EFF1F1;
@@ -57,9 +49,6 @@
   --code-variable: #9CDCFE;
   --code-text: #D4D4D4;
   --code-bullet: #E6E4DE;
-
-  /* Misc */
-  --gold: #F0C674;
 }
 
 html, body, #root {
@@ -287,4 +276,267 @@ html, body, #root {
   background: var(--text-primary);
   vertical-align: middle;
   margin-left: 1px;
+}
+
+/* ============================================================================
+ * Declarative scene/scroll-motion keyframes (see the css-animations skill for
+ * the fill-mode rules every animation below follows: `backwards` when the
+ * from-state differs from the element's un-animated default, `forwards` when
+ * the to-state does, `both` for either/both — audited per animation below).
+ * ========================================================================= */
+
+/* === Reveal (src/components/Reveal.tsx) — declarative fade + float-up/out === */
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(var(--reveal-y, 20px)); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes reveal-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(var(--reveal-exit-y, 0px)); }
+}
+
+/* === Generic instant (steps(1)) show/hide — status-line swaps, prompt/chip
+   swaps, the trace overlay. `--instant-opacity` lets a caller cap the "shown"
+   opacity below 1 (see TraceOverlay). === */
+@keyframes instant-show { to { opacity: var(--instant-opacity, 1); } }
+@keyframes instant-hide { to { opacity: 0; } }
+
+/* Generic linear fade-in (autoModeIn / thought line — plain clamp-based ramps
+   in the original, no easing). */
+@keyframes linear-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* === Background (src/components/Background.tsx) — whole-video linear drift === */
+@keyframes bg-drift {
+  from { transform: translate(-18px, -10px); }
+  to   { transform: translate(18px, 8px); }
+}
+
+/* === Hero scene (src/scenes/Hero.tsx) === */
+.term-status {
+  position: absolute;
+  inset: 0;
+  color: var(--text-secondary);
+  font-size: 27px;
+  opacity: 0;
+}
+@keyframes hero-wrap-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(-40px) scale(0.86); }
+}
+@keyframes hero-term-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes hero-term-scale-in {
+  from { transform: scale(0.8); }
+  to   { transform: scale(1); }
+}
+
+/* === Command scene (src/scenes/Command.tsx) === */
+@keyframes cmd-term-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes cmd-term-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes chip-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+/* Camera push-in on the returned terminal only (the zoom window is fully
+   inside this scene — see Command.tsx doc comment for why it isn't a
+   whole-canvas rig like the original). */
+@keyframes cmd-camera-zoom {
+  0%, 18.75% { transform: scale(1); }
+  22.2656%   { transform: scale(1.75); }
+  41.25%     { transform: scale(1.75); }
+  45.4688%   { transform: scale(1); }
+  100%       { transform: scale(1); }
+}
+/* Log scroll — shifts up as each new code line would have pushed past the
+   13-row viewport, computed once from CODE_LINES' fixed reveal times (see
+   CodeBlock.tsx) rather than a per-frame `revealed.length` count. The original
+   was an instant per-line jump; here each stop is a plain keyframe percentage
+   (arrival time), so the browser interpolates a continuous slow scroll across
+   the gaps instead of snapping at each line — a deliberate simplification,
+   still monotonic and reaching the same final position. */
+@keyframes cmd-log-scroll {
+  0%      { transform: translateY(0); }
+  55.469% { transform: translateY(-24px); }
+  57.813% { transform: translateY(-48px); }
+  58.438% { transform: translateY(-72px); }
+  60.938% { transform: translateY(-96px); }
+  61.563% { transform: translateY(-120px); }
+  63.672% { transform: translateY(-144px); }
+  64.297% { transform: translateY(-168px); }
+  66.016% { transform: translateY(-192px); }
+  100%    { transform: translateY(-192px); }
+}
+
+/* === CodeBlock (src/components/CodeBlock.tsx) === */
+@keyframes code-line-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* === CreatureAndKites (src/components/CreatureAndKites.tsx) ===
+   A continuous motif spanning the Hero + Headlines scenes (see that
+   component's doc comment for why it's a sibling of the scene sequence). */
+.creature-kites-walk-shift {
+  animation: creature-walk-shift 2800ms 4000ms cubic-bezier(0.65,0,0.35,1) forwards;
+}
+@keyframes creature-walk-shift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(200px); }
+}
+.creature-kites-roam-exit {
+  animation: creature-roam-exit 600ms 12600ms cubic-bezier(0.32,0,0.67,0) forwards;
+}
+@keyframes creature-roam-exit {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-120px); }
+}
+.kite-float-up {
+  animation: kite-float-up-anim 1400ms 7500ms cubic-bezier(0.32,0,0.67,0) forwards;
+}
+@keyframes kite-float-up-anim {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-240px); }
+}
+
+/* Creature fade-in (linear clamp(ms/500) in the original) */
+.creature-fade-in {
+  animation: creature-fade-in-anim 500ms linear backwards;
+}
+@keyframes creature-fade-in-anim {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+/* Creature horizontal roam sway — bespoke keyframe sampling
+   sin((ms-8000)/1600)*40 across its one active window (8000–13200ms
+   absolute), since it isn't a repeating infinite loop (under half a period
+   elapses in that window). */
+.creature-roam-sway {
+  animation: creature-roam-sway-anim 5200ms 8000ms linear both;
+}
+@keyframes creature-roam-sway-anim {
+  0%   { transform: translateX(0); }
+  10%  { transform: translateX(12.8px); }
+  20%  { transform: translateX(24.2px); }
+  30%  { transform: translateX(33.1px); }
+  40%  { transform: translateX(38.5px); }
+  50%  { transform: translateX(39.9px); }
+  60%  { transform: translateX(37.2px); }
+  70%  { transform: translateX(30.5px); }
+  80%  { transform: translateX(20.6px); }
+  90%  { transform: translateX(8.6px); }
+  100% { transform: translateX(-4.3px); }
+}
+/* Creature bob — infinite, constant ~3px amplitude (simplified from the
+   original's 1.5px idle / 5px walking split — see CreatureAndKites.tsx doc). */
+.creature-bob {
+  animation: creature-bob-anim 1382ms linear infinite;
+}
+@keyframes creature-bob-anim {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+
+/* Creature legs — alternating diagonal-gait hop, active only during the walk
+   window (see PixelCreature.tsx doc comment for the phase-shift derivation). */
+.leg-hop-a {
+  animation: leg-hop 816.81ms linear 4000ms 3.428 both;
+}
+.leg-hop-b {
+  animation: leg-hop 816.81ms linear 4408.41ms 2.928 both;
+}
+@keyframes leg-hop {
+  0%   { transform: translateY(0); }
+  25%  { transform: translateY(-7px); }
+  50%, 100% { transform: translateY(0); }
+}
+
+/* Kite pop-in (scale, easeOutBack-ish) + fade (linear, faster than the scale) */
+@keyframes kite-pop-scale {
+  from { transform: scale(0.2); }
+  to   { transform: scale(1); }
+}
+@keyframes kite-pop-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.kite-pop-orange { animation: kite-pop-scale 500ms 1917ms cubic-bezier(0.34,1.56,0.64,1) backwards, kite-pop-fade 250ms 1917ms linear backwards; }
+.kite-pop-pink   { animation: kite-pop-scale 500ms 2833ms cubic-bezier(0.34,1.56,0.64,1) backwards, kite-pop-fade 250ms 2833ms linear backwards; }
+.kite-pop-purple { animation: kite-pop-scale 500ms 3583ms cubic-bezier(0.34,1.56,0.64,1) backwards, kite-pop-fade 250ms 3583ms linear backwards; }
+
+/* Kite sway + tilt (infinite ambient drift). Each kite's phase/period is
+   sampled once (module scope, matching AmbientField's fiber-drift pattern) —
+   a negative `animation-delay` starts the infinite loop partway through its
+   cycle so the 3 kites don't move in lockstep. Simplification: the original
+   "tilt" rotation used a period 1.25x the sway's own period; here it shares
+   the sway keyframe/period (imperceptible at this amplitude — see
+   CreatureAndKites.tsx doc). */
+@keyframes kite-sway-orange {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  50%      { transform: translateX(18px) rotate(7deg); }
+}
+.kite-sway-orange { animation: kite-sway-orange 11938.1ms linear infinite; }
+@keyframes kite-sway-pink {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  50%      { transform: translateX(22px) rotate(7deg); }
+}
+.kite-sway-pink { animation: kite-sway-pink 14451.3ms linear infinite -9621.3ms; }
+@keyframes kite-sway-purple {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  50%      { transform: translateX(15px) rotate(7deg); }
+}
+.kite-sway-purple { animation: kite-sway-purple 10053.1ms linear infinite -3653.1ms; }
+
+@keyframes kite-bob-orange {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(10px); }
+}
+.kite-bob-orange { animation: kite-bob-orange 8796.5ms linear infinite; }
+@keyframes kite-bob-pink {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(14px); }
+}
+.kite-bob-pink { animation: kite-bob-pink 10681.4ms linear infinite -4612.4ms; }
+@keyframes kite-bob-purple {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(8px); }
+}
+.kite-bob-purple { animation: kite-bob-purple 7539.8ms linear infinite -6919.6ms; }
+
+/* === NotificationStack (src/components/NotificationStack.tsx) ===
+   Each card's small(top-right)→centered→scrolled-up journey is one bespoke
+   multi-stop keyframe (see that component's doc comment for the simplification
+   vs. the original's nested per-frame lerp). transform-origin is "top left"
+   (set inline) so translate+scale compose the same way the original
+   `translate(x,y) scale(s)` string did. */
+@keyframes card-issue {
+  0%     { opacity: 0; transform: translate(1554px, 73px) scale(0.326); }
+  2.5%   { opacity: 1; transform: translate(1554px, 73px) scale(0.326); }
+  67.083% { opacity: 1; transform: translate(1554px, 73px) scale(0.326); }
+  75%    { opacity: 1; transform: translate(460px, 55px) scale(1); }
+  87.917% { opacity: 1; transform: translate(460px, 55px) scale(1); }
+  93.75% { opacity: 0; transform: translate(460px, -259px) scale(1); }
+  100%   { opacity: 0; transform: translate(460px, -259px) scale(1); }
+}
+@keyframes card-calendar {
+  0%      { opacity: 0; transform: translate(1980px, 415px) scale(0.326); }
+  8.14%   { opacity: 1; transform: translate(1554px, 415px) scale(0.326); }
+  30.23%  { opacity: 1; transform: translate(460px, 369px) scale(1); }
+  66.28%  { opacity: 1; transform: translate(460px, 369px) scale(1); }
+  82.56%  { opacity: 1; transform: translate(460px, 55px) scale(1); }
+  100%    { opacity: 1; transform: translate(460px, 55px) scale(1); }
+}
+@keyframes card-kite {
+  0%      { opacity: 0; transform: translate(460px, 743px) scale(1); }
+  23.08%  { opacity: 1; transform: translate(460px, 683px) scale(1); }
+  25.64%  { opacity: 1; transform: translate(460px, 683px) scale(1); }
+  61.54%  { opacity: 1; transform: translate(460px, 369px) scale(1); }
+  100%    { opacity: 1; transform: translate(460px, 369px) scale(1); }
 }

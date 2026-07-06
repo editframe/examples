@@ -1,4 +1,5 @@
 import React from "react";
+import { DURATION_MS } from "../constants";
 
 /**
  * Sage-green background with SPARSE, large, hand-drawn intersecting topographic
@@ -9,10 +10,12 @@ import React from "react";
  * #BCD2C8). The container is oversized so a subtle parallax drift never shows
  * an edge.
  *
- * Editframe landmine: per-frame stroke animation must use setAttribute, NOT
- * .style — but here the curves are STATIC (the ref-driven parent just drifts).
+ * Rendered as a sibling of the scene sequence (whole-video ambient drift), so its
+ * own local time equals the composition's absolute time — the `bg-drift` keyframe
+ * below runs once, linearly, across the full `DURATION_MS`, replacing the old
+ * per-frame `ms / 25000` ref mutation.
  */
-const Background = React.forwardRef<HTMLDivElement>((_, ref) => {
+const Background: React.FC = () => {
   // A hand-authored set of long, crossing organic strokes (in a 2400×1320 space).
   // Each path is a smooth cubic that spans most of the canvas at a shallow angle.
   const strokes: string[] = [
@@ -38,7 +41,6 @@ const Background = React.forwardRef<HTMLDivElement>((_, ref) => {
       }}
     >
       <div
-        ref={ref}
         style={{
           position: "absolute",
           top: -120,
@@ -46,6 +48,7 @@ const Background = React.forwardRef<HTMLDivElement>((_, ref) => {
           width: 2400,
           height: 1320,
           willChange: "transform",
+          animation: `bg-drift ${DURATION_MS}ms linear both`,
         }}
       >
         <svg
@@ -69,6 +72,5 @@ const Background = React.forwardRef<HTMLDivElement>((_, ref) => {
       </div>
     </div>
   );
-});
-Background.displayName = "Background";
+};
 export default Background;

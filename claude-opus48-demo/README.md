@@ -102,10 +102,13 @@ Coral `#D97757` accent on warm off-white; text never pure `#000`.
 ├── output/
 │   └── demo.mp4         ← the render (silent, 25.0s)
 └── src/
-    ├── Video.tsx        ← composition root
+    ├── Video.tsx        ← composition root (3 scenes sequenced + 2 cross-scene motifs)
     ├── brand.ts · constants.ts · styles.css · main.tsx
-    ├── scenes/          ← one file per beat
-    └── components/      ← helpers (track/lerp/clamp/easings) + coded assets
+    ├── scenes/          ← Hero, Headlines, Command — one `Timegroup` per scene
+    ├── components/      ← Reveal (fade/float), CreatureAndKites + NotificationStack
+    │                       (cross-scene motifs), TerminalWindow, Kite, PixelCreature,
+    │                       CodeBlock, NotifCard, Background, MenuBar, TraceOverlay
+    └── assets/trace/    ← extracted reference alignment frames (TRACE_MODE only)
 ```
 
 ---

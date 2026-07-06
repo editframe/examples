@@ -7,22 +7,22 @@ import React, { forwardRef } from "react";
  *
  * Grid: 16 cols × 12 rows. Pixel size configurable.
  *   . = transparent   B = body (coral)
- * Eyes + legs are drawn separately so they can be animated via refs:
- *   - legs: 4 groups (leg1..leg4) — translateY for the walk cycle
- *   - eyes: leftEye / rightEye — tiny translate for gaze (optional)
+ *
+ * The 4 leg groups walk via the `leg-hop-a` / `leg-hop-b` CSS keyframes
+ * (styles.css) — legs 0 & 2 share phase A, legs 1 & 3 share phase B (a negative
+ * `animation-delay` of half the hop period), reproducing the original alternating
+ * diagonal gait without any per-frame ref mutation. The walk window (4000–6800ms,
+ * this composition's only appearance of the creature walking) is baked into the
+ * animation's own `animation-delay` + `animation-iteration-count` — this
+ * component is a one-off asset for this composition, not a reusable design-system
+ * piece, so hardcoding its one walk cue here (rather than threading it through as
+ * a prop) keeps the call site simple.
  *
  * Matches PALETTE: body #CE6E58, eyes #1A1A1A.
  */
 
 interface Props {
   pixel?: number;
-  bodyRef?: React.Ref<SVGGElement>;
-  leftEyeRef?: React.Ref<SVGRectElement>;
-  rightEyeRef?: React.Ref<SVGRectElement>;
-  leg1Ref?: React.Ref<SVGGElement>;
-  leg2Ref?: React.Ref<SVGGElement>;
-  leg3Ref?: React.Ref<SVGGElement>;
-  leg4Ref?: React.Ref<SVGGElement>;
   style?: React.CSSProperties;
   className?: string;
 }
@@ -59,10 +59,7 @@ const LEG_COLS: number[][] = [
 const LEG_ROWS = [9, 10];
 
 const PixelCreature = forwardRef<SVGSVGElement, Props>(
-  (
-    { pixel = 12, bodyRef, leftEyeRef, rightEyeRef, leg1Ref, leg2Ref, leg3Ref, leg4Ref, style, className },
-    ref
-  ) => {
+  ({ pixel = 12, style, className }, ref) => {
     const px = pixel;
     const COLS = 16;
     const ROWS = 12;
@@ -105,34 +102,36 @@ const PixelCreature = forwardRef<SVGSVGElement, Props>(
         viewBox={`0 0 ${W} ${H}`}
         style={style}
       >
-        <g ref={bodyRef}>{bodyCells}</g>
+        <g>{bodyCells}</g>
 
-        {/* Legs — each a group with transform-origin at top for a pivot/lift walk */}
-        <g ref={leg1Ref} style={{ transformBox: "fill-box", transformOrigin: "center top", willChange: "transform" }}>{legGroups[0]}</g>
-        <g ref={leg2Ref} style={{ transformBox: "fill-box", transformOrigin: "center top", willChange: "transform" }}>{legGroups[1]}</g>
-        <g ref={leg3Ref} style={{ transformBox: "fill-box", transformOrigin: "center top", willChange: "transform" }}>{legGroups[2]}</g>
-        <g ref={leg4Ref} style={{ transformBox: "fill-box", transformOrigin: "center top", willChange: "transform" }}>{legGroups[3]}</g>
+        {/* Legs — each a group with transform-origin at top for a pivot/lift walk.
+            Groups 0 & 2 share phase A, groups 1 & 3 share phase B (see styles.css). */}
+        {legGroups.map((cells, gi) => (
+          <g
+            key={gi}
+            className={gi % 2 === 0 ? "leg-hop-a" : "leg-hop-b"}
+            style={{ transformBox: "fill-box", transformOrigin: "center top" }}
+          >
+            {cells}
+          </g>
+        ))}
 
         {/* Eyes — black squares, slightly oversized to avoid AA gaps */}
         <rect
-          ref={leftEyeRef}
           x={LEFT_EYE_COL * px - 1}
           y={EYE_ROW * px - 1}
           width={px + 2}
           height={px + 2}
           fill="var(--creature-eye)"
           shapeRendering="crispEdges"
-          style={{ willChange: "transform" }}
         />
         <rect
-          ref={rightEyeRef}
           x={RIGHT_EYE_COL * px - 1}
           y={EYE_ROW * px - 1}
           width={px + 2}
           height={px + 2}
           fill="var(--creature-eye)"
           shapeRendering="crispEdges"
-          style={{ willChange: "transform" }}
         />
       </svg>
     );

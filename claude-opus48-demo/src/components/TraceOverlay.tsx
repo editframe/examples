@@ -1,39 +1,58 @@
 import React from "react";
-import { TRACE_FRAMES } from "../traceFrames";
+import { Image } from "@editframe/react";
+import { TRACE_OPACITY } from "../constants";
 
 /**
- * Trace ("tracing paper") overlay — renders ALL sparse reference frames stacked,
- * and the scene's onFrame toggles which one is visible by ms. Cheaper than
- * swapping src per frame (avoids decode hitches in the renderer).
+ * Trace ("tracing paper") overlay — sparse reference frames (one per second,
+ * `src/assets/trace/frame-<ms>ms.jpg`), each visible only for the window around
+ * its own timestamp (an instant on/off toggle, no fade), so a builder can align
+ * the composition against the original reference at any point in the video.
  *
  * Only mounted when TRACE_MODE is true (see Video.tsx). Default OFF.
  *
- * Exposes refs via the provided array so the scene can set opacity per frame.
+ * A sibling of the scene sequence — its own local time equals the composition's
+ * absolute time, so each frame's on/off window is still keyed off its original
+ * master-ms timestamp. Visibility is a `steps(1)` instant show/hide pair
+ * (`instant-show`/`instant-hide`, styles.css), computed once per frame at module
+ * scope from TRACE_FRAMES — no per-frame ms comparison.
  */
-interface Props {
-  imgRefs: React.RefObject<(HTMLImageElement | null)[]>;
-}
+const TRACE_FRAMES: { ms: number; src: string }[] = Array.from({ length: 25 }, (_, i) => ({
+  ms: i * 1000,
+  src: `/assets/trace/frame-${String(i * 1000).padStart(6, "0")}ms.jpg`,
+}));
 
-const TraceOverlay: React.FC<Props> = ({ imgRefs }) => (
-  <div style={{ position: "absolute", inset: 0, zIndex: 9999, pointerEvents: "none" }}>
-    {TRACE_FRAMES.map((f, i) => (
-      <img
-        key={i}
-        ref={(el) => {
-          if (imgRefs.current) imgRefs.current[i] = el;
-        }}
-        src={f.src}
-        alt=""
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "fill",
-          opacity: 0,
-        }}
-      />
-    ))}
+const FRAME_WINDOWS = TRACE_FRAMES.map((f, i) => {
+  const prev = TRACE_FRAMES[i - 1]?.ms ?? -Infinity;
+  const next = TRACE_FRAMES[i + 1]?.ms ?? Infinity;
+  const start = prev === -Infinity ? 0 : (prev + f.ms) / 2;
+  const end = next === Infinity ? undefined : (f.ms + next) / 2;
+  return { ...f, start, end };
+});
+
+const TraceOverlay: React.FC = () => (
+  <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 9999 }}>
+    {FRAME_WINDOWS.map((f) => {
+      const animations = [`instant-show 1ms ${f.start}ms steps(1) both`];
+      if (f.end !== undefined) animations.push(`instant-hide 1ms ${f.end}ms steps(1) forwards`);
+      return (
+        <Image
+          key={f.ms}
+          src={f.src}
+          style={
+            {
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "fill",
+              opacity: 0,
+              "--instant-opacity": TRACE_OPACITY,
+              animation: animations.join(", "),
+            } as React.CSSProperties
+          }
+        />
+      );
+    })}
   </div>
 );
 
