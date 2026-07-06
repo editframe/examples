@@ -17,10 +17,13 @@
  * `css-animations` / `composition` skills for the underlying timing model).
  */
 import React from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { SceneTerminal } from "./scenes/SceneTerminal";
 import { Scene6 } from "./scenes/Scene6";
 import { Scene7 } from "./scenes/Scene7";
+import { DURATION_MS } from "./constants";
+
+const MUSIC = "/assets/music.mp3";
 
 export const Video: React.FC = () => (
   <Timegroup
@@ -34,5 +37,9 @@ export const Video: React.FC = () => (
     <SceneTerminal />
     <Scene6 />
     <Scene7 />
+
+    {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the
+        composition's total runtime regardless of the source file's own length. */}
+    <Audio src={MUSIC} volume={1} duration={`${DURATION_MS}ms`} />
   </Timegroup>
 );

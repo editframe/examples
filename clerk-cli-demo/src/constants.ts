@@ -14,3 +14,8 @@
  */
 export const TRACE_MODE: boolean = false;
 export const TRACE_OPACITY: number = 0.5;
+
+// Total composition runtime — SceneTerminal(11500) + Scene6(2000) + Scene7(3500),
+// hard-cut sequence (no overlap). Pins the root `<Audio>`'s duration so the music
+// bed matches the sequence's resolved length (`<Audio>` has no `mode="fit"`).
+export const DURATION_MS: number = 17000;

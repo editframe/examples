@@ -5,7 +5,11 @@ node_modules/
 # Build output
 dist/
 .vite/
+.vite-cache/
 .turbo/
+
+# Editframe local asset cache (transcoded media under src/assets)
+src/assets/.cache/
 
 # Render artifacts — the repo commits ONLY output/demo.mp4 (final, with audio)
 output/*
@@ -13,15 +17,6 @@ output/*
 output.mp4
 frames/
 _refframes/
-
-# Reference frames + QA captures extracted from source demo videos — NOT redistributable
-public/extracted/_*
-public/extracted/verify_*
-public/**/_ref*
-public/**/_ours*
-public/**/_cur*
-**/verify_*.jpg
-**/verify_*.png
 
 # Internal build / QA artifacts — not part of the published template
 .claude/
@@ -41,6 +36,7 @@ _ROUND*.md
 _USER_COMMENTS.txt
 chk*.jpg
 chk*.png
+cur_*.png
 
 # Editor / OS
 .DS_Store

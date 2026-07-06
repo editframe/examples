@@ -54,7 +54,7 @@
  *    needed once every stage boundary is expressed as a keyframe percentage.
  */
 import React from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
 import { cc, fonts } from "../lib/colors";
@@ -201,6 +201,13 @@ export function SceneTerminal() {
       }}
     >
       <TraceLayer sceneStartMs={SCENE_START} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
+
+      {/* Keyboard SFX — fires on each typed command submit. Scene-local offsets
+          equal global time since this is the first scene in the sequence.
+          `duration="500ms"` trims the 2.2s source .wav down to just the transient,
+          matching the old mux script's `atrim=duration=0.5`. */}
+      <Audio src="/assets/sfx/keyboard.wav" offset="300ms" duration="500ms" volume={0.7} />
+      <Audio src="/assets/sfx/keyboard.wav" offset="2900ms" duration="500ms" volume={0.7} />
 
       {/* Purple radial gradient backdrop */}
       {!TRACE_MODE && (
