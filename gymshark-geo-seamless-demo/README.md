@@ -128,14 +128,20 @@ soft drop shadows. Full spec in [`brand-rules-gymshark.md`](brand-rules-gymshark
 ├── output/
 │   └── demo.mp4               ← final shipped render (footage composited + music muxed)
 └── src/
-    ├── Video.tsx              ← composition root (7 beats, 6 transitions, ~19s)
+    ├── Video.tsx              ← composition root: 7 scenes sequenced with one shared overlap
     ├── main.tsx
-    ├── constants.ts          ← canonical brand tokens + master timing + well rects
-    ├── styles.css
-    ├── assets.ts             ← base64-inlined brand imagery (Editframe inlining)
-    ├── assets/               ← source brand imagery (models, colorways, logo, posters)
+    ├── constants.ts           ← brand tokens + well rects + per-scene durations (SCENES)
+    ├── styles.css             ← Google Fonts import + every scene's `@keyframes`
+    ├── assets/                ← brand imagery (models, colorways, logo, posters), referenced
+    │                            directly via `<Image src="/assets/...">` — no base64 inlining
+    ├── scenes/                ← one file per beat, each its own `<Timegroup mode="fixed">`
+    │   ├── Hook.tsx, Hero.tsx, Athlete.tsx, Feature.tsx, Fabric.tsx, Colorways.tsx, Cta.tsx
     └── components/
-        └── helpers.ts        ← track, lerp, clamp, easings (outBack, easeOutCubic…)
+        ├── Reveal.tsx         ← shared fade + float-up/out entrance/exit component
+        ├── camo.ts            ← shared geo-camo background style helpers
+        ├── Fin.tsx            ← the Gymshark fin mark, shared across scenes
+        ├── AmbientField.tsx   ← whole-video grain layer
+        └── helpers.ts         ← track/easeOutCubic, used only by Fabric.tsx's scoped onFrame
 ```
 
 ---
@@ -150,10 +156,11 @@ NO_COLOR=1 FORCE_COLOR=0 npm run render
 bash add-audio.sh
 ```
 
-1. **Swap the story** — each of the 7 beats has its timing in `src/constants.ts` (`*_IN` / `*_OUT`
-   master-ms constants) and its render body in `src/Video.tsx`. Retime by editing the constants.
+1. **Swap the story** — each of the 7 beats is its own file under `src/scenes/`, with its
+   `duration` and label declared in `src/constants.ts` (`SCENES`). Retime a beat by editing
+   its `SCENES.<name>.duration` and the local-ms delays inside that scene file.
 2. **Rebrand** — replace the tokens in `src/constants.ts` and the imagery in `src/assets/`
-   (re-inline into `src/assets.ts`). Keep type off pure `#000`, no drop shadows.
+   (referenced directly by path, no inlining step needed). Keep type off pure `#000`, no drop shadows.
 3. **Re-place the wells** — edit the rects in `wells.json`; `add-audio.sh` reads them to build the
    masks and overlay positions. Drop replacement footage into `audio/brand-video/`.
 4. **Re-time the audio** — adjust `MUSIC_START` / `FADE_IN` (and the fades/limiter) in

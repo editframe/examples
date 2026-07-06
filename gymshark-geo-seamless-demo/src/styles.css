@@ -4,3 +4,223 @@
 @source "../index.html";
 
 html, body, #root { height: 100%; margin: 0; padding: 0; }
+
+/* === Reveal (see src/components/Reveal.tsx) — declarative fade + float-up/out === */
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(var(--reveal-y, 20px)); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes reveal-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(var(--reveal-exit-y, 0px)); }
+}
+
+/* === Shared ambient (camo.ts drift + AmbientField grain) — infinite, no JS === */
+@keyframes camo-drift {
+  from { background-position: 0 0, 9px 9px; }
+  to   { background-position: -180px -108px, -90px -54px; }
+}
+@keyframes grain-breathe {
+  0%, 100% { opacity: 0.10; }
+  50%      { opacity: 0.13; }
+}
+
+/* === Hook scene (src/scenes/Hook.tsx) === */
+@keyframes hook-logo-wipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0% 0 0); }
+}
+@keyframes hook-wipe-edge {
+  0%   { left: 0%;   opacity: 0; }
+  4%   { opacity: 0.9; }
+  96%  { opacity: 0.9; }
+  100% { left: 100%; opacity: 0; }
+}
+
+/* === Hero scene (src/scenes/Hero.tsx) — settle/breathe + T1 halftone-dissolve entrance === */
+@keyframes hero-reveal-mask {
+  from { -webkit-mask-image: radial-gradient(circle at 50% 42%, #000 0%, transparent 1%); mask-image: radial-gradient(circle at 50% 42%, #000 0%, transparent 1%); }
+  to   { -webkit-mask-image: radial-gradient(circle at 50% 42%, #000 78%, transparent 84%); mask-image: radial-gradient(circle at 50% 42%, #000 78%, transparent 84%); }
+}
+@keyframes reveal-dots-scatter-a {
+  from { transform: translate(0,0) scale(1); opacity: 1; }
+  to   { transform: translate(-140px,-100px) scale(1.7); opacity: 0; }
+}
+@keyframes reveal-dots-scatter-b {
+  from { transform: translate(0,0) scale(1); opacity: 1; }
+  to   { transform: translate(140px,100px) scale(1.7); opacity: 0; }
+}
+@keyframes hero-settle {
+  from { transform: translateY(14px) scale(1.10); }
+  to   { transform: translateY(0) scale(1.04); }
+}
+@keyframes hero-breathe {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50%      { transform: translateX(-50%) scale(1.01); }
+}
+
+/* === Athlete scene / WELL_A (src/scenes/Athlete.tsx) — push-in + T2 gear-mesh shutter === */
+@keyframes athlete-push-in {
+  from { transform: scale(1.12) translateY(0); }
+  to   { transform: scale(1.26) translateY(-14px); }
+}
+@keyframes wellA-copy1-in {
+  from { opacity: 0; transform: translateX(70px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes wellA-copy1-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-18px); }
+}
+@keyframes wellA-copy2-in {
+  from { opacity: 0; transform: translateX(-70px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes athlete-shutter-top-out {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-1020px); }
+}
+@keyframes athlete-shutter-bottom-out {
+  from { transform: translateY(0); }
+  to   { transform: translateY(1020px); }
+}
+@keyframes athlete-shutter-seam {
+  0%   { opacity: 1; transform: scaleX(1); }
+  60%  { opacity: 0.4; transform: scaleX(0.7); }
+  100% { opacity: 0; transform: scaleX(0.4); }
+}
+
+/* === Feature scene (src/scenes/Feature.tsx) — punch/push/breathe + T3 spec-panel shatter === */
+@keyframes feature-punch-in {
+  from { transform: scale(1.05); }
+  to   { transform: scale(1); }
+}
+@keyframes feature-push-in {
+  0%   { opacity: 0; transform: scale(1.1, 1.1) translateX(0); }
+  10%  { opacity: 1; }
+  100% { opacity: 1; transform: scale(1.24, 1.24) translateX(-34px); }
+}
+@keyframes feature-breathe {
+  0%, 100% { transform: scale(1, 1) translateY(0); }
+  50%      { transform: scale(1.012, 0.988) translateY(4px); }
+}
+@keyframes feature-callout-in {
+  from { opacity: 0; transform: translateX(64px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes feature-panel-in {
+  0%   { opacity: 0; transform: translate(var(--panel-x,0), var(--panel-y,0)) rotate(var(--panel-rot,0deg)); }
+  50%  { opacity: 1; transform: translate(0,0) rotate(0deg); }
+  100% { opacity: 0; transform: translate(0,0) rotate(0deg); }
+}
+
+/* === Fabric scene / WELL_B (src/scenes/Fabric.tsx) — push-in/sweep/ticks + T4 grid draw === */
+@keyframes fabric-ticks-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-44px); }
+}
+@keyframes fabric-bar-fill-0 { from { width: 0%; } to { width: 98%; } }
+@keyframes fabric-bar-fill-1 { from { width: 0%; } to { width: 86%; } }
+@keyframes fabric-bar-glow-0 { 0% { left: 0%; opacity: 0; } 8% { opacity: 0.9; } 92% { opacity: 0.9; } 100% { left: 98%; opacity: 0; } }
+@keyframes fabric-bar-glow-1 { 0% { left: 0%; opacity: 0; } 8% { opacity: 0.9; } 92% { opacity: 0.9; } 100% { left: 86%; opacity: 0; } }
+@keyframes fabric-frame-pop {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes fabric-push-in {
+  from { transform: scaleX(-1) scale(1.04); }
+  to   { transform: scaleX(-1) scale(1.14); }
+}
+@keyframes fabric-sweep-loop {
+  0%   { transform: translateY(0); opacity: 0.5; }
+  50%  { opacity: 0.9; }
+  100% { transform: translateY(640px); opacity: 0.5; }
+}
+@keyframes fabric-grid-field {
+  0%   { opacity: 0; }
+  50%  { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+@keyframes fabric-rule-h {
+  0%   { transform: scaleX(0); opacity: 0.9; }
+  50%  { transform: scaleX(1); opacity: 0.9; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+@keyframes fabric-rule-v {
+  0%   { transform: scaleY(0); opacity: 0.9; }
+  50%  { transform: scaleY(1); opacity: 0.9; }
+  100% { transform: scaleY(1); opacity: 0; }
+}
+@keyframes fabric-crosshair-travel {
+  0%   { left: 8%;  top: 12%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { left: 78%; top: 80%; opacity: 0; }
+}
+
+/* === Colorways scene (src/scenes/Colorways.tsx) — punch/swatch-in + T5 rack split === */
+@keyframes cw-punch-in {
+  from { transform: scale(1.04); }
+  to   { transform: scale(1); }
+}
+@keyframes cw-preview-pop {
+  0%   { opacity: 0; transform: scale(0.92); }
+  50%  { opacity: 1; }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes cw-swatch-in {
+  from { opacity: 0; transform: translateY(36px) scale(0.84); clip-path: inset(0 0 100% 0); }
+  to   { opacity: 1; transform: translateY(0) scale(1); clip-path: inset(0 0 0% 0); }
+}
+@keyframes cw-slab-rack-in {
+  0%   { opacity: 1; transform: translateY(var(--slab-y,0)) skewX(-6deg); }
+  70%  { opacity: 1; transform: translateY(0) skewX(0deg); }
+  100% { opacity: 0; transform: translateY(0) skewX(0deg); }
+}
+
+/* === Cta scene (src/scenes/Cta.tsx) — logo/title/button + T6 halftone converge === */
+@keyframes cta-bg-drift {
+  from { transform: scale(1.04) translateY(0); }
+  to   { transform: scale(1.12) translateY(-22px); }
+}
+@keyframes cta-bg-bloom {
+  0%, 100% { opacity: 0.48; }
+  50%      { opacity: 0.60; }
+}
+@keyframes cta-bg2-drift {
+  from { transform: scale(1.12) translateY(-10px); }
+  to   { transform: scale(1.04) translateY(14px); }
+}
+@keyframes cta-logo-in {
+  from { opacity: 0; transform: scale(1.16); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes cta-title-in {
+  from { opacity: 0; transform: translateY(34px); clip-path: inset(0 0 102% 0); }
+  to   { opacity: 1; transform: translateY(0); clip-path: inset(0 0 0% 0); }
+}
+@keyframes cta-btn-pop {
+  from { opacity: 0; transform: scale(0.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes cta-btn-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.022); }
+}
+@keyframes cta-sheen-sweep {
+  from { transform: translateX(-160%) skewX(-18deg); }
+  to   { transform: translateX(260%) skewX(-18deg); }
+}
+@keyframes cta-btn-flash {
+  0%, 100% { opacity: 0; }
+  50%      { opacity: 0.85; }
+}
+@keyframes cta-tiles-converge {
+  from { opacity: 1; transform: translate(0,0) scale(1); }
+  to   { opacity: 0; transform: translate(var(--tile-ncx,0), var(--tile-ncy,0)) scale(0); }
+}
+@keyframes cta-bloom-core {
+  0%   { opacity: 0; transform: scale(0.3); }
+  55%  { opacity: 1; transform: scale(1.4); }
+  100% { opacity: 0; transform: scale(2.5); }
+}
