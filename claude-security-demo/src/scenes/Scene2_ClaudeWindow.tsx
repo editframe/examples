@@ -1,17 +1,16 @@
-import React, { useCallback, useRef } from "react";
+import React from "react";
 import { Timegroup } from "@editframe/react";
-import { eases } from "animejs";
 import { PaperBackground } from "../components/PaperBackground";
 import { Sfx } from "../components/Sfx";
-import { lerp, track } from "../components/helpers";
+import { Reveal } from "../components/Reveal";
 import { claude } from "../brand";
 
 /**
  * Scene 2 — Claude.ai Window with Security tab — v8 RETIMED
  *
  * v8 FIXES (Jeremy round):
- *   FIX 1 — Click at EXACTLY master 5.0s. Scene1 ends at 3800ms, so the
- *           click pulse must fire at scene-local 1200ms (3800 + 1200 = 5000).
+ *   FIX 1 — Click at EXACTLY master 5.0s. Scene1 is 3800ms, so the click
+ *           pulse fires at scene-local 1200ms (3800 + 1200 = 5000).
  *   FIX 2 — Scene held 3+ seconds dead after the click. Cut Scene2 from
  *           4.3s → 2.2s. Breakdown:
  *             0–400ms    window builds + sidebar cascade
@@ -20,14 +19,22 @@ import { claude } from "../brand";
  *             1500–1800ms highlight settles + brief hold
  *             1800–2200ms cross-fade out
  *
- * Timing (v8):
+ * Timing (v8, all scene-local — this scene's own `<Timegroup>` resets to 0):
  *   0.0–0.4s   Window fades up + 12px slide (compressed from 600ms)
- *   0.25–0.55s Sidebar items cascade (20ms stagger)
- *   0.55–0.95s "Security" row highlights (background fade)
+ *   0.25–0.55s Sidebar items cascade (20ms stagger — see the per-item
+ *              `enter` delay below, computed once from array index)
+ *   0.55–0.95s "Security" row highlights (background fade + scaleX grow)
  *   0.40–1.20s Cursor drifts in to Security row tip-on-target
- *   1.20–1.50s Click pulse fires (coral ring + row flash)
+ *   1.20–1.50s Click pulse fires (coral ring + row brightness flash)
  *   1.50–1.80s Settle + hold
  *   1.80–2.20s Cross-fade out
+ *
+ * NOTE: the original per-frame version also added a ~2px idle sine wobble to
+ * the cursor after it landed, plus a ~2px "press/release" bump exactly at
+ * click time. Both are sub-pixel-scale details invisible at video playback
+ * size; they're dropped here in favor of a single declarative slide-in
+ * (`cursor-in` keyframe) rather than chaining several near-imperceptible
+ * effects for a lot of extra keyframe complexity.
  */
 
 type IconKind =
@@ -186,110 +193,36 @@ const SIDEBAR_NAV: { label: string; icon: IconKind }[] = [
   { label: "Security", icon: "security" },
 ];
 
+// Sidebar cascade: 250ms start, 20ms stagger, 200ms ease — computed once per
+// item index (priority-2 stagger), not recomputed every frame.
+const SIDEBAR_STAGGER_START_MS = 250;
+const SIDEBAR_STAGGER_MS = 20;
+const SIDEBAR_ITEM_DURATION_MS = 200;
+
 export const Scene2_ClaudeWindow: React.FC = () => {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const winRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const highlightRef = useRef<HTMLDivElement>(null);
-  const cursorRef = useRef<HTMLDivElement>(null);
-  // v6 FIX 4: click pulse refs
-  const pulseRef = useRef<HTMLDivElement>(null);
-
-  const handleFrame = useCallback(
-    ({ ownCurrentTimeMs }: { ownCurrentTimeMs: number }) => {
-      const ms = ownCurrentTimeMs;
-
-      // v8: window slide compressed 600ms → 400ms
-      const winP = track(ms, 0, 400, eases.outCubic);
-      if (winRef.current) {
-        winRef.current.style.opacity = String(winP);
-        winRef.current.style.transform = `translateY(${lerp(12, 0, winP)}px)`;
-      }
-
-      // v8: sidebar cascade 250ms start, 20ms stagger, 200ms ease
-      itemRefs.current.forEach((el, i) => {
-        if (!el) return;
-        const start = 250 + i * 20;
-        const p = track(ms, start, start + 200, eases.outCubic);
-        el.style.opacity = String(p);
-        el.style.transform = `translateX(${lerp(-6, 0, p)}px)`;
-      });
-
-      // v8: highlight 550–950ms (was 950–1450) + brightness flash at click 1200–1400ms
-      const hp = track(ms, 550, 950, eases.outCubic);
-      const flashP = track(ms, 1200, 1400, eases.outCubic);
-      // bell-curve flash: peaks mid-window
-      const flashAmt = flashP < 0.5 ? flashP * 2 : (1 - flashP) * 2;
-      if (highlightRef.current) {
-        highlightRef.current.style.opacity = String(Math.min(1, hp + flashAmt * 0.35));
-        highlightRef.current.style.transform = `scaleX(${lerp(0.6, 1, hp)})`;
-        // brightness flash by shifting bg toward cream during the flash
-        const baseR = 232, baseG = 230, baseB = 220; // #E8E6DC
-        const flashShift = flashAmt * 14;
-        highlightRef.current.style.background = `rgb(${Math.min(255, baseR + flashShift)}, ${Math.min(255, baseG + flashShift)}, ${Math.min(255, baseB + flashShift)})`;
-      }
-
-      // v8: Cursor drift 400–1200ms (was 1300–1800). Lands tip-on-target at 1200ms.
-      const cIn = track(ms, 400, 1200, eases.outCubic);
-      const drift = ms > 1200 ? Math.sin((ms - 1200) / 500) * 2.0 : 0;
-      if (cursorRef.current) {
-        cursorRef.current.style.opacity = String(cIn);
-        // v8: tip lands on Security row center at master 5.0s (scene-local 1200ms).
-        // Press/release tiny push-in synced to pulse window.
-        const pressP = track(ms, 1200, 1330, eases.outCubic);
-        const releaseP = track(ms, 1330, 1480, eases.outCubic);
-        const press = pressP - releaseP; // 0→1→0
-        cursorRef.current.style.transform = `translate(${lerp(28, 0, cIn) + drift}px, ${lerp(24, 0, cIn) + press * 2}px)`;
-      }
-
-      // v8: click pulse — coral ring expands 1.0 → 1.5x over 300ms.
-      // Starts at scene-local 1200ms = master 5000ms (exactly 5.0s click).
-      const pulseT = track(ms, 1200, 1500, eases.outCubic);
-      if (pulseRef.current) {
-        if (pulseT > 0 && pulseT < 1) {
-          pulseRef.current.style.opacity = String(0.5 * (1 - pulseT));
-          pulseRef.current.style.transform = `scale(${lerp(1.0, 1.5, pulseT)})`;
-        } else {
-          pulseRef.current.style.opacity = "0";
-        }
-      }
-
-      // v8: exit 1800→2200ms (Scene2 total = 2.2s)
-      let outOp = 1;
-      if (ms >= 1800) outOp = 1 - track(ms, 1800, 2200, eases.outCubic);
-      if (wrapRef.current) wrapRef.current.style.opacity = String(outOp);
-    },
-    []
-  );
-
   // Sidebar item index -> ref index mapping
   const SECURITY_INDEX = SIDEBAR_TOP.length + SIDEBAR_NAV.findIndex((x) => x.label === "Security");
 
   return (
-    <Timegroup
-      mode="fixed"
-      duration="2.2s"
-      onFrame={handleFrame as any}
-      className="absolute inset-0"
-    >
+    <Timegroup mode="fixed" duration="2.2s" className="absolute inset-0">
       <PaperBackground />
       <Sfx cue="reveal" at={0.1} dur={0.8} volume={0.06} />
       <Sfx cue="plop" at={1.2} dur={0.3} volume={0.05} />
 
       {/* Center container — flex centers the window in the 1920×1080 viewport. */}
       <div
-        ref={wrapRef}
         style={{
           position: "absolute",
           inset: 0,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          willChange: "opacity",
+          animation: "wrap-fade-out 400ms 1800ms cubic-bezier(0.33,1,0.68,1) forwards",
         }}
       >
-        <div
-          ref={winRef}
+        <Reveal
+          enter={[0, 400]}
+          y={12}
           style={{
             width: 1520,
             height: 860,
@@ -298,8 +231,6 @@ export const Scene2_ClaudeWindow: React.FC = () => {
             borderRadius: 18,
             overflow: "hidden",
             display: "flex",
-            opacity: 0,
-            willChange: "opacity, transform",
           }}
         >
           {/* Sidebar */}
@@ -338,9 +269,14 @@ export const Scene2_ClaudeWindow: React.FC = () => {
 
             {/* Top group */}
             {SIDEBAR_TOP.map((item, i) => (
-              <div
+              <Reveal
                 key={`t-${i}`}
-                ref={(el) => (itemRefs.current[i] = el)}
+                enter={[
+                  SIDEBAR_STAGGER_START_MS + i * SIDEBAR_STAGGER_MS,
+                  SIDEBAR_STAGGER_START_MS + i * SIDEBAR_STAGGER_MS + SIDEBAR_ITEM_DURATION_MS,
+                ]}
+                x={-6}
+                y={0}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -352,13 +288,11 @@ export const Scene2_ClaudeWindow: React.FC = () => {
                   fontFamily: claude.fonts.body,
                   fontSize: 17,
                   fontWeight: 400,
-                  opacity: 0,
-                  willChange: "opacity, transform",
                 }}
               >
                 <Icon kind={item.icon} color={claude.fg.primary} />
                 <span>{item.label}</span>
-              </div>
+              </Reveal>
             ))}
 
             <div style={{ height: 22 }} />
@@ -368,9 +302,14 @@ export const Scene2_ClaudeWindow: React.FC = () => {
               const refIdx = SIDEBAR_TOP.length + i;
               const isHighlight = item.label === "Security";
               return (
-                <div
+                <Reveal
                   key={`n-${i}`}
-                  ref={(el) => (itemRefs.current[refIdx] = el)}
+                  enter={[
+                    SIDEBAR_STAGGER_START_MS + refIdx * SIDEBAR_STAGGER_MS,
+                    SIDEBAR_STAGGER_START_MS + refIdx * SIDEBAR_STAGGER_MS + SIDEBAR_ITEM_DURATION_MS,
+                  ]}
+                  x={-6}
+                  y={0}
                   style={{
                     position: "relative",
                     display: "flex",
@@ -383,24 +322,31 @@ export const Scene2_ClaudeWindow: React.FC = () => {
                     fontFamily: claude.fonts.body,
                     fontSize: 17,
                     fontWeight: 400,
-                    opacity: 0,
-                    willChange: "opacity, transform",
                   }}
                 >
                   {isHighlight && (
                     <div
-                      ref={highlightRef}
                       style={{
                         position: "absolute",
                         inset: 0,
                         background: claude.bg.lightGray,
                         borderRadius: 8,
-                        opacity: 0,
                         transformOrigin: "left center",
-                        willChange: "opacity, transform",
                         zIndex: 0,
+                        animation: "row-highlight-in 400ms 550ms cubic-bezier(0.33,1,0.68,1) backwards",
                       }}
-                    />
+                    >
+                      {/* brightness flash overlay, timed to the click at scene-local 1200ms */}
+                      <div
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          borderRadius: 8,
+                          background: "#FFFFFF",
+                          animation: "row-highlight-flash 200ms 1200ms cubic-bezier(0.33,1,0.68,1) both",
+                        }}
+                      />
+                    </div>
                   )}
                   <div
                     style={{
@@ -414,19 +360,18 @@ export const Scene2_ClaudeWindow: React.FC = () => {
                     <Icon kind={item.icon} color={claude.fg.primary} />
                     <span>{item.label}</span>
                   </div>
-                </div>
+                </Reveal>
               );
             })}
 
             {/*
               v6 FIX 4: click pulse ring — coral, behind the cursor,
               centered on the Security row's vertical middle. The cursor's
-              fingertip lands here at click time.
+              fingertip lands here at click time (scene-local 1200ms).
               Security row top: 30 + 60 + 30 + SECURITY_INDEX * 40 + 22
               Row middle: + 20
             */}
             <div
-              ref={pulseRef}
               style={{
                 position: "absolute",
                 left: 160 - 24,
@@ -435,10 +380,9 @@ export const Scene2_ClaudeWindow: React.FC = () => {
                 height: 48,
                 borderRadius: "50%",
                 border: `2px solid ${claude.accent.coral}`,
-                opacity: 0,
-                willChange: "opacity, transform",
                 zIndex: 4,
                 pointerEvents: "none",
+                animation: "click-pulse 300ms 1200ms cubic-bezier(0.33,1,0.68,1) both",
               }}
             />
             {/*
@@ -449,14 +393,12 @@ export const Scene2_ClaudeWindow: React.FC = () => {
               Horizontal: tip is at x≈14, so left = pulseCenter - 14.
             */}
             <div
-              ref={cursorRef}
               style={{
                 position: "absolute",
                 left: 160 - 14,
                 top: 30 + 60 + 30 + SECURITY_INDEX * 40 + 22 + 20 - 1.5,
-                opacity: 0,
-                willChange: "opacity, transform",
                 zIndex: 5,
+                animation: "cursor-in 800ms 400ms cubic-bezier(0.33,1,0.68,1) backwards",
               }}
             >
               <HandCursor />
@@ -600,7 +542,7 @@ export const Scene2_ClaudeWindow: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </Reveal>
       </div>
     </Timegroup>
   );

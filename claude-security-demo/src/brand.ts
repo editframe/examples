@@ -30,25 +30,16 @@ export const claude = {
   },
   state: {
     alert: "#C84A3A",      // muted brick, not safety-orange
-    success: "#788C5D",    // brand sage
-    warn: "#D9A05B",       // amber, paired w/ coral family
   },
   fonts: {
     display: "'Newsreader', 'Source Serif 4 Display', 'EB Garamond', 'Tiempos Headline', Georgia, serif",
     body: "'Space Grotesk', 'Styrene B Web', Inter, system-ui, sans-serif",
-    ui: "'Space Grotesk', 'Styrene A Web', Inter, system-ui, sans-serif",
     mono: "'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
   },
   weight: {
     displayHero: 400,      // Regular for serif hero — NEVER bold
-    displayMedium: 500,    // for slight emphasis only
-    bodyRegular: 400,
-    bodyMedium: 500,
-    bodyBold: 600,
   },
   letterSpacing: {
     display: "-0.01em",
-    body: "0",
-    ui: "0.02em",
   },
 } as const;

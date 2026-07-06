@@ -1,9 +1,8 @@
-import React, { useCallback, useRef } from "react";
+import React from "react";
 import { Timegroup } from "@editframe/react";
-import { eases } from "animejs";
 import { PaperBackground } from "../components/PaperBackground";
 import { Sfx } from "../components/Sfx";
-import { lerp, track } from "../components/helpers";
+import { Reveal } from "../components/Reveal";
 import { claude } from "../brand";
 
 /**
@@ -17,13 +16,15 @@ import { claude } from "../brand";
  * secure code block. Coral underline draws under "secure subprocess
  * execution" — the single coral accent for this scene.
  *
- * Timing:
+ * Timing (scene-local — this scene's own `<Timegroup>` resets to 0):
  *   0.0–1.0s   Title row fades + slides
  *   0.8–1.8s   "The Fix" headline + body fade
- *   1.4–3.2s   Code block lines reveal (clip-path expand)
+ *   1.4–3.2s   Code block clip-path reveal (`code-reveal` keyframe)
  *   3.0–3.6s   Coral underline draws under "secure subprocess execution"
- *   3.6–4.4s   Hold
- *   4.4–5.0s   Cross-fade out
+ *              (`underline-draw` keyframe on the SVG path's stroke-dashoffset)
+ *   3.6–5.0s   Hold — no fade-out. Scene5 hard-cuts in on top of this
+ *              (its own background is drawn immediately), so there's no
+ *              cream-gap at the Scene4→Scene5 boundary.
  */
 
 const CODE_LINES = [
@@ -38,215 +39,158 @@ const CODE_LINES = [
   { text: "                                    timeout=30)", color: "code" },
 ];
 
-export const Scene4_PRPatch: React.FC = () => {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
-  const subheadRef = useRef<HTMLDivElement>(null);
-  const codeRef = useRef<HTMLDivElement>(null);
-  const underlineRef = useRef<SVGPathElement>(null);
+// v8 FIX 4: shorter underline matches "secure subprocess execution" text width.
+// Space Grotesk 22px, 27 chars (incl 2 spaces) → ~298px text width.
+// Underline is 298px so it ends right under the "n" of execution.
+const UNDERLINE_LENGTH = 298;
 
-  const handleFrame = useCallback(
-    ({ ownCurrentTimeMs }: { ownCurrentTimeMs: number }) => {
-      const ms = ownCurrentTimeMs;
+export const Scene4_PRPatch: React.FC = () => (
+  <Timegroup mode="fixed" duration="5s" className="absolute inset-0">
+    <PaperBackground />
+    <Sfx cue="plop" at={0.2} dur={0.4} volume={0.05} />
+    <Sfx cue="reveal" at={1.4} dur={1.6} volume={0.06} />
+    <Sfx cue="twinkle" at={3.0} dur={0.6} volume={0.04} />
 
-      const tp = track(ms, 0, 1000, eases.outCubic);
-      if (titleRef.current) {
-        titleRef.current.style.opacity = String(tp);
-        titleRef.current.style.transform = `translateY(${lerp(12, 0, tp)}px)`;
-      }
-
-      const sp = track(ms, 800, 1800, eases.outCubic);
-      if (subheadRef.current) {
-        subheadRef.current.style.opacity = String(sp);
-        subheadRef.current.style.transform = `translateY(${lerp(10, 0, sp)}px)`;
-      }
-
-      const cp = track(ms, 1400, 3200, eases.outCubic);
-      if (codeRef.current) {
-        codeRef.current.style.opacity = String(Math.min(1, cp * 1.5));
-        codeRef.current.style.clipPath = `inset(0 0 ${lerp(100, 0, cp)}% 0)`;
-      }
-
-      // v8 FIX 4: shorter underline matches "secure subprocess execution" text width.
-      // Space Grotesk 22px, 27 chars (incl 2 spaces) → ~298px text width.
-      // Underline now 298px (was 336px) so it ends right under the "n" of execution.
-      const up = track(ms, 3000, 3600, eases.outCubic);
-      if (underlineRef.current) {
-        const total = 298;
-        underlineRef.current.style.strokeDasharray = String(total);
-        underlineRef.current.style.strokeDashoffset = String(total * (1 - up));
-      }
-
-      // No fade-out — Timegroup hard-cuts to Scene5 which has its own dark bg.
-      // This prevents the cream-gap at the Scene4→Scene5 boundary.
-      if (wrapRef.current) wrapRef.current.style.opacity = "1";
-    },
-    []
-  );
-
-  return (
-    <Timegroup
-      mode="fixed"
-      duration="5s"
-      onFrame={handleFrame as any}
-      className="absolute inset-0"
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
     >
-      <PaperBackground />
-      <Sfx cue="plop" at={0.2} dur={0.4} volume={0.05} />
-      <Sfx cue="reveal" at={1.4} dur={1.6} volume={0.06} />
-      <Sfx cue="twinkle" at={3.0} dur={0.6} volume={0.04} />
-
       <div
-        ref={wrapRef}
         style={{
-          position: "absolute",
-          inset: 0,
+          width: 1380,
+          background: claude.bg.card,
+          border: `1px solid ${claude.fg.rule}`,
+          borderRadius: 14,
+          padding: "38px 46px 42px 46px",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          willChange: "opacity",
+          flexDirection: "column",
+          gap: 22,
         }}
       >
-        <div
+        {/* PR title row */}
+        <Reveal
+          enter={[0, 1000]}
+          y={12}
           style={{
-            width: 1380,
-            background: claude.bg.card,
-            border: `1px solid ${claude.fg.rule}`,
-            borderRadius: 14,
-            padding: "38px 46px 42px 46px",
             display: "flex",
-            flexDirection: "column",
-            gap: 22,
+            alignItems: "center",
+            gap: 16,
+            fontFamily: claude.fonts.body,
+            fontSize: 28,
+            fontWeight: 500,
+            color: claude.fg.primary,
+            paddingBottom: 18,
+            borderBottom: `1px solid ${claude.fg.rule}`,
           }}
         >
-          {/* PR title row */}
+          {/* Claude security cloud icon */}
+          <svg width={32} height={32} viewBox="0 0 32 32" fill="none">
+            <path
+              d="M9 22a5 5 0 1 1 1-9.9A6.5 6.5 0 0 1 22.6 13 5 5 0 0 1 22 22H9Z"
+              stroke={claude.fg.primary}
+              strokeWidth={1.8}
+              strokeLinejoin="round"
+            />
+            <circle cx="20.5" cy="22" r="3.2" fill={claude.accent.blue} />
+          </svg>
+          <span>[Security Scan] Fix command_injection: app/services/notifiers/script_runner.py</span>
+        </Reveal>
+
+        {/* The Fix subhead */}
+        <Reveal enter={[800, 1800]} y={10} style={{ position: "relative" }}>
           <div
-            ref={titleRef}
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
               fontFamily: claude.fonts.body,
-              fontSize: 28,
-              fontWeight: 500,
+              fontSize: 24,
+              fontWeight: 600,
               color: claude.fg.primary,
-              opacity: 0,
-              willChange: "opacity, transform",
-              paddingBottom: 18,
-              borderBottom: `1px solid ${claude.fg.rule}`,
+              marginBottom: 12,
             }}
           >
-            {/* Claude security cloud icon */}
-            <svg width={32} height={32} viewBox="0 0 32 32" fill="none">
-              <path
-                d="M9 22a5 5 0 1 1 1-9.9A6.5 6.5 0 0 1 22.6 13 5 5 0 0 1 22 22H9Z"
-                stroke={claude.fg.primary}
-                strokeWidth={1.8}
-                strokeLinejoin="round"
-              />
-              <circle cx="20.5" cy="22" r="3.2" fill={claude.accent.blue} />
-            </svg>
-            <span>[Security Scan] Fix command_injection: app/services/notifiers/script_runner.py</span>
+            The Fix
           </div>
-
-          {/* The Fix subhead */}
           <div
-            ref={subheadRef}
             style={{
-              opacity: 0,
-              willChange: "opacity, transform",
+              fontFamily: claude.fonts.body,
+              fontSize: 22,
+              color: claude.fg.primary,
+              lineHeight: 1.5,
               position: "relative",
+              display: "inline-block",
             }}
           >
-            <div
-              style={{
-                fontFamily: claude.fonts.body,
-                fontSize: 24,
-                fontWeight: 600,
-                color: claude.fg.primary,
-                marginBottom: 12,
-              }}
-            >
-              The Fix
-            </div>
-            <div
-              style={{
-                fontFamily: claude.fonts.body,
-                fontSize: 22,
-                color: claude.fg.primary,
-                lineHeight: 1.5,
-                position: "relative",
-                display: "inline-block",
-              }}
-            >
-              I replaced the vulnerable code with{" "}
-              <span style={{ position: "relative", display: "inline-block" }}>
-                secure subprocess execution
-                {/*
-                  v6 FIX 7 — STRAIGHT clean minimal underline.
-                  Client: "the 3rd reference image shows a weird and uneven
-                  line it should be straight clean minimal."
-                  Per REGRESSION-LEDGER rule #12: minimalist = precise,
-                  strict measurements, straight lines, true centers.
-                */}
-                <svg
-                  width={302}
-                  height={10}
-                  viewBox="0 0 302 10"
-                  style={{
-                    position: "absolute",
-                    left: -2,
-                    bottom: -8,
-                    pointerEvents: "none",
-                  }}
-                >
-                  <path
-                    ref={underlineRef}
-                    d="M2 5 L300 5"
-                    stroke={claude.accent.coral}
-                    strokeWidth={3}
-                    fill="none"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </span>
-              .
-            </div>
-          </div>
-
-          {/* Code block */}
-          <div
-            ref={codeRef}
-            style={{
-              background: "#F3EFE3",
-              border: `1px solid ${claude.fg.rule}`,
-              borderRadius: 10,
-              padding: "22px 28px",
-              opacity: 0,
-              clipPath: "inset(0 0 100% 0)",
-              willChange: "opacity, clip-path",
-              marginTop: 6,
-            }}
-          >
-            {CODE_LINES.map((l, i) => (
-              <div
-                key={i}
+            I replaced the vulnerable code with{" "}
+            <span style={{ position: "relative", display: "inline-block" }}>
+              secure subprocess execution
+              {/*
+                v6 FIX 7 — STRAIGHT clean minimal underline.
+                Client: "the 3rd reference image shows a weird and uneven
+                line it should be straight clean minimal."
+                Per REGRESSION-LEDGER rule #12: minimalist = precise,
+                strict measurements, straight lines, true centers.
+              */}
+              <svg
+                width={302}
+                height={10}
+                viewBox="0 0 302 10"
                 style={{
-                  fontFamily: claude.fonts.mono,
-                  fontSize: 20,
-                  lineHeight: 1.55,
-                  color: l.color === "comment" ? claude.accent.green : claude.fg.primary,
-                  whiteSpace: "pre",
+                  position: "absolute",
+                  left: -2,
+                  bottom: -8,
+                  pointerEvents: "none",
                 }}
               >
-                {l.text}
-              </div>
-            ))}
+                <path
+                  d="M2 5 L300 5"
+                  stroke={claude.accent.coral}
+                  strokeWidth={3}
+                  fill="none"
+                  strokeLinecap="round"
+                  style={{
+                    strokeDasharray: `${UNDERLINE_LENGTH}`,
+                    animation: "underline-draw 600ms 3000ms cubic-bezier(0.33,1,0.68,1) backwards",
+                  }}
+                />
+              </svg>
+            </span>
+            .
           </div>
+        </Reveal>
+
+        {/* Code block */}
+        <div
+          style={{
+            background: "#F3EFE3",
+            border: `1px solid ${claude.fg.rule}`,
+            borderRadius: 10,
+            padding: "22px 28px",
+            marginTop: 6,
+            animation: "code-reveal 1800ms 1400ms cubic-bezier(0.33,1,0.68,1) both",
+          }}
+        >
+          {CODE_LINES.map((l, i) => (
+            <div
+              key={i}
+              style={{
+                fontFamily: claude.fonts.mono,
+                fontSize: 20,
+                lineHeight: 1.55,
+                color: l.color === "comment" ? claude.accent.green : claude.fg.primary,
+                whiteSpace: "pre",
+              }}
+            >
+              {l.text}
+            </div>
+          ))}
         </div>
       </div>
-    </Timegroup>
-  );
-};
+    </div>
+  </Timegroup>
+);
 
 export default Scene4_PRPatch;

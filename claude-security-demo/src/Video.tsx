@@ -5,6 +5,7 @@ import Scene2_ClaudeWindow from "./scenes/Scene2_ClaudeWindow";
 import Scene3_Findings from "./scenes/Scene3_Findings";
 import Scene4_PRPatch from "./scenes/Scene4_PRPatch";
 import Scene5_Logo from "./scenes/Scene5_Logo";
+import { claude } from "./brand";
 
 /**
  * Claude Security — v5 TOTAL SCRAP REBUILD
@@ -34,7 +35,7 @@ export const Video: React.FC = () => {
       style={{
         width: 1920,
         height: 1080,
-        background: "#DEDCD2",
+        background: claude.bg.primary,
       }}
     >
       <Scene1_Headline />

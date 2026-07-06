@@ -1,9 +1,8 @@
-import React, { useCallback, useRef } from "react";
+import React from "react";
 import { Timegroup } from "@editframe/react";
-import { eases } from "animejs";
 import { PaperBackground } from "../components/PaperBackground";
 import { Sfx } from "../components/Sfx";
-import { lerp, track, easeOutBack } from "../components/helpers";
+import { Reveal } from "../components/Reveal";
 import { claude } from "../brand";
 
 /**
@@ -14,23 +13,22 @@ import { claude } from "../brand";
  *
  * Centered with flexbox (NOT absolute translate — see vercel-1 regression).
  *
- * Timing:
- *   0.0–0.6s   Burst scales 0 → 1 with subtle back-out
+ * Timing (scene-local — this scene's own `<Timegroup>` resets to 0):
+ *   0.0–0.6s   Burst scales 0 → 1 with a back-out overshoot (`burst-in`
+ *              keyframe, cubic-bezier(0.34,1.56,0.64,1) — CSS equivalent of
+ *              the original hand-rolled `outBack(1.7)`)
  *   0.4–1.0s   Wordmark fades + slides 8px left → 0
  *   1.0–2.4s   Hold
  *   2.4–3.0s   Cross-fade out
+ *
+ * NOTE: the original per-frame version ramped the burst's opacity to 1
+ * 1.5x faster than its scale (so opacity settled at ~400ms while the scale
+ * overshoot kept animating until 600ms). A single CSS keyframe animates
+ * both properties on the same clock, so here they both resolve together at
+ * 600ms — a barely-perceptible timing difference on an 84px icon during a
+ * 600ms beat, traded for a much simpler declarative animation.
  */
 
-/**
- * v6 FIX 6 — Anthropic burst with 14 asymmetric spokes.
- *
- * The real Anthropic mark uses 14 radiating spokes with subtly varied
- * lengths (NOT even, NOT a sun-star). Per the client: "The claude icon at
- * the end is also wrong." Pattern below alternates between three subtly
- * different lengths to break the perfect-circle feel while staying minimal.
- *
- * Coral #D97757 fill, no outline, rounded caps.
- */
 const SPOKE_LENGTHS = [24, 22, 24, 21, 24, 23, 24, 22, 24, 21, 24, 23, 24, 22];
 const Burst: React.FC<{ size?: number; color?: string }> = ({
   size = 84,
@@ -55,93 +53,55 @@ const Burst: React.FC<{ size?: number; color?: string }> = ({
   </svg>
 );
 
-export const Scene5_Logo: React.FC = () => {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const burstRef = useRef<HTMLDivElement>(null);
-  const wordRef = useRef<HTMLDivElement>(null);
+export const Scene5_Logo: React.FC = () => (
+  <Timegroup mode="fixed" duration="3s" className="absolute inset-0">
+    <PaperBackground />
+    <Sfx cue="twinkle" at={0.05} dur={0.8} volume={0.08} />
 
-  const handleFrame = useCallback(
-    ({ ownCurrentTimeMs }: { ownCurrentTimeMs: number }) => {
-      const ms = ownCurrentTimeMs;
-
-      const bp = track(ms, 0, 600, easeOutBack);
-      if (burstRef.current) {
-        burstRef.current.style.opacity = String(Math.min(1, bp * 1.5));
-        burstRef.current.style.transform = `scale(${lerp(0.4, 1, bp)})`;
-      }
-
-      const wp = track(ms, 400, 1000, eases.outCubic);
-      if (wordRef.current) {
-        wordRef.current.style.opacity = String(wp);
-        wordRef.current.style.transform = `translateX(${lerp(-8, 0, wp)}px)`;
-      }
-
-      let outOp = 1;
-      if (ms >= 2400) outOp = 1 - track(ms, 2400, 3000, eases.outCubic);
-      if (wrapRef.current) wrapRef.current.style.opacity = String(outOp);
-    },
-    []
-  );
-
-  return (
-    <Timegroup
-      mode="fixed"
-      duration="3s"
-      onFrame={handleFrame as any}
-      className="absolute inset-0"
+    {/* Flex center container — NOT absolute translate. */}
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        animation: "wrap-fade-out 600ms 2400ms cubic-bezier(0.33,1,0.68,1) forwards",
+      }}
     >
-      <PaperBackground />
-      <Sfx cue="twinkle" at={0.05} dur={0.8} volume={0.08} />
-
-      {/* Flex center container — NOT absolute translate. */}
       <div
-        ref={wrapRef}
         style={{
-          position: "absolute",
-          inset: 0,
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
-          willChange: "opacity",
+          gap: 22,
         }}
       >
         <div
           style={{
             display: "flex",
-            alignItems: "center",
-            gap: 22,
+            animation: "burst-in 600ms 0ms cubic-bezier(0.34,1.56,0.64,1) backwards",
           }}
         >
-          <div
-            ref={burstRef}
-            style={{
-              opacity: 0,
-              transform: "scale(0.4)",
-              willChange: "opacity, transform",
-              display: "flex",
-            }}
-          >
-            <Burst size={84} />
-          </div>
-          <div
-            ref={wordRef}
-            style={{
-              fontFamily: claude.fonts.display,
-              fontWeight: 500,
-              fontSize: 96,
-              color: claude.fg.primary,
-              letterSpacing: "-0.015em",
-              lineHeight: 1,
-              opacity: 0,
-              willChange: "opacity, transform",
-            }}
-          >
-            Claude
-          </div>
+          <Burst size={84} />
         </div>
+        <Reveal
+          enter={[400, 1000]}
+          x={-8}
+          y={0}
+          style={{
+            fontFamily: claude.fonts.display,
+            fontWeight: 500,
+            fontSize: 96,
+            color: claude.fg.primary,
+            letterSpacing: "-0.015em",
+            lineHeight: 1,
+          }}
+        >
+          Claude
+        </Reveal>
       </div>
-    </Timegroup>
-  );
-};
+    </div>
+  </Timegroup>
+);
 
 export default Scene5_Logo;

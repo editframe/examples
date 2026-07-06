@@ -95,3 +95,69 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 }
+
+/* ================================================================
+ * Scene animations (src/scenes/, src/components/Reveal.tsx)
+ *
+ * Every scene is its own `<Timegroup mode="fixed">`, so every delay below
+ * is scene-local ms, not a master clock. There is no `onFrame`/ref-driven
+ * style mutation anywhere in src/scenes/ — see REFACTOR-PATTERNS.md Part 2b.
+ * ================================================================ */
+
+/* === Reveal (see src/components/Reveal.tsx) — declarative fade + translate === */
+@keyframes reveal-in {
+  from { opacity: 0; transform: translate(var(--reveal-x, 0px), var(--reveal-y, 20px)); }
+  to   { opacity: 1; transform: translate(0, 0); }
+}
+@keyframes reveal-out {
+  from { opacity: 1; transform: translate(0, 0); }
+  to   { opacity: 0; transform: translate(0, var(--reveal-exit-y, 0px)); }
+}
+
+/* === Shared wrapper exit fade (Scene1, Scene2, Scene5) === */
+@keyframes wrap-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* === Scene1 (src/scenes/Scene1_Headline.tsx) — staggered word reveal === */
+@keyframes word-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* === Scene2 (src/scenes/Scene2_ClaudeWindow.tsx) === */
+@keyframes row-highlight-in {
+  from { opacity: 0; transform: scaleX(0.6); }
+  to   { opacity: 1; transform: scaleX(1); }
+}
+@keyframes row-highlight-flash {
+  0%   { opacity: 0; }
+  50%  { opacity: 0.35; }
+  100% { opacity: 0; }
+}
+@keyframes cursor-in {
+  from { opacity: 0; transform: translate(28px, 24px); }
+  to   { opacity: 1; transform: translate(0, 0); }
+}
+@keyframes click-pulse {
+  0%   { opacity: 0;   transform: scale(1); }
+  3%   { opacity: 0.5; transform: scale(1.015); }
+  100% { opacity: 0;   transform: scale(1.5); }
+}
+
+/* === Scene4 (src/scenes/Scene4_PRPatch.tsx) === */
+@keyframes code-reveal {
+  from { opacity: 0; clip-path: inset(0 0 100% 0); }
+  to   { opacity: 1; clip-path: inset(0 0 0% 0); }
+}
+@keyframes underline-draw {
+  from { stroke-dashoffset: 298; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* === Scene5 (src/scenes/Scene5_Logo.tsx) === */
+@keyframes burst-in {
+  from { opacity: 0; transform: scale(0.4); }
+  to   { opacity: 1; transform: scale(1); }
+}

@@ -1,4 +1,5 @@
 import React from "react";
+import { claude } from "../brand";
 
 /**
  * Anthropic editorial paper background — FLAT warm off-white #FAF9F5.
@@ -15,7 +16,7 @@ export const PaperBackground: React.FC<{ tone?: "primary" | "cream"; grain?: boo
   <div
     className="absolute inset-0"
     style={{
-      background: tone === "cream" ? "#E5DECC" : "#DEDCD2",
+      background: tone === "cream" ? claude.bg.cream : claude.bg.primary,
     }}
   >
     {grain && (

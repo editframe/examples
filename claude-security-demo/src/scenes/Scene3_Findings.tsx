@@ -1,13 +1,12 @@
-import React, { useCallback, useRef } from "react";
+import React from "react";
 import { Timegroup } from "@editframe/react";
-import { eases } from "animejs";
 import { PaperBackground } from "../components/PaperBackground";
 import { Sfx } from "../components/Sfx";
-import { lerp, track } from "../components/helpers";
+import { Reveal } from "../components/Reveal";
 import { claude } from "../brand";
 
 /**
- * Scene 3 — Findings Card (7s) — REBUILT v5
+ * Scene 3 — Findings Card (5s) — REBUILT v5
  *
  * Reference: jeremy-refs frame f-15.png
  *
@@ -17,12 +16,17 @@ import { claude } from "../brand";
  * Layout: both cards stacked, group is centered vertically and horizontally
  * in the 1920×1080 viewport via outer flex.
  *
- * Timing:
+ * Timing (scene-local — this scene's own `<Timegroup>` resets to 0):
  *   0.0–1.0s   Header card fades + slides
  *   0.6–1.6s   Findings card fades
- *   1.4–4.6s   Each of 4 finding rows cascades in (300ms stagger)
- *   4.6–6.4s   Hold
- *   6.4–7.0s   Cross-fade out
+ *   1.4–2.75s  Each of 4 finding rows cascades in (300ms stagger, 450ms ease
+ *              — see the per-row `enter` window computed from array index
+ *              below)
+ *   2.75–5.0s  Hold — Scene4's own incoming fade covers the hand-off, so
+ *              this scene hard-cuts with no exit animation of its own
+ *              (matches the original: its exit-fade window was declared
+ *              starting at 6400ms, past this scene's actual 5000ms
+ *              duration, so it never actually ran).
  */
 
 type Severity = "Critical" | "High";
@@ -83,211 +87,166 @@ const SeverityPill: React.FC<{ severity: Severity }> = ({ severity }) => {
   );
 };
 
-export const Scene3_Findings: React.FC = () => {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const findingsCardRef = useRef<HTMLDivElement>(null);
-  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
+const ROW_STAGGER_START_MS = 1400;
+const ROW_STAGGER_MS = 300;
+const ROW_DURATION_MS = 450;
 
-  const handleFrame = useCallback(
-    ({ ownCurrentTimeMs }: { ownCurrentTimeMs: number }) => {
-      const ms = ownCurrentTimeMs;
+export const Scene3_Findings: React.FC = () => (
+  <Timegroup mode="fixed" duration="5s" className="absolute inset-0">
+    <PaperBackground />
+    <Sfx cue="plop" at={0.3} dur={0.4} volume={0.06} />
+    <Sfx cue="plop" at={0.9} dur={0.4} volume={0.05} />
+    {[0, 1, 2, 3].map((i) => (
+      <Sfx key={i} cue="pop" at={1.5 + i * 0.3} dur={0.25} volume={0.04} />
+    ))}
 
-      const hp = track(ms, 0, 1000, eases.outCubic);
-      if (headerRef.current) {
-        headerRef.current.style.opacity = String(hp);
-        headerRef.current.style.transform = `translateY(${lerp(14, 0, hp)}px)`;
-      }
-
-      const cp = track(ms, 600, 1600, eases.outCubic);
-      if (findingsCardRef.current) {
-        findingsCardRef.current.style.opacity = String(cp);
-        findingsCardRef.current.style.transform = `translateY(${lerp(14, 0, cp)}px)`;
-      }
-
-      rowRefs.current.forEach((el, i) => {
-        if (!el) return;
-        const start = 1400 + i * 300;
-        const p = track(ms, start, start + 450, eases.outCubic);
-        el.style.opacity = String(p);
-        el.style.transform = `translateY(${lerp(8, 0, p)}px)`;
-      });
-
-      let outOp = 1;
-      if (ms >= 6400) outOp = 1 - track(ms, 6400, 7000, eases.outCubic);
-      if (wrapRef.current) wrapRef.current.style.opacity = String(outOp);
-    },
-    []
-  );
-
-  return (
-    <Timegroup
-      mode="fixed"
-      duration="5s"
-      onFrame={handleFrame as any}
-      className="absolute inset-0"
+    {/* Outer centering frame */}
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
     >
-      <PaperBackground />
-      <Sfx cue="plop" at={0.3} dur={0.4} volume={0.06} />
-      <Sfx cue="plop" at={0.9} dur={0.4} volume={0.05} />
-      {[0, 1, 2, 3].map((i) => (
-        <Sfx key={i} cue="pop" at={1.5 + i * 0.3} dur={0.25} volume={0.04} />
-      ))}
-
-      {/* Outer centering frame */}
       <div
-        ref={wrapRef}
         style={{
-          position: "absolute",
-          inset: 0,
+          width: 1380,
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          willChange: "opacity",
+          flexDirection: "column",
+          gap: 28,
         }}
       >
-        <div
+        {/* Header card: acme-corp/hookrelay · Completed */}
+        <Reveal
+          enter={[0, 1000]}
+          y={14}
           style={{
-            width: 1380,
+            background: claude.bg.card,
+            border: `1px solid ${claude.fg.rule}`,
+            borderRadius: 14,
+            padding: "26px 36px",
             display: "flex",
-            flexDirection: "column",
-            gap: 28,
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          {/* Header card: acme-corp/hookrelay · Completed */}
-          <div
-            ref={headerRef}
-            style={{
-              background: claude.bg.card,
-              border: `1px solid ${claude.fg.rule}`,
-              borderRadius: 14,
-              padding: "26px 36px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              opacity: 0,
-              willChange: "opacity, transform",
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontFamily: claude.fonts.body,
-                  fontSize: 26,
-                  fontWeight: 500,
-                  color: claude.fg.primary,
-                  marginBottom: 6,
-                }}
-              >
-                acme-corp/hookrelay
-              </div>
-              <div
-                style={{
-                  fontFamily: claude.fonts.body,
-                  fontSize: 18,
-                  color: claude.fg.tertiary,
-                }}
-              >
-                1 minute ago &middot; 4 findings
-              </div>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                fontFamily: claude.fonts.body,
-                fontSize: 22,
-                fontWeight: 500,
-                color: claude.accent.green,
-              }}
-            >
-              <svg width={28} height={28} viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke={claude.accent.green} strokeWidth={1.8} />
-                <path d="m7.5 12.2 3 3 6-6.2" stroke={claude.accent.green} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Completed
-            </div>
-          </div>
-
-          {/* Findings card */}
-          <div
-            ref={findingsCardRef}
-            style={{
-              background: claude.bg.card,
-              border: `1px solid ${claude.fg.rule}`,
-              borderRadius: 14,
-              padding: "30px 38px 36px 38px",
-              opacity: 0,
-              willChange: "opacity, transform",
-            }}
-          >
+          <div>
             <div
               style={{
                 fontFamily: claude.fonts.body,
-                fontSize: 24,
+                fontSize: 26,
                 fontWeight: 500,
                 color: claude.fg.primary,
-                marginBottom: 22,
+                marginBottom: 6,
               }}
             >
-              4 findings
+              acme-corp/hookrelay
             </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-              {FINDINGS.map((f, i) => (
-                <div
-                  key={i}
-                  ref={(el) => (rowRefs.current[i] = el)}
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 22,
-                    opacity: 0,
-                    willChange: "opacity, transform",
-                  }}
-                >
-                  <div style={{ paddingTop: 2, minWidth: 110 }}>
-                    <SeverityPill severity={f.severity} />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div
-                      style={{
-                        fontFamily: claude.fonts.body,
-                        fontSize: 22,
-                        fontWeight: 500,
-                        color: claude.fg.primary,
-                        marginBottom: 6,
-                        lineHeight: 1.25,
-                      }}
-                    >
-                      {f.title}
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 14,
-                        fontFamily: claude.fonts.mono,
-                        fontSize: 17,
-                        color: claude.fg.secondary,
-                      }}
-                    >
-                      <span>{f.path}</span>
-                      <span style={{ color: claude.fg.tertiary }}>&middot;</span>
-                      <span style={{ fontFamily: claude.fonts.body, color: claude.fg.secondary }}>
-                        {f.category}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div
+              style={{
+                fontFamily: claude.fonts.body,
+                fontSize: 18,
+                color: claude.fg.tertiary,
+              }}
+            >
+              1 minute ago &middot; 4 findings
             </div>
           </div>
-        </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              fontFamily: claude.fonts.body,
+              fontSize: 22,
+              fontWeight: 500,
+              color: claude.accent.green,
+            }}
+          >
+            <svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke={claude.accent.green} strokeWidth={1.8} />
+              <path d="m7.5 12.2 3 3 6-6.2" stroke={claude.accent.green} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Completed
+          </div>
+        </Reveal>
+
+        {/* Findings card */}
+        <Reveal
+          enter={[600, 1600]}
+          y={14}
+          style={{
+            background: claude.bg.card,
+            border: `1px solid ${claude.fg.rule}`,
+            borderRadius: 14,
+            padding: "30px 38px 36px 38px",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: claude.fonts.body,
+              fontSize: 24,
+              fontWeight: 500,
+              color: claude.fg.primary,
+              marginBottom: 22,
+            }}
+          >
+            4 findings
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+            {FINDINGS.map((f, i) => (
+              <Reveal
+                key={i}
+                enter={[
+                  ROW_STAGGER_START_MS + i * ROW_STAGGER_MS,
+                  ROW_STAGGER_START_MS + i * ROW_STAGGER_MS + ROW_DURATION_MS,
+                ]}
+                y={8}
+                style={{ display: "flex", alignItems: "flex-start", gap: 22 }}
+              >
+                <div style={{ paddingTop: 2, minWidth: 110 }}>
+                  <SeverityPill severity={f.severity} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div
+                    style={{
+                      fontFamily: claude.fonts.body,
+                      fontSize: 22,
+                      fontWeight: 500,
+                      color: claude.fg.primary,
+                      marginBottom: 6,
+                      lineHeight: 1.25,
+                    }}
+                  >
+                    {f.title}
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 14,
+                      fontFamily: claude.fonts.mono,
+                      fontSize: 17,
+                      color: claude.fg.secondary,
+                    }}
+                  >
+                    <span>{f.path}</span>
+                    <span style={{ color: claude.fg.tertiary }}>&middot;</span>
+                    <span style={{ fontFamily: claude.fonts.body, color: claude.fg.secondary }}>
+                      {f.category}
+                    </span>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </Reveal>
       </div>
-    </Timegroup>
-  );
-};
+    </div>
+  </Timegroup>
+);
 
 export default Scene3_Findings;
