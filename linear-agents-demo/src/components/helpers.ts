@@ -15,18 +15,8 @@ export const track = (
   ease: (t: number) => number = (t) => t
 ): number => ease(clamp((ms - start) / (end - start)));
 
-/** Ease out + overshoot (spring-like) */
-export const outBack = (t: number, overshoot = 1.7): number => {
-  const c1 = overshoot;
-  const c3 = c1 + 1;
-  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
-};
-
 /** Ease out cubic */
 export const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
-
-/** Ease in cubic */
-export const easeInCubic = (t: number) => t * t * t;
 
 /** Ease in-out quad */
 export const easeInOutQuad = (t: number) =>

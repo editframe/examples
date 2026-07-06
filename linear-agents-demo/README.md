@@ -105,12 +105,24 @@ Linear runs a dark, flat UI — a warm near-black ground, two greys of type, and
 ├── output/
 │   └── demo.mp4               ← final shipped render (with audio)
 └── src/
-    ├── Video.tsx              ← composition root (32s, one fixed Timegroup, all beats)
+    ├── Video.tsx              ← composition root: one `<Timegroup mode="sequence">` of 8 scenes
     ├── main.tsx               ← TimelineRoot mount
-    ├── constants.ts           ← master timing (ms) + palette tokens
-    ├── styles.css             ← document reset for the 1920×1080 canvas
+    ├── constants.ts           ← scene durations (SCENES) + palette tokens
+    ├── styles.css             ← document reset + every scene's `@keyframes`
+    ├── scenes/                ← one file per scene, each its own `<Timegroup mode="fixed">`
+    │   ├── TitleIntro.tsx
+    │   ├── Backlog.tsx
+    │   ├── CodegenIssue.tsx
+    │   ├── Integrations.tsx
+    │   ├── DevinIssue.tsx
+    │   ├── OutroTicker.tsx
+    │   ├── OutroTitle.tsx
+    │   └── LinearLogo.tsx
     └── components/
-        └── helpers.ts         ← track, lerp, clamp, easings (outBack, easeOutCubic…)
+        ├── Reveal.tsx         ← declarative fade/slide reveal (CSS keyframes, not per-frame JS)
+        ├── icons.tsx          ← shared SVG icons + Cursor, used across scenes
+        └── helpers.ts         ← track, lerp, clamp, easings — used only by Backlog.tsx's
+                                   small scoped `addFrameTask` (see that file for why)
 ```
 
 ---
@@ -125,8 +137,8 @@ NO_COLOR=1 FORCE_COLOR=0 npm run render
 bash add-audio.sh
 ```
 
-1. **Swap the story** — every beat is driven from the one `handleFrame` in `src/Video.tsx` against named constants. Edit timings in `src/constants.ts` (master ms); the 32s clock is one fixed `<Timegroup>`.
-2. **Rebrand** — replace the palette tokens at the top of `src/constants.ts` (and `FONT` / `MONO` in `src/Video.tsx`). Never use pure `#000` or drop shadows on text.
+1. **Swap the story** — each beat is its own file under `src/scenes/`, sequenced by the root `<Timegroup mode="sequence">` in `src/Video.tsx`. Edit a scene's own local timing constants directly in that file; scene durations live in `src/constants.ts` (`SCENES`).
+2. **Rebrand** — replace the palette tokens at the top of `src/constants.ts` (and `FONT` / `MONO`, also in `src/constants.ts`). Never use pure `#000` or drop shadows on text.
 3. **Swap the music** — drop a replacement `music-bed.mp3` into `audio/` (or update the `MUSIC=` variable in `add-audio.sh`); log it in [`CREDITS.md`](CREDITS.md).
 4. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render`, then `bash add-audio.sh`.
 

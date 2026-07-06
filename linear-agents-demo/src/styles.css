@@ -23,3 +23,191 @@ body {
 * {
   box-sizing: border-box;
 }
+
+/* === Reveal (see src/components/Reveal.tsx) — declarative fade + float-up/out === */
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(var(--reveal-y, 20px)); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes reveal-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(var(--reveal-exit-y, 0px)); }
+}
+
+/* === Generic, reused across scenes === */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes instant-show {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes instant-hide {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+/* one-shot clip-path "typing" reveal, left-to-right (used by CodegenIssue + DevinIssue) */
+@keyframes codegen-typing {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+/* === TitleIntro scene (src/scenes/TitleIntro.tsx) === */
+@keyframes title-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes title-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* === Backlog scene (src/scenes/Backlog.tsx) === */
+@keyframes backlog-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes backlog-zoom-out {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(4); }
+}
+@keyframes selection-tint-1 {
+  from { background: rgba(94, 106, 210, 0); }
+  to   { background: rgba(94, 106, 210, 0.05); }
+}
+@keyframes selection-tint-2 {
+  from { background: rgba(94, 106, 210, 0.05); }
+  to   { background: rgba(94, 106, 210, 0.10); }
+}
+@keyframes checkbox-instant-on {
+  from { background: transparent; border-color: #62646B; }
+  to   { background: rgb(38, 43, 69); border-color: rgb(38, 43, 69); }
+}
+@keyframes checkbox-color-ramp {
+  from { background: rgb(38, 43, 69); border-color: rgb(38, 43, 69); }
+  to   { background: rgb(94, 106, 210); border-color: rgb(94, 106, 210); }
+}
+@keyframes checkbox-icon-ramp-1 {
+  from { opacity: 0; }
+  to   { opacity: 0.5; }
+}
+@keyframes checkbox-icon-ramp-2 {
+  from { opacity: 0.5; }
+  to   { opacity: 1; }
+}
+@keyframes codegen-icon-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes assignee-ring-out {
+  from { opacity: 0.55; }
+  to   { opacity: 0; }
+}
+@keyframes lin1293-highlight-in {
+  from { background: transparent; }
+  to   { background: rgba(94, 106, 210, 0.13); }
+}
+@keyframes lin1293-highlight-out {
+  from { background: rgba(94, 106, 210, 0.13); }
+  to   { background: transparent; }
+}
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes modal-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes codegen-row-flash {
+  0%   { background: rgba(94, 106, 210, 0.06); }
+  57%  { background: rgba(94, 106, 210, 0.18); }
+  100% { background: rgba(94, 106, 210, 0.06); }
+}
+
+/* === CodegenIssue scene (src/scenes/CodegenIssue.tsx) === */
+@keyframes issue1-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes issue1-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes issue1-scroll {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-470px); }
+}
+@keyframes issue1-entry-scale {
+  from { transform: scale(1.05); }
+  to   { transform: scale(1); }
+}
+@keyframes issue1-zoom-scale {
+  from { transform: scale(1); }
+  to   { transform: scale(1.14); }
+}
+@keyframes issue1-origin-switch {
+  from { transform-origin: 726px 360px; }
+  to   { transform-origin: 760px 620px; }
+}
+
+/* === Integrations scene (src/scenes/Integrations.tsx) === */
+@keyframes integrations-scroll-in {
+  from { transform: translateY(600px); }
+  to   { transform: translateY(22px); }
+}
+@keyframes devin-card-highlight {
+  from { background: #0E0E12; border-color: #1d1d22; }
+  to   { background: #17171C; border-color: #2c2c34; }
+}
+@keyframes devin-cursor-move {
+  from { transform: translate(1660px, 250px); }
+  to   { transform: translate(1592px, 340px); }
+}
+
+/* === DevinIssue scene (src/scenes/DevinIssue.tsx) === */
+@keyframes andreas-typing-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes devin-msg-open {
+  from { max-height: 0; }
+  to   { max-height: 900px; }
+}
+@keyframes devin-msg-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes devin-reveal {
+  from { clip-path: inset(0 0 100% 0); }
+  to   { clip-path: inset(0 0 0% 0); }
+}
+@keyframes code-cursor-move {
+  from { transform: translate(1040px, 820px); }
+  to   { transform: translate(1010px, 800px); }
+}
+
+/* === OutroTicker scene (src/scenes/OutroTicker.tsx) === */
+@keyframes ticker-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes ticker-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes ticker-slide-1 {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-100px); }
+}
+@keyframes ticker-slide-2 {
+  from { transform: translateY(-100px); }
+  to   { transform: translateY(-200px); }
+}
+
+/* === OutroTitle scene (src/scenes/OutroTitle.tsx) === */
+@keyframes title-agents-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
