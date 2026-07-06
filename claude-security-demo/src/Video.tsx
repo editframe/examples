@@ -33,7 +33,8 @@ const DURATION_MS = 19000; // 3800 + 2200 + 5000 + 5000 + 3000 (scene durations,
 export const Video: React.FC = () => {
   return (
     <Timegroup
-      mode="sequence"
+      mode="contain"
+      workbench
       className="relative w-full h-full overflow-hidden"
       style={{
         width: 1920,
@@ -41,13 +42,17 @@ export const Video: React.FC = () => {
         background: claude.bg.primary,
       }}
     >
-      <Scene1_Headline />
-      <Scene2_ClaudeWindow />
-      <Scene3_Findings />
-      <Scene4_PRPatch />
-      <Scene5_Logo />
+      <Timegroup mode="sequence" className="absolute w-full h-full">
+        <Scene1_Headline />
+        <Scene2_ClaudeWindow />
+        <Scene3_Findings />
+        <Scene4_PRPatch />
+        <Scene5_Logo />
+      </Timegroup>
       {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the
-          composition's total runtime regardless of the source file's own length. */}
+          composition's total runtime regardless of the source file's own length. Sibling of
+          the sequence (not a child of it) so it spans the whole timeline as a background
+          track instead of being treated as an extra sequential scene. */}
       <Audio src={MUSIC} volume={1} duration={`${DURATION_MS}ms`} />
     </Timegroup>
   );
