@@ -7,18 +7,24 @@
  * - "What will you build in CloudTicTacToe?" headline centered ~64px
  * - Chat input box: "Run this app in [Xcode] , test it by playing a game, and fix any bugs you find"
  * - Below input: toolbar row, chips row, suggestion pills
- * - Typing starts immediately (faster than v4), completes by ~1600ms
- * - Send button highlights when typing done
+ * - Typing starts immediately (faster than v4)
  *
  * FIX 2: Compressed from 5500ms to 2000ms. Typing faster (25ms/char).
+ *
+ * The char-by-char typewriter effect (with the "Xcode" chip swapped in mid-string) is the
+ * one genuinely irreducible per-frame effect in this scene — it's kept as a small
+ * scene-scoped `onFrame`. Everything else (background/headline/panel/chips/pills fades,
+ * caret blink) is plain CSS. Note: at 22ms/char the 76-char message needs 2472ms to fully
+ * type, longer than this scene's own 2000ms duration — so the "typing complete" send-button
+ * pulse in the original never actually fires within this scene. Preserved as-is (the send
+ * button renders in its static "not done" state) rather than silently changing the timing.
  */
 
 import React, { useCallback, useRef } from "react";
 import { Timegroup } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
-import { track, lerp } from "../components/helpers";
-import { eases } from "animejs";
+import { Reveal } from "../components/Reveal";
 
 const SCENE_DURATION = 2000;
 const SCENE_START_MS = 2500;
@@ -26,63 +32,18 @@ const SCENE_START_MS = 2500;
 const PANEL_W = 1350;
 const PANEL_LEFT = (1920 - PANEL_W) / 2; // 285
 
-const FADE_IN_START = 0;
-const FADE_IN_END = 300;
-const HEADLINE_IN_START = 100;
-const HEADLINE_IN_END = 500;
-const INPUT_IN_START = 300;
-const INPUT_IN_END = 600;
-const CHIPS_IN_START = 500;
-const CHIPS_IN_END = 800;
-const PILLS_IN_START = 700;
-const PILLS_IN_END = 1000;
-
 // Typing starts at t=800ms to let UI appear first
 const TYPE_START = 800;
 const FULL_MSG = "Run this app in Xcode , test it by playing a game, and fix any bugs you find";
 const XCODE_END_IDX = 21; // "Run this app in Xcode" = 21 chars
 const MS_PER_CHAR = 22; // faster to finish within 2s
 
-let blinkTick = 0;
-
 export const Scene2: React.FC = () => {
-  const bgRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLDivElement>(null);
-  const inputPanelRef = useRef<HTMLDivElement>(null);
-  const chipsRef = useRef<HTMLDivElement>(null);
-  const pillsRef = useRef<HTMLDivElement>(null);
   const typedRef = useRef<HTMLSpanElement>(null);
   const xcodeChipRef = useRef<HTMLSpanElement>(null);
-  const sendBtnRef = useRef<HTMLButtonElement>(null);
-  const cursorBlinkRef = useRef<HTMLSpanElement>(null);
 
   const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    if (bgRef.current) {
-      const t = track(ms, FADE_IN_START, FADE_IN_END, eases.outCubic);
-      bgRef.current.style.opacity = String(t);
-    }
-    if (headlineRef.current) {
-      const t = track(ms, HEADLINE_IN_START, HEADLINE_IN_END, eases.outCubic);
-      headlineRef.current.style.opacity = String(t);
-      headlineRef.current.style.transform = `translateY(${lerp(20, 0, t)}px)`;
-    }
-    if (inputPanelRef.current) {
-      const t = track(ms, INPUT_IN_START, INPUT_IN_END, eases.outCubic);
-      inputPanelRef.current.style.opacity = String(t);
-      inputPanelRef.current.style.transform = `translateY(${lerp(16, 0, t)}px)`;
-    }
-    if (chipsRef.current) {
-      const t = track(ms, CHIPS_IN_START, CHIPS_IN_END, eases.outCubic);
-      chipsRef.current.style.opacity = String(t);
-      chipsRef.current.style.transform = `translateY(${lerp(12, 0, t)}px)`;
-    }
-    if (pillsRef.current) {
-      const t = track(ms, PILLS_IN_START, PILLS_IN_END, eases.outCubic);
-      pillsRef.current.style.opacity = String(t);
-      pillsRef.current.style.transform = `translateY(${lerp(12, 0, t)}px)`;
-    }
-
-    // Typing animation
+    // Typewriter reveal + mid-string Xcode chip swap — see file header for why this stays JS.
     if (ms >= TYPE_START && typedRef.current) {
       const elapsed = ms - TYPE_START;
       const charCount = Math.min(FULL_MSG.length, Math.floor(elapsed / MS_PER_CHAR));
@@ -100,17 +61,6 @@ export const Scene2: React.FC = () => {
             afterSpan.textContent = typed.slice(XCODE_END_IDX);
           }
         }
-      }
-
-      blinkTick = Math.floor(ms / 500);
-      if (cursorBlinkRef.current) {
-        cursorBlinkRef.current.style.opacity = blinkTick % 2 === 0 ? "1" : "0";
-      }
-
-      if (sendBtnRef.current) {
-        const typingDone = charCount >= FULL_MSG.length;
-        sendBtnRef.current.style.transform = typingDone ? "scale(1.08)" : "scale(1)";
-        sendBtnRef.current.style.boxShadow = typingDone ? "0 0 16px rgba(0,0,0,0.4)" : "none";
       }
     }
   }, []);
@@ -130,21 +80,13 @@ export const Scene2: React.FC = () => {
       <TraceLayer sceneStartMs={SCENE_START_MS} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
 
       {!TRACE_MODE && (
-        <div
-          ref={bgRef}
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "#FFFFFF",
-            zIndex: 1,
-            opacity: 0,
-          }}
-        />
+        <Reveal enter={[0, 300]} y={0} style={{ position: "absolute", inset: 0, background: "#FFFFFF", zIndex: 1 }} />
       )}
 
       {/* Headline */}
-      <div
-        ref={headlineRef}
+      <Reveal
+        enter={[100, 500]}
+        y={20}
         style={{
           position: "absolute",
           top: 160,
@@ -157,17 +99,17 @@ export const Scene2: React.FC = () => {
           fontFamily: "'SF Pro Display', 'Helvetica Neue', Arial, sans-serif",
           letterSpacing: "-0.02em",
           lineHeight: 1.1,
-          opacity: 0,
           zIndex: 2,
           whiteSpace: "nowrap",
         }}
       >
         What will you build in CloudTicTacToe?
-      </div>
+      </Reveal>
 
       {/* Chat input panel */}
-      <div
-        ref={inputPanelRef}
+      <Reveal
+        enter={[300, 600]}
+        y={16}
         style={{
           position: "absolute",
           top: 310,
@@ -178,7 +120,6 @@ export const Scene2: React.FC = () => {
           borderRadius: 16,
           padding: "22px 24px 0 24px",
           boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-          opacity: 0,
           zIndex: 2,
         }}
       >
@@ -217,7 +158,6 @@ export const Scene2: React.FC = () => {
           </span>
           <span className="after-xcode" style={{ display: "inline" }}></span>
           <span
-            ref={cursorBlinkRef}
             style={{
               display: "inline-block",
               width: 2,
@@ -225,7 +165,7 @@ export const Scene2: React.FC = () => {
               background: "#0D0D0D",
               marginLeft: 1,
               verticalAlign: "middle",
-              opacity: 1,
+              animation: "s2-caret-blink 1000ms steps(1) 800ms infinite backwards",
             }}
           />
         </div>
@@ -259,8 +199,8 @@ export const Scene2: React.FC = () => {
               <span style={{ fontSize: 12 }}>▾</span>
             </div>
             <span style={{ fontSize: 18, color: "#666" }}>🎤</span>
-            <button
-              ref={sendBtnRef}
+            {/* Static "not done" state — see file header: typing never completes within this scene */}
+            <div
               style={{
                 width: 42,
                 height: 42,
@@ -270,19 +210,18 @@ export const Scene2: React.FC = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                cursor: "pointer",
-                transition: "transform 0.2s, box-shadow 0.2s",
               }}
             >
               <span style={{ color: "#FFF", fontSize: 18, marginTop: -2 }}>↑</span>
-            </button>
+            </div>
           </div>
         </div>
-      </div>
+      </Reveal>
 
       {/* Filter chips row */}
-      <div
-        ref={chipsRef}
+      <Reveal
+        enter={[500, 800]}
+        y={12}
         style={{
           position: "absolute",
           top: 560,
@@ -290,7 +229,6 @@ export const Scene2: React.FC = () => {
           width: PANEL_W,
           display: "flex",
           gap: 8,
-          opacity: 0,
           zIndex: 2,
         }}
       >
@@ -319,11 +257,12 @@ export const Scene2: React.FC = () => {
             <span style={{ fontSize: 11, color: "#888" }}>▾</span>
           </div>
         ))}
-      </div>
+      </Reveal>
 
       {/* Suggestion pills */}
-      <div
-        ref={pillsRef}
+      <Reveal
+        enter={[700, 1000]}
+        y={12}
         style={{
           position: "absolute",
           top: 630,
@@ -332,7 +271,6 @@ export const Scene2: React.FC = () => {
           display: "flex",
           flexDirection: "column",
           gap: 0,
-          opacity: 0,
           zIndex: 2,
         }}
       >
@@ -344,7 +282,7 @@ export const Scene2: React.FC = () => {
           <span style={{ fontSize: 18, color: "#999" }}>+</span>
           <span>Connect your favorite apps to Codex</span>
         </div>
-      </div>
+      </Reveal>
     </Timegroup>
   );
 };

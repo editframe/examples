@@ -11,16 +11,20 @@
  *     x% = 648/1920 = 33.75%
  *     y% = 42/1052  = 3.99% ≈ 4%
  *   At this origin, zooming in keeps the Run button centered on screen.
+ *
+ * A multi-stage shape morph (camera push-in → hold → pull-out, plus the Codex/Xcode
+ * panels resizing toward their Scene7 targets during the pull-out) — converted to a
+ * bespoke pair of percentage-keyframe `@keyframes` per element (see styles.css) rather
+ * than a per-frame `onFrame`. Percentage stops line up exactly with this scene's own
+ * 1500ms duration: 0–550ms push-in (0–36.67%), 550–900ms hold (36.67–60%), 900–1500ms
+ * pull-out (60–100%).
  */
 
-import React, { useCallback, useRef } from "react";
-import { Timegroup } from "@editframe/react";
+import React from "react";
+import { Timegroup, Image } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
-// Clean macOS desktop gradient (no circles/grid artifacts)
-const DESKTOP_BG = "linear-gradient(135deg, #8B9EC8 0%, #6B7FA8 20%, #4A5F9E 40%, #2E4590 60%, #1A2E7A 80%, #0D1B5E 100%)";
-import { cursorMacosDataUri } from "../scenes/scene-assets";
-import { track, lerp } from "../components/helpers";
+import { cursorMacosSrc } from "../scenes/scene-assets";
 import {
   XcodeWindow,
   CodexTitleBar,
@@ -28,14 +32,13 @@ import {
   ToolCallRow,
   CodexBottomBar,
 } from "../components/panels";
-import { eases } from "animejs";
+// Clean macOS desktop gradient (no circles/grid artifacts)
+const DESKTOP_BG = "linear-gradient(135deg, #8B9EC8 0%, #6B7FA8 20%, #4A5F9E 40%, #2E4590 60%, #1A2E7A 80%, #0D1B5E 100%)";
 
 const SCENE_DURATION = 1500;
 const SCENE_START_MS = 13000;
 
-const CAMERA_SCALE = 1.4;
-
-const CODEX_W = 640;  // FIX 3: widened from 540 to 640
+const CODEX_W = 640; // FIX 3: widened from 540 to 640
 const CODEX_H = 620;
 const XCODE_W = 860;
 const XCODE_H = 680;
@@ -44,178 +47,19 @@ const CODEX_TOP = 50;
 const XCODE_LEFT = 500;
 const XCODE_TOP = 20;
 
-// CONTINUOUS camera (ROUND-7 jump-cut fix). Scene6 must start EXACTLY where
-// Scene5 ends — scale 1.4, origin "top left", same panel positions — so there
-// is NO snap at the 13s boundary. Then it pushes in GENTLY (to ~1.62, not a
-// 2.6 slam — the slam shoved the Codex chat off-screen = "assets disappear"),
-// holds for the Run click, then eases back to 1.0 for Scene7. The old build
-// also jumped transformOrigin "top left" → "33.75% 4%" at the same scale,
-// which teleported the whole layout ("version shifted down / snap cut").
-// ROUND-8e: the 1.62 push read as "too minimal" — the run-button click wasn't a
-// clear focal point. Deepen to 1.95 AND pan toward the Run button (translate, not
-// an origin change → still continuous from Scene5, no jump) so the camera fixates
-// on the coding panel with the cursor/Run button at upper-centre as the focal point.
-// At peak: run button (native 648,42) → screen ≈ (960, 150).
-//   tx = 960 - 648*1.95 = -304 ;  ty = 150 - (28 + 42*1.95) = 40
-const PEAK_SCALE = 1.95;
-const PEAK_TX = -304;
-const PEAK_TY = 40;
-const ZOOM_IN_START = 0;
-const ZOOM_IN_END = 550;     // gentle push-in (no slam)
-const ZOOM_HOLD_END = 900;   // hold while the cursor clicks Run
-const ZOOM_OUT_START = 900;
-const ZOOM_OUT_END = 1500;   // ease back to 1.0x for Scene7
-
-// FIX 6: Cursor and click-ring are now rendered INSIDE the zoomed container,
-// in the same coordinate space as the Xcode panel. No zoom math needed.
-//
-// Run button layout position inside XcodeWindow (XcodeTitleBar flex row):
-//   padding-left: 12
-//   traffic-lights group: 3×12px dots + 2×6px gaps = 48px wide
-//   gap: 8
-//   hamburger group (~22px wide)
-//   gap: 8
-//   stop button: 26px wide
-//   gap: 8
-//   Run button: 32px wide → center at +16
-//   Total left edge: 12 + 48 + 8 + 22 + 8 + 26 + 8 = 132 → center = 148px
-//
-// In container-space (XCODE_LEFT=500, XCODE_TOP=20, titlebar height=44):
-//   RUN_BTN_CONTAINER.x = 500 + 148 = 648
-//   RUN_BTN_CONTAINER.y = 20 + 22  = 42  (center of 44px title bar)
+// Run button layout position inside XcodeWindow (XcodeTitleBar flex row) — see FIX 6:
+// cursor + click-ring live in the same container-space coordinates as the Xcode panel.
 const RUN_BTN_CONTAINER = { x: 648, y: 42 };
-
-const CLICK_T = 760; // cursor clicks during the hold phase (550–900ms)
-
-// Cursor starts from roughly center of the container (below the panels)
 const CURSOR_START = { x: 820, y: 380 };
 
 const BOTTOM_H = 110;
-
-// Scene7 target positions — window positions must match these exactly when Scene6 ends
-// so Scene7's opening frame is continuous with Scene6's last frame.
-const S7_CODEX_LEFT = 68;
-const S7_CODEX_TOP  = 195;
-const S7_CODEX_W    = 590;
-const S7_CODEX_H    = 660;
-const S7_XCODE_LEFT = 490;
-const S7_XCODE_TOP  = 52;
-const S7_XCODE_W    = 930;
-const S7_XCODE_H    = 640;
+const CHAT_H = CODEX_H - 44 - BOTTOM_H;
 
 export const Scene6: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const cursorRef = useRef<HTMLImageElement>(null);
-  const runBtnRef = useRef<HTMLDivElement>(null);
-  const clickRingRef = useRef<HTMLDivElement>(null);
-  const codexPanelRef = useRef<HTMLDivElement>(null);
-  const xcodePanelRef = useRef<HTMLDivElement>(null);
-
-  const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    // Camera zoom in → hold → pan back out (FIX 4: explicit strong zoom)
-    // During zoom-out: smoothly transition transformOrigin from Run-button focus
-    // to center-center so Scene7 picks up seamlessly.
-    if (containerRef.current) {
-      // SAME origin as Scene5 ("top left") for the whole scene → seamless 13s
-      // boundary. Cursor + click-ring + Run button all live inside this scaled
-      // container, so they stay glued together through the push-in/out.
-      containerRef.current.style.transformOrigin = "top left";
-      let scale: number, tx: number, ty: number;
-      if (ms <= ZOOM_IN_END) {
-        const t = track(ms, ZOOM_IN_START, ZOOM_IN_END, eases.inOutCubic);
-        scale = lerp(CAMERA_SCALE, PEAK_SCALE, t);
-        tx = lerp(0, PEAK_TX, t);
-        ty = lerp(0, PEAK_TY, t);
-      } else if (ms <= ZOOM_HOLD_END) {
-        scale = PEAK_SCALE; tx = PEAK_TX; ty = PEAK_TY;
-      } else {
-        const t = track(ms, ZOOM_OUT_START, ZOOM_OUT_END, eases.inOutCubic);
-        scale = lerp(PEAK_SCALE, 1.0, t);
-        tx = lerp(PEAK_TX, 0, t);
-        ty = lerp(PEAK_TY, 0, t);
-      }
-      containerRef.current.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
-    }
-
-    // During zoom-out: slide Codex + Xcode panels to their Scene7 positions
-    // so there's no jump at the Scene6→Scene7 boundary.
-    if (codexPanelRef.current) {
-      if (ms >= ZOOM_OUT_START) {
-        const t = track(ms, ZOOM_OUT_START, ZOOM_OUT_END, eases.inOutCubic);
-        const left = lerp(CODEX_LEFT, S7_CODEX_LEFT, t);
-        const top  = lerp(CODEX_TOP,  S7_CODEX_TOP,  t);
-        const w    = lerp(CODEX_W,    S7_CODEX_W,    t);
-        const h    = lerp(CODEX_H,    S7_CODEX_H,    t);
-        codexPanelRef.current.style.left   = left + "px";
-        codexPanelRef.current.style.top    = top  + "px";
-        codexPanelRef.current.style.width  = w    + "px";
-        codexPanelRef.current.style.height = h    + "px";
-      }
-    }
-    if (xcodePanelRef.current) {
-      if (ms >= ZOOM_OUT_START) {
-        const t = track(ms, ZOOM_OUT_START, ZOOM_OUT_END, eases.inOutCubic);
-        const left = lerp(XCODE_LEFT, S7_XCODE_LEFT, t);
-        const top  = lerp(XCODE_TOP,  S7_XCODE_TOP,  t);
-        const w    = lerp(XCODE_W,    S7_XCODE_W,    t);
-        const h    = lerp(XCODE_H,    S7_XCODE_H,    t);
-        xcodePanelRef.current.style.left   = left + "px";
-        xcodePanelRef.current.style.top    = top  + "px";
-        xcodePanelRef.current.style.width  = w    + "px";
-        xcodePanelRef.current.style.height = h    + "px";
-      }
-    }
-
-    // Cursor moves to RUN button (FIX 6: container-space coords — no zoom math)
-    if (cursorRef.current) {
-      const moveT = track(ms, 100, CLICK_T - 80, eases.outCubic);
-      const cx = lerp(CURSOR_START.x, RUN_BTN_CONTAINER.x, moveT);
-      const cy = lerp(CURSOR_START.y, RUN_BTN_CONTAINER.y, moveT);
-      cursorRef.current.style.left = cx + "px";
-      cursorRef.current.style.top = cy + "px";
-
-      // Click pulse at CLICK_T
-      if (ms >= CLICK_T - 60 && ms <= CLICK_T + 160) {
-        const progress = (ms - (CLICK_T - 60)) / 220;
-        const scaleV = progress < 0.5
-          ? lerp(1.0, 0.75, progress * 2)
-          : lerp(0.75, 1.0, (progress - 0.5) * 2);
-        cursorRef.current.style.transform = `scale(${scaleV})`;
-      } else {
-        cursorRef.current.style.transform = "scale(1)";
-      }
-
-      // Fade in at the start (so the cursor doesn't pop at the 13s cut), then
-      // fade out as the camera eases back (so it doesn't drag into Scene7).
-      if (ms > ZOOM_OUT_START + 300) {
-        const fadeT = track(ms, ZOOM_OUT_START + 300, ZOOM_OUT_END, eases.outCubic);
-        cursorRef.current.style.opacity = String(lerp(1, 0, fadeT));
-      } else if (ms < 250) {
-        cursorRef.current.style.opacity = String(track(ms, 0, 250, eases.outCubic));
-      } else {
-        cursorRef.current.style.opacity = "1";
-      }
-    }
-
-    // Click ring burst at RUN button screen position
-    if (clickRingRef.current) {
-      if (ms >= CLICK_T && ms <= CLICK_T + 500) {
-        const t = (ms - CLICK_T) / 500;
-        clickRingRef.current.style.opacity = String(1 - t);
-        clickRingRef.current.style.transform = `translate(-50%, -50%) scale(${lerp(0.4, 3.0, t)})`;
-      } else {
-        clickRingRef.current.style.opacity = "0";
-      }
-    }
-  }, []);
-
-  const CHAT_H = CODEX_H - 44 - BOTTOM_H;
-
   return (
     <Timegroup
       mode="fixed"
       duration={`${SCENE_DURATION}ms` as any}
-      onFrame={onFrame as any}
       style={{ position: "relative", width: 1920, height: 1080, overflow: "hidden" }}
     >
       <TraceLayer sceneStartMs={SCENE_START_MS} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
@@ -255,24 +99,21 @@ export const Scene6: React.FC = () => {
         <span style={{ opacity: 0.7, fontSize: 12 }}>Wed Apr 16  8:16 PM</span>
       </div>
 
-      {/* Camera container — zoom-in centered on Run button + pan-out */}
-      {/* FIX B: transformOrigin targets the Xcode Run button coords (33.75% 4%)
-          so the zoom CENTERS on the Run button area, not Codex/left-side */}
+      {/* Camera container — SAME origin as Scene5 ("top left") for the whole scene so
+          there is no snap at the 13s boundary. Push-in → hold (Run click) → pull-out. */}
       <div
-        ref={containerRef}
         style={{
           position: "absolute",
           top: 28, left: 0,
           width: 1920,
           height: 1080 - 28,
           zIndex: 2,
-          transform: `scale(${CAMERA_SCALE})`,
           transformOrigin: "top left",
+          animation: "s6-camera 1500ms linear both",
         }}
       >
         {/* XCODE PANEL (z=3) — wrapper holds position+size, animated to S7 targets on zoom-out */}
         <div
-          ref={xcodePanelRef}
           style={{
             position: "absolute",
             left: XCODE_LEFT,
@@ -280,11 +121,11 @@ export const Scene6: React.FC = () => {
             width: XCODE_W,
             height: XCODE_H,
             zIndex: 3,
+            animation: "s6-xcode-panel 1500ms linear both",
           }}
         >
           <XcodeWindow
             style={{ width: "100%", height: "100%" }}
-            runBtnRef={runBtnRef}
             navWidth={220}
             fontSize={12}
             lineCount={18}
@@ -294,7 +135,6 @@ export const Scene6: React.FC = () => {
 
         {/* CODEX CHAT PANEL (z=4) — left/top/width/height animated to S7 targets during zoom-out */}
         <div
-          ref={codexPanelRef}
           style={{
             position: "absolute",
             left: CODEX_LEFT,
@@ -307,6 +147,7 @@ export const Scene6: React.FC = () => {
             overflow: "hidden",
             zIndex: 4,
             fontFamily: "'SF Pro Text', 'Helvetica Neue', Arial, sans-serif",
+            animation: "s6-codex-panel 1500ms linear both",
           }}
         >
           <CodexTitleBar taskTitle="Playtest app ..." />
@@ -342,7 +183,6 @@ export const Scene6: React.FC = () => {
 
         {/* Click ring — container-space, centered on RUN button (FIX 6: no zoom math) */}
         <div
-          ref={clickRingRef}
           style={{
             position: "absolute",
             left: RUN_BTN_CONTAINER.x,
@@ -355,14 +195,15 @@ export const Scene6: React.FC = () => {
             opacity: 0,
             zIndex: 25,
             pointerEvents: "none",
+            animation: "s6-click-ring 500ms 760ms linear forwards",
           }}
         />
 
-        {/* macOS cursor — container-space, travels to RUN button (FIX 6: no zoom math) */}
-        <img
-          ref={cursorRef}
-          src={cursorMacosDataUri}
-          alt=""
+        {/* macOS cursor — container-space, travels to RUN button (FIX 6: no zoom math).
+            Position, click-pulse scale, and fade are independent properties, so they're
+            layered as three separate keyframe animations on the same element. */}
+        <Image
+          src={cursorMacosSrc}
           style={{
             position: "absolute",
             left: CURSOR_START.x,
@@ -372,6 +213,11 @@ export const Scene6: React.FC = () => {
             zIndex: 26,
             pointerEvents: "none",
             transformOrigin: "top left",
+            animation: [
+              "s6-cursor-move 1500ms linear both",
+              "s6-cursor-click 1500ms linear both",
+              "s6-cursor-opacity 1500ms linear both",
+            ].join(", "),
           }}
         />
       </div>

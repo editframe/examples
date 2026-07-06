@@ -2,6 +2,16 @@
  * Video.tsx — OpenAI Codex demo (v5, round-5 fixes)
  * 1920×1080 @ 30fps · 22000ms total
  *
+ * Eight scenes (see src/scenes/), each its OWN `<Timegroup mode="fixed">`, played by one
+ * root `<Timegroup mode="sequence">` (hard cuts — no crossfade overlap between beats, by
+ * design; see individual scene files for the transition each one performs into the next).
+ * Every scene animates against its own local clock via plain CSS `@keyframes` /
+ * `animation-delay` — there is no master-ms clock and no imperative ref-driven style
+ * mutation anywhere in this composition except a small number of scene-scoped `onFrame`
+ * callbacks kept for genuinely irreducible per-frame text (a "Working for Xs" counter,
+ * and Scene2's char-by-char typewriter effect) — see the file header comment in each of
+ * those scenes for why.
+ *
  * Scene timing (all compressed per FIX 2):
  * Scene1:  0–2500ms   — "Computer Use / in Codex on Mac" title on codex-gradient bg
  * Scene2:  2500–4500ms — CloudTicTacToe headline + typing (fast, 2000ms)

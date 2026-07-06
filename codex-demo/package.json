@@ -9,8 +9,7 @@
   "type": "module",
   "scripts": {
     "start": "editframe preview",
-    "prebuild": "node scripts/inline-bitmaps.mjs",
-    "render": "node scripts/inline-bitmaps.mjs && NO_COLOR=1 FORCE_COLOR=0 editframe render -o output/demo-silent.mp4"
+    "render": "NO_COLOR=1 FORCE_COLOR=0 editframe render -o output/demo-silent.mp4"
   },
   "dependencies": {
     "@editframe/cli": "0.54.0",

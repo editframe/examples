@@ -9,54 +9,19 @@
  * - By end: full-screen blank white, ready for Scene4 to zoom out from
  */
 
-import React, { useCallback, useRef } from "react";
+import React from "react";
 import { Timegroup } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
-import { track, lerp } from "../components/helpers";
-import { eases } from "animejs";
 
 const SCENE_DURATION = 1500;
 const SCENE_START_MS = 4500;
 
-// Send button click at t=200–500ms
-const CLICK_START = 200;
-const CLICK_END = 500;
-
-// Contents fade out after click: t=500–1100ms
-const FADE_START = 500;
-const FADE_END = 1100;
-
 export const Scene3: React.FC = () => {
-  const contentsRef = useRef<HTMLDivElement>(null);
-  const sendBtnRef = useRef<HTMLDivElement>(null);
-
-  const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    // Send button click pulse — brief scale down then back
-    if (sendBtnRef.current) {
-      if (ms >= CLICK_START && ms <= CLICK_END) {
-        const progress = (ms - CLICK_START) / (CLICK_END - CLICK_START);
-        const scale = progress < 0.5
-          ? lerp(1.0, 0.85, progress * 2)
-          : lerp(0.85, 1.0, (progress - 0.5) * 2);
-        sendBtnRef.current.style.transform = `scale(${scale})`;
-      } else {
-        sendBtnRef.current.style.transform = "scale(1)";
-      }
-    }
-
-    // Contents fade out in place — card itself stays full-screen white
-    if (contentsRef.current) {
-      const t = track(ms, FADE_START, FADE_END, eases.outCubic);
-      contentsRef.current.style.opacity = String(lerp(1, 0, t));
-    }
-  }, []);
-
   return (
     <Timegroup
       mode="fixed"
       duration={`${SCENE_DURATION}ms` as any}
-      onFrame={onFrame as any}
       style={{
         position: "relative",
         width: 1920,
@@ -82,10 +47,10 @@ export const Scene3: React.FC = () => {
             Layout is PIXEL-IDENTICAL to Scene2's final frame (same absolute positions)
             so there is no snap or position shift at the Scene2→Scene3 boundary. */}
         <div
-          ref={contentsRef}
           style={{
             position: "absolute",
             inset: 0,
+            animation: "s3-contents-out 600ms 500ms cubic-bezier(0.33,1,0.68,1) forwards",
           }}
         >
           {/* Headline — same position as Scene2: top:160, centered */}
@@ -149,13 +114,13 @@ export const Scene3: React.FC = () => {
                 <span style={{ fontSize: 18, color: "#666" }}>🎤</span>
                 {/* Send button with click pulse */}
                 <div
-                  ref={sendBtnRef}
                   style={{
                     width: 42, height: 42, borderRadius: "50%",
                     background: "#111111",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     transformOrigin: "center center",
                     boxShadow: "0 0 16px rgba(0,0,0,0.4)",
+                    animation: "s3-send-click 300ms 200ms linear both",
                   }}
                 >
                   <span style={{ color: "#FFF", fontSize: 18, marginTop: -2 }}>↑</span>

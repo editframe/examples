@@ -3,18 +3,21 @@
  * Duration: 4500ms (t=8500–13000ms)
  *
  * Reference: ref-frames/frame_0011.jpg, frame_0012.jpg, frame_0013.jpg
- * - Same dual-panel layout as Scene4 but camera is still 1.4x zoomed
- * - More agent response lines appear progressively
+ * - Same dual-panel layout as Scene4 but camera is still 1.4x zoomed (static, no animation)
+ * - More agent response lines appear progressively (CSS reveals, staggered per line)
  * - Tool call rows with proper icon style
+ *
+ * The "Working for Xs" counter is kept as a small scene-scoped `onFrame` (text content
+ * can't be expressed as a CSS keyframe); every reveal below it is plain CSS.
  */
 
 import React, { useCallback, useRef } from "react";
 import { Timegroup } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
+import { Reveal } from "../components/Reveal";
 // Clean macOS desktop gradient (no circles/grid artifacts)
 const DESKTOP_BG = "linear-gradient(135deg, #8B9EC8 0%, #6B7FA8 20%, #4A5F9E 40%, #2E4590 60%, #1A2E7A 80%, #0D1B5E 100%)";
-import { track, lerp } from "../components/helpers";
 import {
   XcodeWindow,
   CodexTitleBar,
@@ -22,14 +25,13 @@ import {
   ToolCallRow,
   CodexBottomBar,
 } from "../components/panels";
-import { eases } from "animejs";
 
 const SCENE_DURATION = 4500;
 const SCENE_START_MS = 8500;
 
 const CAMERA_SCALE = 1.4;
 
-const CODEX_W = 640;  // FIX 3: widened from 540 to 640
+const CODEX_W = 640; // FIX 3: widened from 540 to 640
 const CODEX_H = 620;
 const XCODE_W = 860;
 const XCODE_H = 680;
@@ -38,26 +40,8 @@ const CODEX_TOP = 50;
 const XCODE_LEFT = 500;
 const XCODE_TOP = 20;
 
-// Agent lines appear progressively over 4500ms
-const LINE_CALLED2_START = 400;
-const LINE_I_FOUND_START = 900;
-const LINE_CALLED4_START = 1600;
-const LINE_BUILD_START = 2200;
-const LINE_USED_START = 3000;
-const LINE_LIST_MCP_START = 3400;
-const LINE_LIST_MAC_START = 3800;
-const LINE_LOOKED_START = 4100;
-
 export const Scene5: React.FC = () => {
   const workingTimerRef = useRef<HTMLDivElement>(null);
-  const lineCalled2Ref = useRef<HTMLDivElement>(null);
-  const lineIFoundRef = useRef<HTMLDivElement>(null);
-  const lineCalled4Ref = useRef<HTMLDivElement>(null);
-  const lineBuildRef = useRef<HTMLDivElement>(null);
-  const lineUsedRef = useRef<HTMLDivElement>(null);
-  const lineListMcpRef = useRef<HTMLDivElement>(null);
-  const lineListMacRef = useRef<HTMLDivElement>(null);
-  const lineLookedRef = useRef<HTMLDivElement>(null);
 
   const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
     if (workingTimerRef.current) {
@@ -65,22 +49,6 @@ export const Scene5: React.FC = () => {
       const secs = Math.max(3, Math.floor((masterMs - 6000) / 1000) + 1);
       workingTimerRef.current.textContent = `Working for ${secs}s`;
     }
-
-    const revealLine = (ref: React.RefObject<HTMLDivElement>, startMs: number) => {
-      if (ref.current) {
-        const t = track(ms, startMs, startMs + 350, eases.outCubic);
-        ref.current.style.opacity = String(t);
-        ref.current.style.transform = `translateY(${lerp(6, 0, t)}px)`;
-      }
-    };
-    revealLine(lineCalled2Ref, LINE_CALLED2_START);
-    revealLine(lineIFoundRef, LINE_I_FOUND_START);
-    revealLine(lineCalled4Ref, LINE_CALLED4_START);
-    revealLine(lineBuildRef, LINE_BUILD_START);
-    revealLine(lineUsedRef, LINE_USED_START);
-    revealLine(lineListMcpRef, LINE_LIST_MCP_START);
-    revealLine(lineListMacRef, LINE_LIST_MAC_START);
-    revealLine(lineLookedRef, LINE_LOOKED_START);
   }, []);
 
   const BOTTOM_H = 110;
@@ -130,7 +98,7 @@ export const Scene5: React.FC = () => {
         <span style={{ opacity: 0.7, fontSize: 12 }}>Wed Apr 16  8:16 PM</span>
       </div>
 
-      {/* Camera-zoomed container */}
+      {/* Camera-zoomed container — steady 1.4x hold, continuation of Scene4's zoom-out */}
       <div style={{
         position: "absolute",
         top: 28, left: 0,
@@ -185,37 +153,37 @@ export const Scene5: React.FC = () => {
             </div>
 
             {/* Progressive lines */}
-            <div ref={lineCalled2Ref} style={{ fontSize: 11, color: "#BBBBBB", marginBottom: 6, opacity: 0 }}>
+            <Reveal enter={[400, 750]} y={6} style={{ fontSize: 11, color: "#BBBBBB", marginBottom: 6 }}>
               Called 2 tools
-            </div>
+            </Reveal>
 
-            <div ref={lineIFoundRef} style={{ fontSize: 12, color: "#1A1A1A", marginBottom: 8, lineHeight: 1.55, opacity: 0 }}>
+            <Reveal enter={[900, 1250]} y={6} style={{ fontSize: 12, color: "#1A1A1A", marginBottom: 8, lineHeight: 1.55 }}>
               I found Xcode already open on the project and located the Run control. I'm clicking Run now and will immediately drive the running app to play a full game and spot behavior regressions.
-            </div>
+            </Reveal>
 
-            <div ref={lineCalled4Ref} style={{ fontSize: 11, color: "#BBBBBB", marginBottom: 6, opacity: 0 }}>
+            <Reveal enter={[1600, 1950]} y={6} style={{ fontSize: 11, color: "#BBBBBB", marginBottom: 6 }}>
               Called 4 tools
-            </div>
+            </Reveal>
 
-            <div ref={lineBuildRef} style={{ fontSize: 12, color: "#1A1A1A", marginBottom: 8, lineHeight: 1.55, opacity: 0 }}>
+            <Reveal enter={[2200, 2550]} y={6} style={{ fontSize: 12, color: "#1A1A1A", marginBottom: 8, lineHeight: 1.55 }}>
               Build is running and now reports "Running CloudTicTacToe." Next I'm locating the app window and driving a real game flow through the UI to validate gameplay and detect behavioral issues.
-            </div>
+            </Reveal>
 
-            <div ref={lineUsedRef} style={{ fontSize: 11, color: "#BBBBBB", marginBottom: 5, opacity: 0 }}>
+            <Reveal enter={[3000, 3350]} y={6} style={{ fontSize: 11, color: "#BBBBBB", marginBottom: 5 }}>
               Used Codex
-            </div>
+            </Reveal>
 
-            <div ref={lineListMcpRef} style={{ opacity: 0 }}>
+            <Reveal enter={[3400, 3750]} y={6}>
               <ToolCallRow label="List MCP resources" />
-            </div>
+            </Reveal>
 
-            <div ref={lineListMacRef} style={{ opacity: 0 }}>
+            <Reveal enter={[3800, 4150]} y={6}>
               <ToolCallRow label="List Mac apps" />
-            </div>
+            </Reveal>
 
-            <div ref={lineLookedRef} style={{ opacity: 0 }}>
+            <Reveal enter={[4100, 4450]} y={6}>
               <ToolCallRow label="Looked at Xcode" italic />
-            </div>
+            </Reveal>
           </div>
 
           <CodexBottomBar height={BOTTOM_H} />

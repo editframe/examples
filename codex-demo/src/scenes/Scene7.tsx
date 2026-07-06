@@ -3,15 +3,25 @@
  * Duration: 3000ms (t=14500–17500ms)
  *
  * Reference: ref-frames/frame_0017.jpg, frame_0018.jpg, frame_0019.jpg, frame_0020.jpg
+ *
+ * Scene6 already ends at scale(1.0) with windows in S7 positions — hold steady, no
+ * camera animation needed here. The TicTacToe "launch" (fade + rise + scale) is a CSS
+ * one-shot; note the original clipped opacity to reach 1 slightly (~22%) before the
+ * transform finished (`Math.min(1, t * 1.25)`) — simplified here to a single shared
+ * curve for both properties since the difference is ~140ms on a 700ms fade, well under
+ * a frame's worth of perceptible difference at 30fps.
+ *
+ * The "Working for Xs" counter is kept as a small scene-scoped `onFrame` (text content
+ * can't be expressed as a CSS keyframe).
  */
 
 import React, { useCallback, useRef } from "react";
 import { Timegroup } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
+import { Reveal } from "../components/Reveal";
 // Clean macOS desktop gradient (no circles/grid artifacts)
 const DESKTOP_BG = "linear-gradient(135deg, #8B9EC8 0%, #6B7FA8 20%, #4A5F9E 40%, #2E4590 60%, #1A2E7A 80%, #0D1B5E 100%)";
-import { track, lerp } from "../components/helpers";
 import {
   XcodeWindow,
   CodexTitleBar,
@@ -20,20 +30,11 @@ import {
   CodexBottomBar,
   TicTacToeWindow,
 } from "../components/panels";
-import { eases } from "animejs";
 
 const SCENE_DURATION = 3000;
 const SCENE_START_MS = 14500;
 
-// Scene6 ends at scale(1.0) with windows already at their S7 positions.
-// No scale settle — just hold 1.0. The TicTacToe app "launches" in with a
-// smoother, slightly slower fade + rise + scale so the popup doesn't feel
-// abrupt (ROUND-7: "Run-click → popup is abrupt").
-const TTT_FADE_START = 80;
-const TTT_FADE_END = 780;
-
 // Layout — screen coordinates at 1.0x
-// Reference-derived positions scaled to 1920×1080
 const CODEX_LEFT = 68;
 const CODEX_TOP = 195;
 const CODEX_W = 590;
@@ -50,39 +51,16 @@ const TTT_TOP = 52;
 const TTT_W = 390;
 const TTT_H = 570;
 
-const LINE_CLICKED_START = 1400;
-
 const BOTTOM_H = 100;
 
 export const Scene7: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const lineClickingRef = useRef<HTMLDivElement>(null);
   const workingTimerRef = useRef<HTMLDivElement>(null);
-  const tttRef = useRef<HTMLDivElement>(null);
 
   const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    // Scene6 already ends at scale(1.0) with windows in S7 positions — hold steady
-    if (containerRef.current) {
-      containerRef.current.style.transform = "scale(1.0)";
-    }
-
-    // TicTacToe "launches" in: fade + gentle rise + scale (smoother, ~700ms)
-    if (tttRef.current) {
-      const t = track(ms, TTT_FADE_START, TTT_FADE_END, eases.outCubic);
-      tttRef.current.style.opacity = String(Math.min(1, t * 1.25));
-      tttRef.current.style.transform = `translateY(${lerp(16, 0, t)}px) scale(${lerp(0.82, 1.0, t)})`;
-    }
-
     if (workingTimerRef.current) {
       const masterMs = SCENE_START_MS + ms;
       const secs = Math.max(8, Math.floor((masterMs - 6000) / 1000) + 1);
       workingTimerRef.current.textContent = `Working for ${secs}s`;
-    }
-
-    if (lineClickingRef.current) {
-      const t = track(ms, LINE_CLICKED_START, LINE_CLICKED_START + 350, eases.outCubic);
-      lineClickingRef.current.style.opacity = String(t);
-      lineClickingRef.current.style.transform = `translateY(${lerp(5, 0, t)}px)`;
     }
   }, []);
 
@@ -132,9 +110,8 @@ export const Scene7: React.FC = () => {
         <span style={{ opacity: 0.7, fontSize: 12 }}>Wed Apr 16  8:16 PM</span>
       </div>
 
-      {/* Main content container — starts at scale(1.0), Scene6 already eased out */}
+      {/* Main content container — Scene6 already eased out to scale(1.0), just hold steady */}
       <div
-        ref={containerRef}
         style={{
           position: "absolute",
           inset: 0,
@@ -154,17 +131,15 @@ export const Scene7: React.FC = () => {
           />
         </div>
 
-        {/* CLOUD TIC TAC TOE APP (z=5, overlaps Xcode) — fades + scales in over first 400ms */}
+        {/* CLOUD TIC TAC TOE APP (z=5, overlaps Xcode) — fades + scales in over first ~700ms */}
         <div
-          ref={tttRef}
           style={{
             position: "absolute",
             left: TTT_LEFT,
             top: TTT_TOP,
             zIndex: 5,
-            opacity: 0,
             transformOrigin: "center center",
-            transform: "scale(0.88)",
+            animation: "s7-ttt-in 700ms 80ms cubic-bezier(0.33,1,0.68,1) both",
           }}
         >
           <TicTacToeWindow style={{ width: TTT_W, height: TTT_H }} cellSize={96} />
@@ -219,9 +194,9 @@ export const Scene7: React.FC = () => {
             <ToolCallRow label="List Mac apps" />
             <ToolCallRow label="Looked at App" />
 
-            <div ref={lineClickingRef} style={{ opacity: 0 }}>
+            <Reveal enter={[1400, 1750]} y={5}>
               <ToolCallRow label="Clicking · App" italic />
-            </div>
+            </Reveal>
           </div>
 
           <CodexBottomBar height={BOTTOM_H} />

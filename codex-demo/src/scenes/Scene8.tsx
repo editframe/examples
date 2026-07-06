@@ -21,16 +21,17 @@
  *     Center (1,1): x = 788 + 1*104 + 48 = 940, y = 240 + 1*104 + 48 = 392
  *     Top-left (0,0): x = 788 + 48 = 836, y = 240 + 48 = 288
  *     Bottom-right (2,2): x = 788 + 2*104 + 48 = 1044, y = 240 + 2*104 + 48 = 496
+ *
+ * Every effect in this scene is a fixed-delay one-shot (cursor move, click pulse, click
+ * ring, X/O spawns, fade-to-black) — all converted to plain CSS `@keyframes`, no
+ * `onFrame` needed anywhere in this scene.
  */
 
-import React, { useCallback, useRef } from "react";
-import { Timegroup } from "@editframe/react";
+import React from "react";
+import { Timegroup, Image } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
-// Clean macOS desktop gradient (no circles/grid artifacts)
-const DESKTOP_BG = "linear-gradient(135deg, #8B9EC8 0%, #6B7FA8 20%, #4A5F9E 40%, #2E4590 60%, #1A2E7A 80%, #0D1B5E 100%)";
-import { cursorMacosDataUri } from "../scenes/scene-assets";
-import { track, lerp } from "../components/helpers";
+import { cursorMacosSrc } from "../scenes/scene-assets";
 import {
   XcodeWindow,
   CodexTitleBar,
@@ -39,7 +40,8 @@ import {
   CodexBottomBar,
   TicTacToeWindow,
 } from "../components/panels";
-import { eases } from "animejs";
+// Clean macOS desktop gradient (no circles/grid artifacts)
+const DESKTOP_BG = "linear-gradient(135deg, #8B9EC8 0%, #6B7FA8 20%, #4A5F9E 40%, #2E4590 60%, #1A2E7A 80%, #0D1B5E 100%)";
 
 const SCENE_DURATION = 4500;
 const SCENE_START_MS = 17500;
@@ -59,8 +61,8 @@ const TTT_W = 390;
 const TTT_H = 570;
 
 // Grid geometry (FIX C: re-derived from TicTacToeWindow component — see header comment)
-const GRID_LEFT = 788;   // x of grid left edge on screen
-const GRID_TOP = 240;    // y of grid top edge on screen (corrected from 227 → 240)
+const GRID_LEFT = 788;
+const GRID_TOP = 240;
 const CELL_SIZE = 96;
 const CELL_GAP = 8;
 const CELL_STEP = CELL_SIZE + CELL_GAP; // 104
@@ -71,10 +73,8 @@ const cellCenter = (row: number, col: number) => ({
 });
 
 const CENTER_CELL = cellCenter(1, 1); // (940, 392) — exact visual center of center square
-const O_CELL_1 = cellCenter(0, 0);   // (836, 288) — top-left
-const O_CELL_2 = cellCenter(2, 2);   // (1044, 496) — bottom-right
-
-const CURSOR_START = { x: 1080, y: 300 };
+const O_CELL_1 = cellCenter(0, 0); // (836, 288) — top-left
+const O_CELL_2 = cellCenter(2, 2); // (1044, 496) — bottom-right
 
 const CLICK_T = 1000;
 const X_SPAWN_T = 1100;
@@ -84,94 +84,12 @@ const O2_SPAWN_T = 1700;
 const BOTTOM_H = 100;
 
 export const Scene8: React.FC = () => {
-  const cursorRef = useRef<HTMLImageElement>(null);
-  const clickRingRef = useRef<HTMLDivElement>(null);
-  const xMarkRef = useRef<HTMLDivElement>(null);
-  const o1MarkRef = useRef<HTMLDivElement>(null);
-  const o2MarkRef = useRef<HTMLDivElement>(null);
-  const fadeRef = useRef<HTMLDivElement>(null);
-
-  const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    // Cursor moves to center cell
-    if (cursorRef.current) {
-      const moveT = track(ms, 0, CLICK_T - 100, eases.outCubic);
-      const cx = lerp(CURSOR_START.x, CENTER_CELL.x, moveT);
-      const cy = lerp(CURSOR_START.y, CENTER_CELL.y, moveT);
-      cursorRef.current.style.left = cx + "px";
-      cursorRef.current.style.top = cy + "px";
-
-      if (ms >= CLICK_T && ms <= CLICK_T + 200) {
-        const progress = (ms - CLICK_T) / 200;
-        const scaleV = progress < 0.5
-          ? lerp(1.0, 0.75, progress * 2)
-          : lerp(0.75, 1.0, (progress - 0.5) * 2);
-        cursorRef.current.style.transform = `scale(${scaleV})`;
-      } else {
-        cursorRef.current.style.transform = "scale(1)";
-      }
-    }
-
-    // Click ring
-    if (clickRingRef.current) {
-      if (ms >= CLICK_T && ms <= CLICK_T + 450) {
-        const t = (ms - CLICK_T) / 450;
-        clickRingRef.current.style.opacity = String(1 - t);
-        clickRingRef.current.style.transform = `translate(-50%, -50%) scale(${lerp(0.5, 2.2, t)})`;
-      } else {
-        clickRingRef.current.style.opacity = "0";
-      }
-    }
-
-    // X appears at X_SPAWN_T — centered via translate(-50%, -50%)
-    if (xMarkRef.current) {
-      if (ms >= X_SPAWN_T) {
-        const spawnT = track(ms, X_SPAWN_T, X_SPAWN_T + 200, eases.outCubic);
-        xMarkRef.current.style.opacity = String(Math.min(1, spawnT));
-        xMarkRef.current.style.transform = `translate(-50%, -50%) scale(${lerp(0.3, 1.0, Math.min(1, spawnT))})`;
-      } else {
-        xMarkRef.current.style.opacity = "0";
-        xMarkRef.current.style.transform = "translate(-50%, -50%) scale(0.3)";
-      }
-    }
-
-    // O1
-    if (o1MarkRef.current) {
-      if (ms >= O1_SPAWN_T) {
-        const spawnT = track(ms, O1_SPAWN_T, O1_SPAWN_T + 200, eases.outCubic);
-        o1MarkRef.current.style.opacity = String(Math.min(1, spawnT));
-        o1MarkRef.current.style.transform = `translate(-50%, -50%) scale(${lerp(0.3, 1.0, Math.min(1, spawnT))})`;
-      } else {
-        o1MarkRef.current.style.opacity = "0";
-        o1MarkRef.current.style.transform = "translate(-50%, -50%) scale(0.3)";
-      }
-    }
-
-    // O2
-    if (o2MarkRef.current) {
-      if (ms >= O2_SPAWN_T) {
-        const spawnT = track(ms, O2_SPAWN_T, O2_SPAWN_T + 200, eases.outCubic);
-        o2MarkRef.current.style.opacity = String(Math.min(1, spawnT));
-        o2MarkRef.current.style.transform = `translate(-50%, -50%) scale(${lerp(0.3, 1.0, Math.min(1, spawnT))})`;
-      } else {
-        o2MarkRef.current.style.opacity = "0";
-        o2MarkRef.current.style.transform = "translate(-50%, -50%) scale(0.3)";
-      }
-    }
-
-    // Fade to black
-    if (fadeRef.current) {
-      const fadeT = track(ms, 4000, 4500, eases.outCubic);
-      fadeRef.current.style.opacity = String(fadeT);
-    }
-  }, []);
-
   const CHAT_H = CODEX_H - 44 - BOTTOM_H;
 
   return (
     <Timegroup
       mode="fixed"
       duration={`${SCENE_DURATION}ms` as any}
-      onFrame={onFrame as any}
       style={{ position: "relative", width: 1920, height: 1080, overflow: "hidden" }}
     >
       <TraceLayer sceneStartMs={SCENE_START_MS} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
@@ -277,18 +195,16 @@ export const Scene8: React.FC = () => {
 
       {/* X MARK — centered on center cell (1,1) */}
       <div
-        ref={xMarkRef}
         style={{
           position: "absolute",
           left: CENTER_CELL.x,
           top: CENTER_CELL.y,
-          transform: "translate(-50%, -50%) scale(0.3)",
           zIndex: 7,
-          opacity: 0,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           pointerEvents: "none",
+          animation: `s8-mark-spawn 200ms ${X_SPAWN_T}ms cubic-bezier(0.33,1,0.68,1) both`,
         }}
       >
         <span style={{
@@ -302,18 +218,16 @@ export const Scene8: React.FC = () => {
 
       {/* O MARK 1 — top-left cell (0,0) */}
       <div
-        ref={o1MarkRef}
         style={{
           position: "absolute",
           left: O_CELL_1.x,
           top: O_CELL_1.y,
-          transform: "translate(-50%, -50%) scale(0.3)",
           zIndex: 7,
-          opacity: 0,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           pointerEvents: "none",
+          animation: `s8-mark-spawn 200ms ${O1_SPAWN_T}ms cubic-bezier(0.33,1,0.68,1) both`,
         }}
       >
         <span style={{
@@ -327,18 +241,16 @@ export const Scene8: React.FC = () => {
 
       {/* O MARK 2 — bottom-right cell (2,2) */}
       <div
-        ref={o2MarkRef}
         style={{
           position: "absolute",
           left: O_CELL_2.x,
           top: O_CELL_2.y,
-          transform: "translate(-50%, -50%) scale(0.3)",
           zIndex: 7,
-          opacity: 0,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           pointerEvents: "none",
+          animation: `s8-mark-spawn 200ms ${O2_SPAWN_T}ms cubic-bezier(0.33,1,0.68,1) both`,
         }}
       >
         <span style={{
@@ -352,7 +264,6 @@ export const Scene8: React.FC = () => {
 
       {/* Click ring */}
       <div
-        ref={clickRingRef}
         style={{
           position: "absolute",
           left: CENTER_CELL.x,
@@ -365,29 +276,29 @@ export const Scene8: React.FC = () => {
           opacity: 0,
           zIndex: 8,
           pointerEvents: "none",
+          animation: `s8-click-ring 450ms ${CLICK_T}ms linear forwards`,
         }}
       />
 
-      {/* macOS cursor */}
-      <img
-        ref={cursorRef}
-        src={cursorMacosDataUri}
-        alt=""
+      {/* macOS cursor — moves to center cell, click-pulses at CLICK_T */}
+      <Image
+        src={cursorMacosSrc}
         style={{
           position: "absolute",
-          left: CURSOR_START.x,
-          top: CURSOR_START.y,
           width: 32,
           height: 32,
           zIndex: 9,
           pointerEvents: "none",
           transformOrigin: "top left",
+          animation: [
+            `s8-cursor-move ${CLICK_T - 100}ms cubic-bezier(0.33,1,0.68,1) both`,
+            `s8-click-pulse 200ms ${CLICK_T}ms linear both`,
+          ].join(", "),
         }}
       />
 
       {/* Fade to black overlay */}
       <div
-        ref={fadeRef}
         style={{
           position: "absolute",
           inset: 0,
@@ -395,6 +306,7 @@ export const Scene8: React.FC = () => {
           opacity: 0,
           zIndex: 15,
           pointerEvents: "none",
+          animation: "s8-fade-to-black 500ms 4000ms cubic-bezier(0.33,1,0.68,1) both",
         }}
       />
     </Timegroup>
