@@ -55,13 +55,17 @@ export const Video = () => {
     <Timegroup
       workbench
       className="w-[1920px] h-[1080px] bg-white relative overflow-hidden"
-      mode="sequence"
+      mode="contain"
     >
-      <TicketScatter />
-      <CursorJiraScene />
-      <LogoCard />
+      <Timegroup mode="sequence" className="absolute w-full h-full">
+        <TicketScatter />
+        <CursorJiraScene />
+        <LogoCard />
+      </Timegroup>
       {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to
-          the composition's total runtime regardless of the source file's own length. */}
+          the composition's total runtime regardless of the source file's own length. Sibling
+          of the sequence (not a child of it) so it spans the whole timeline as a background
+          track instead of being treated as an extra sequential scene. */}
       <Audio src={MUSIC} volume={1} duration={`${DURATION_MS}ms`} />
     </Timegroup>
   );
