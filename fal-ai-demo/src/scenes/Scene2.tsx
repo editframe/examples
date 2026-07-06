@@ -1,33 +1,33 @@
 /**
- * Scene 2 — "Introducing fal Assets" Reveal (8200–11400ms master)
+ * Scene 2 — "Introducing fal Assets" Reveal (8000–11200ms master)
  * Scene-local duration: 3200ms
  *
- * REWORK v3 — reference-faithful:
- *  - Background: deep solid violet (#5B21B6 → #6D28D9) — NO drifting thumbnail tiles
- *  - Text is CRISP — NO transform/blur on text layers; all text rendered static in DOM
- *    with only opacity + translateY for reveal (NO filter:blur on text ever)
- *  - "fal Assets" builds in: "fal" visible first, then "Assets" slides in
- *  - Subline: TYPEWRITER reveal "Beta" → "Beta now" → "Beta now available"
- *  - Pixel squares: smaller, sparser, lighter opacity — matches reference's subtle corner squares
- *  - "Introducing" pill is smaller/tighter (reference: compact salmon pill)
- *  - No blurry font rasterization: using will-change: auto, no filter on text elements
+ * Reference-faithful:
+ *  - Background: solid deep violet — NO drifting thumbnail tiles.
+ *  - Text is CRISP — no transform/blur on text layers; opacity + translateY only.
+ *  - "fal Assets" builds in: "fal" visible first, then "Assets" slides in from the right.
+ *  - Subline: typewriter reveal "Beta" → "Beta now" → "Beta now available", done as a
+ *    3-step `clip-path` reveal (`steps(3, jump-end)`) instead of swapping `textContent`
+ *    every frame — the full string is always in the DOM, so it stays crisp/selectable.
+ *  - Pixel squares: sparse corner-hugging squares, each twinkling on its own cycle —
+ *    declarative infinite `@keyframes` with a per-particle negative `animation-delay`
+ *    (same technique as `AmbientField`'s fiber drift in the allbirds reference), computed
+ *    once at module load. No `onFrame`, no refs, no per-frame math anywhere in this scene.
  *
  * Beat breakdown (scene-local):
- *  0ms:    deep violet bg; corner pixel squares
+ *  0ms:    deep violet bg; corner pixel squares twinkling
  *  150ms:  "Introducing" pill fades in (no transform — crisp)
  *  500ms:  "fal" part of headline fades up — crisp
- *  900ms:  "Assets" part slides in from right
+ *  900ms:  "Assets" part slides in from right (outBack overshoot)
  *  1200ms: typewriter starts on "Beta now available"
  *  3200ms: end → Scene 3
  */
-import React, { useCallback, useRef } from "react";
+import React from "react";
 import { Timegroup } from "@editframe/react";
-import { track, lerp, clamp, outBack, typewriter } from "../components/helpers";
 import { TraceLayer } from "../components/TraceLayer";
-import { TRACE_MODE, TRACE_OPACITY } from "../constants";
+import { TRACE_MODE, TRACE_OPACITY, SCENES, SCENE2_START_MS } from "../constants";
 
-const SCENE_START_MS = 8000;
-const SCENE_DURATION = 3200;
+const SCENE_DURATION = SCENES.scene2.duration;
 
 // ─── Pixel config — small, sparse, corner-hugging (matches reference) ────────
 function lcg(s: number) {
@@ -52,18 +52,18 @@ function buildPixels(count: number, seed: number): PixelCfg[] {
   const cfgs: PixelCfg[] = [];
   // Denser scatter across all quadrants — reference has pixel shards throughout
   const clusterCenters = [
-    { cx: 60,   cy: 80  }, // top-left
-    { cx: 1820, cy: 60  }, // top-right
+    { cx: 60, cy: 80 }, // top-left
+    { cx: 1820, cy: 60 }, // top-right
     { cx: 1780, cy: 980 }, // bottom-right
-    { cx: 40,   cy: 500 }, // left-middle
-    { cx: 500,  cy: 30  }, // top-center-left
-    { cx: 1400, cy: 50  }, // top-center-right
-    { cx: 60,   cy: 880 }, // bottom-left
-    { cx: 960,  cy: 80  }, // top-center
+    { cx: 40, cy: 500 }, // left-middle
+    { cx: 500, cy: 30 }, // top-center-left
+    { cx: 1400, cy: 50 }, // top-center-right
+    { cx: 60, cy: 880 }, // bottom-left
+    { cx: 960, cy: 80 }, // top-center
     { cx: 1820, cy: 500 }, // right-middle
-    { cx: 300,  cy: 400 }, // left-upper-mid
+    { cx: 300, cy: 400 }, // left-upper-mid
     { cx: 1600, cy: 700 }, // right-lower-mid
-    { cx: 700,  cy: 150 }, // upper spread
+    { cx: 700, cy: 150 }, // upper spread
     { cx: 1200, cy: 200 }, // upper-right spread
   ];
   for (let i = 0; i < count; i++) {
@@ -91,90 +91,6 @@ const PIXEL_CFGS = buildPixels(32, 88); // denser — 32 pixels
 const PIXEL_COLOR = "#C8A0FF";
 
 export function Scene2() {
-  const pillRef        = useRef<HTMLDivElement>(null);
-  const falWordRef     = useRef<HTMLSpanElement>(null);
-  const assetsWordRef  = useRef<HTMLSpanElement>(null);
-  const subtitleRef    = useRef<HTMLDivElement>(null);
-  const pixelRefs      = useRef<Array<HTMLDivElement | null>>(Array(32).fill(null));
-
-  const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    const pill       = pillRef.current;
-    const falWord    = falWordRef.current;
-    const assetsWord = assetsWordRef.current;
-    const subtitle   = subtitleRef.current;
-
-    // ── "Introducing" pill — simple fade-in, NO translate (crisp render) ──
-    if (pill) {
-      if (ms < 150) {
-        pill.style.opacity = "0";
-      } else {
-        pill.style.opacity = String(Math.min(1, track(ms, 150, 450)));
-      }
-    }
-
-    // ── "fal" word — fade + slight upward translate (kept minimal for crispness) ──
-    if (falWord) {
-      if (ms < 500) {
-        falWord.style.opacity = "0";
-        falWord.style.transform = "translateY(20px)";
-      } else {
-        const t = track(ms, 500, 850);
-        falWord.style.opacity = String(t);
-        falWord.style.transform = `translateY(${lerp(20, 0, t)}px)`;
-      }
-    }
-
-    // ── "Assets" word — slides in from right after "fal" ──
-    if (assetsWord) {
-      if (ms < 900) {
-        assetsWord.style.opacity = "0";
-        assetsWord.style.transform = "translateX(40px)";
-      } else {
-        const t = track(ms, 900, 1150, outBack);
-        assetsWord.style.opacity = String(Math.min(1, track(ms, 900, 1100)));
-        assetsWord.style.transform = `translateX(${lerp(40, 0, t)}px)`;
-      }
-    }
-
-    // ── Subtitle: TYPEWRITER reveal ──
-    // "Beta now available" types in word-by-word: Beta → Beta now → Beta now available
-    if (subtitle) {
-      if (ms < 1200) {
-        subtitle.style.opacity = "0";
-        subtitle.textContent = "";
-      } else {
-        subtitle.style.opacity = "1";
-        const tw = ms - 1200;
-        // Each word appears every ~300ms
-        if (tw < 300) {
-          subtitle.textContent = "Beta";
-        } else if (tw < 600) {
-          subtitle.textContent = "Beta now";
-        } else {
-          subtitle.textContent = "Beta now available";
-        }
-      }
-    }
-
-    // ── Pixel animations — corner squares twinkling ──
-    for (let i = 0; i < PIXEL_CFGS.length; i++) {
-      const el = pixelRefs.current[i];
-      if (!el) continue;
-      const cfg = PIXEL_CFGS[i];
-      const cycleMs = ((ms + cfg.offset) % cfg.cycleDuration + cfg.cycleDuration) % cfg.cycleDuration;
-      const frac = cycleMs / cfg.cycleDuration;
-      const fadeInEnd  = 0.15;
-      const holdEnd    = 0.55;
-      const fadeOutEnd = 0.70;
-      let opacity = 0;
-      if (frac < fadeInEnd)       opacity = frac / fadeInEnd;
-      else if (frac < holdEnd)    opacity = 1;
-      else if (frac < fadeOutEnd) opacity = 1 - (frac - holdEnd) / (fadeOutEnd - holdEnd);
-      // Elevated opacity for visibility on violet bg
-      el.style.opacity = String(Math.max(0, Math.min(1, opacity * 0.75)));
-    }
-  }, []);
-
   return (
     <Timegroup
       mode="fixed"
@@ -187,13 +103,12 @@ export function Scene2() {
         background: "#5B21B6",
       }}
     >
-      <TraceLayer sceneStartMs={SCENE_START_MS} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
+      <TraceLayer sceneStartMs={SCENE2_START_MS} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
 
-      {/* Scattered pixel squares — static positions, twinkle only */}
+      {/* Scattered pixel squares — twinkle via infinite CSS keyframes, own cycle+phase each */}
       {PIXEL_CFGS.map((cfg, i) => (
         <div
           key={i}
-          ref={(el) => { pixelRefs.current[i] = el; }}
           style={{
             position: "absolute",
             left: cfg.x,
@@ -202,10 +117,10 @@ export function Scene2() {
             height: cfg.h,
             background: PIXEL_COLOR,
             borderRadius: 1,
-            opacity: 0,
-            // NO willChange: transform — static position, only opacity animates
             pointerEvents: "none",
             zIndex: 1,
+            animation: `pixel-twinkle ${cfg.cycleDuration}ms linear ${-cfg.offset}ms infinite`,
+            ["--twinkle-peak" as string]: 0.75,
           }}
         />
       ))}
@@ -223,7 +138,6 @@ export function Scene2() {
       >
         {/* "Introducing" pill — compact, salmon, crisp */}
         <div
-          ref={pillRef}
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -231,7 +145,7 @@ export function Scene2() {
             borderRadius: 6,
             padding: "5px 14px",
             marginBottom: 18,
-            opacity: 0,
+            animation: "pill-in 300ms 150ms cubic-bezier(0.33,1,0.68,1) both",
             // NO transform on this element — avoids sub-pixel blur
           }}
         >
@@ -242,7 +156,6 @@ export function Scene2() {
               color: "#ffffff",
               fontFamily: "'Inter', system-ui, sans-serif",
               letterSpacing: "0.2px",
-              // Render hint: force sharp text
               WebkitFontSmoothing: "antialiased",
             } as React.CSSProperties}
           >
@@ -263,62 +176,58 @@ export function Scene2() {
           }}
         >
           <span
-            ref={falWordRef}
             style={{
               fontSize: 260,
               fontWeight: 800,
               color: "#EEDDFF",
               fontFamily: "'Inter', system-ui, sans-serif",
               letterSpacing: "-8px",
-              opacity: 0,
-              // transformOrigin for translateY — minimal transform
               WebkitFontSmoothing: "antialiased",
+              animation: "fal-word-in 350ms 500ms cubic-bezier(0.33,1,0.68,1) both",
             } as React.CSSProperties}
           >
             fal&nbsp;
           </span>
           <span
-            ref={assetsWordRef}
             style={{
               fontSize: 260,
               fontWeight: 800,
               color: "#EEDDFF",
               fontFamily: "'Inter', system-ui, sans-serif",
               letterSpacing: "-8px",
-              opacity: 0,
               WebkitFontSmoothing: "antialiased",
+              animation: [
+                "assets-word-fade 200ms 900ms cubic-bezier(0.33,1,0.68,1) both",
+                "assets-word-slide 250ms 900ms cubic-bezier(0.34,1.56,0.64,1) both",
+              ].join(", "),
             } as React.CSSProperties}
           >
             Assets
           </span>
         </div>
 
-        {/* Subtitle — typewriter, monospace, crisp — white for legibility on violet */}
+        {/* Subtitle — typewriter, monospace, crisp — white for legibility on violet.
+            Full string is always in the DOM; the "typewriter" look is a 3-step clip-path
+            reveal (steps(3, jump-end)) matching the original's 3 word-group jumps
+            (Beta / Beta now / Beta now available) instead of mutating textContent. */}
         <div
-          ref={subtitleRef}
           style={{
             fontSize: 26,
             fontWeight: 600,
             color: "rgba(255, 255, 255, 0.92)",
             fontFamily: "'Courier New', Courier, monospace",
             letterSpacing: "2px",
-            opacity: 0,
-            // NO transform — just opacity-on
             WebkitFontSmoothing: "antialiased",
             minHeight: 36, // prevent layout shift during typewriter
+            animation: [
+              "subtitle-fade 200ms 1200ms both",
+              "subtitle-type 600ms steps(3, jump-end) 1200ms both",
+            ].join(", "),
           } as React.CSSProperties}
         >
           Beta now available
         </div>
       </div>
-
-      {/* onFrame driver */}
-      <Timegroup
-        mode="fixed"
-        duration={`${SCENE_DURATION}ms`}
-        onFrame={onFrame as any}
-        style={{ position: "absolute", inset: 0, zIndex: 4, pointerEvents: "none" }}
-      />
     </Timegroup>
   );
 }

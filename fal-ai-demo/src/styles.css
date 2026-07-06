@@ -1,28 +1,6 @@
 @import "tailwindcss";
 
 @theme {
-  /* Figma chrome */
-  --color-fig-panel:    #2C2C2C;
-  --color-fig-panel-2:  #1E1E1E;
-  --color-fig-rule:     #383838;
-  --color-fig-text:     #FFFFFF;
-  --color-fig-text-dim: #B3B3B3;
-  --color-fig-text-mute:#7A7A7A;
-  --color-fig-canvas:   #E5E5E5;
-  --color-fig-select:   #0D99FF;
-
-  /* Bookworm mockup */
-  --color-lime-1:       #E8F5D8;
-  --color-lime-2:       #D4EDA8;
-  --color-lime-deep:    #A8DA8F;
-  --color-green-acc:    #7CB342;
-  --color-green-dark:   #1F5B2E;
-  --color-pink-acc:     #E91E63;
-  --color-blue-acc:     #3B82F6;
-
-  /* Card grid bg */
-  --color-grid-bg:      #2A2A2A;
-
   --font-display: "Inter", "SF Pro", "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -38,4 +16,195 @@
     overflow: hidden;
   }
   * { box-sizing: border-box; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Scene1 (src/scenes/Scene1.tsx) — nav walkthrough + Assets dashboard reveal
+   All percentages below are fixed points on Scene1's own 8000ms Timegroup
+   clock (see SCENES.scene1 in constants.ts) — every one of these keyframes
+   is played with `animation: NAME 8000ms linear both` on its element, so a
+   given keyframe's own percentage IS that constant / 8000.
+   ════════════════════════════════════════════════════════════════════════ */
+
+@keyframes scene1-fadeout {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* Camera: one continuous eased push-in (0 → 2900ms, 36.25%), a hold, then a calm
+   zoom-out to frame the full dashboard (4000 → 5400ms, 50% → 67.5%), then a hold. */
+@keyframes scene1-camera {
+  0%     { transform: translate(0px, 0px) scale(1); animation-timing-function: cubic-bezier(0.65,0,0.35,1); }
+  36.25% { transform: translate(-357px, 0px) scale(1.5); }
+  50%    { transform: translate(-357px, 0px) scale(1.5); animation-timing-function: cubic-bezier(0.65,0,0.35,1); }
+  67.5%  { transform: translate(134.4px, 0px) scale(0.86); }
+  100%   { transform: translate(134.4px, 0px) scale(0.86); }
+}
+
+/* Panel: strip → full dashboard, same 4000–5400ms window as the camera zoom-out.
+   Width/left never change — only height/top (see --panel-* custom properties set
+   inline by Scene1.tsx). */
+@keyframes scene1-panel {
+  0%     { height: var(--panel-strip-h); top: var(--panel-strip-top); }
+  50%    { height: var(--panel-strip-h); top: var(--panel-strip-top); animation-timing-function: cubic-bezier(0.65,0,0.35,1); }
+  67.5%  { height: var(--panel-full-h); top: var(--panel-full-top); }
+  100%   { height: var(--panel-full-h); top: var(--panel-full-top); }
+}
+
+/* Assets tab insert: hidden until the cursor starts arcing toward it (2400ms/30%),
+   fully expanded exactly when the cursor lands (2850ms/35.625%). */
+@keyframes scene1-assets-tab-insert {
+  0%      { max-width: 0px; opacity: 0; padding-left: 0px; padding-right: 0px; }
+  30%     { max-width: 0px; opacity: 0; padding-left: 0px; padding-right: 0px; animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
+  35.625% { max-width: 260px; opacity: 1; padding-left: 12px; padding-right: 12px; }
+  100%    { max-width: 260px; opacity: 1; padding-left: 12px; padding-right: 12px; }
+}
+
+/* Tab active-color states — each snaps instantly (steps(1,jump-end)) the moment the
+   cursor LANDS on that tab, never when it merely starts moving toward it. */
+@keyframes scene1-tab-home-color {
+  0%      { color: #ffffff; font-weight: 600; animation-timing-function: steps(1, jump-end); }
+  10.625% { color: #5a6272; font-weight: 500; }
+  100%    { color: #5a6272; font-weight: 500; }
+}
+@keyframes scene1-tab-explore-color {
+  0%      { color: #5a6272; font-weight: 500; animation-timing-function: steps(1, jump-end); }
+  10.625% { color: #ffffff; font-weight: 600; animation-timing-function: steps(1, jump-end); }
+  21.875% { color: #5a6272; font-weight: 500; }
+  100%    { color: #5a6272; font-weight: 500; }
+}
+@keyframes scene1-tab-generate-color {
+  0%      { color: #5a6272; font-weight: 500; animation-timing-function: steps(1, jump-end); }
+  21.875% { color: #ffffff; font-weight: 600; animation-timing-function: steps(1, jump-end); }
+  35.625% { color: #5a6272; font-weight: 500; }
+  100%    { color: #5a6272; font-weight: 500; }
+}
+@keyframes scene1-tab-assets-color {
+  0%      { color: #5a6272; font-weight: 500; animation-timing-function: steps(1, jump-end); }
+  35.625% { color: #ffffff; font-weight: 600; }
+  100%    { color: #ffffff; font-weight: 600; }
+}
+
+/* Underline — tracks the active tab through three eased slides, holding between them. */
+@keyframes scene1-underline {
+  0%      { transform: translateX(0px); width: 148px; }
+  6.25%   { transform: translateX(0px); width: 148px; animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
+  10.625% { transform: translateX(148px); width: 213px; }
+  17.5%   { transform: translateX(148px); width: 213px; animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
+  21.875% { transform: translateX(361px); width: 235px; }
+  30%     { transform: translateX(361px); width: 235px; animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
+  35.625% { transform: translateX(596px); width: 192px; }
+  100%    { transform: translateX(596px); width: 192px; }
+}
+
+/* Beta badge pop — own local 350ms timeline (delay 2850ms), not scene-percentage based. */
+@keyframes scene1-beta-badge-fade {
+  0%  { opacity: 0; }
+  33% { opacity: 1; }
+  100% { opacity: 1; }
+}
+@keyframes scene1-beta-badge-scale {
+  from { transform: scale(0.4); }
+  to   { transform: scale(1); }
+}
+
+@keyframes scene1-content-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Staggered tile cascade — shared by all 14 dashboard tiles, each with its own
+   `animation-delay` computed once from its index (see Scene1.tsx). */
+@keyframes scene1-tile-reveal {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Cursor opacity — fades in once (150–450ms), holds, fades out (4000–4350ms). Position
+   (transform) is driven by Scene1's one remaining addFrameTask, not this animation. */
+@keyframes scene1-cursor-opacity {
+  0%      { opacity: 0; }
+  1.875%  { opacity: 0; animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
+  5.625%  { opacity: 1; }
+  50%     { opacity: 1; animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
+  54.375% { opacity: 0; }
+  100%    { opacity: 0; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Scene2 (src/scenes/Scene2.tsx) — "Introducing fal Assets" reveal
+   ════════════════════════════════════════════════════════════════════════ */
+
+@keyframes pill-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fal-word-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes assets-word-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes assets-word-slide {
+  from { transform: translateX(40px); }
+  to   { transform: translateX(0); }
+}
+/* Typewriter subtitle — the full string is always in the DOM; the reveal is a 3-step
+   clip-path wipe (steps(3, jump-end)) matching the original's 3 word-group jumps
+   ("Beta" / "Beta now" / "Beta now available") instead of mutating textContent. */
+@keyframes subtitle-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes subtitle-type {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+/* Scattered corner pixels (Scene2 + Scene3's sparse twinkle) — each cycles forever on
+   its own duration/phase via a per-element negative `animation-delay` (same technique as
+   the allbirds reference's AmbientField fiber-drift), computed once at module load. */
+@keyframes pixel-twinkle {
+  0%   { opacity: 0; }
+  15%  { opacity: var(--twinkle-peak, 0.75); }
+  55%  { opacity: var(--twinkle-peak, 0.75); }
+  70%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Scene3 (src/scenes/Scene3.tsx) — fal logo outro
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Converging pixel cloud — each particle collapses from its own start position
+   (--dx/--dy, set inline per element) into the logo center and dissolves. */
+@keyframes converge-in {
+  from { transform: translate(0, 0) scale(1); opacity: 0.9; }
+  to   { transform: translate(var(--dx), var(--dy)) scale(0.4); opacity: 0; }
+}
+
+@keyframes logo-icon-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes logo-icon-scale {
+  from { transform: scale(0.4); }
+  to   { transform: scale(1); }
+}
+@keyframes logo-wordmark-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes logo-wordmark-slide {
+  from { transform: translateX(-25px); }
+  to   { transform: translateX(0); }
+}
+/* Almost-imperceptible breathing drift on the logo hold — infinite, ~5.2s period
+   (matches the original's sin(ms * 0.0012) continuous drift). */
+@keyframes logo-bob {
+  0%, 100% { transform: translateY(0); }
+  25%      { transform: translateY(2.5px); }
+  75%      { transform: translateY(-2.5px); }
 }

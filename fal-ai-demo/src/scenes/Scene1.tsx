@@ -1,48 +1,49 @@
 /**
  * Scene 1 — fal.ai Dashboard Nav Panel + Assets Dashboard Reveal (0–8000ms)
  *
- * REWORK v5 — reference-faithful camera + cursor motion:
- *  - Camera: LEFT-anchored zoom 1.0→1.7×, transformOrigin "0% <navY%"
- *    Simultaneously pans RIGHT tracking active tab (tx grows as cursor moves right)
- *    fal logo stays near left edge throughout; bar bleeds off-screen right at peak zoom
- *  - Cursor: fast, arced bezier paths using cbez() — 300–400ms per hop
- *    Arc height ~30–40px above straight line — flows like air
- *  - Assets tab: HIDDEN at start (maxWidth 0 → full, opacity 0→1) at 2000–2600ms
- *    Flex reflow pushes Serverless/Compute/Workflows/Settings right automatically
- *  - Underline: tracks active tab, 300ms outCubic slide
- *  - Beta badge: pops in at 2600ms with outBack bounce
- *  - Dashboard reveal at ~4s+: UNCHANGED from v4 (zoom-out + expand + tile cascade)
+ * Reference-faithful camera + cursor motion:
+ *  - Camera: ONE continuous eased push-in (scale 1.0→1.5, panning right to frame the
+ *    Assets tab), then a hold, then a calm zoom-out to frame the full dashboard panel.
+ *  - Cursor: fast arced hops between nav tabs (~300–400ms each), each landing exactly
+ *    when its tab activates (color/underline/Assets-insert all snap on the same frame).
+ *  - Assets tab: hidden at start, inserts (maxWidth/opacity) as the cursor arcs toward it.
+ *  - Dashboard reveal at ~4.5s: sidebar+content fade in, tiles cascade in staggered.
  *
- * Beat breakdown:
- *  0ms:      full bar visible (scale 1.0), Home active, NO Assets tab yet
- *  0–400ms:  cursor fades in under Home
- *  400–700ms: cursor arcs Home→Explore (350ms, cbez arc)
- *  700–1200ms: hold at Explore
- *  1200–1550ms: cursor arcs Explore→Generate (350ms)
- *  1550–2000ms: hold at Generate
- *  2000–2600ms: Assets tab INSERTS (width/opacity expand), pushing tabs right
- *  2100–2500ms: cursor arcs Generate→Assets (400ms, overlaps insert)
- *  2600ms:   Assets active; Beta badge pops in
- *  2600–3600ms: hold at Assets (camera settled zoomed 1.7×, panned right)
- *  3600–4000ms: brief transition beat
- *  4000ms+:  dashboard expand + zoom-out (UNCHANGED)
- *  7600ms:   scene fade out
- *  8000ms:   cut
+ * Every timing window below (panel resize, camera push/zoom, tab-color snaps, underline
+ * slide, Assets insert, beta badge pop, content fade, tile stagger, scene fade-out) is a
+ * fixed constant relative to this scene's own 8000ms `Timegroup`, so all of it is now
+ * declarative CSS `@keyframes` (see styles.css) driven by percentages of the scene's own
+ * duration — there is no per-frame JS or refs for any of it.
+ *
+ * The ONE exception: the cursor's own on-screen position. Each hop isn't a straight line —
+ * it's a quadratic-bezier ARC (`bez()` below) layered with a continuous small sine/cosine
+ * "alive" jitter added every frame, independent of the hop phase. Reproducing that exact
+ * curved path + independent continuous noise in CSS would mean building an `offset-path`
+ * per hop and layering a second infinite wobble on top with no render available to verify
+ * pixel-for-pixel fidelity against the reference — a real regression risk for a purely
+ * cosmetic detail. So the cursor's `transform` (position only — NOT its opacity, which is
+ * plain CSS) stays a small scene-scoped `addFrameTask`, per REFACTOR-PATTERNS.md 2b #5.
  */
 import React, { useCallback, useRef } from "react";
-import { Timegroup } from "@editframe/react";
-import { track, lerp, clamp, outBack, bez } from "../components/helpers";
+import { Timegroup, Image } from "@editframe/react";
+import { clamp, bez } from "../components/helpers";
 import { TraceLayer } from "../components/TraceLayer";
-import { TRACE_MODE, TRACE_OPACITY } from "../constants";
-import {
-  tile_char_milo, tile_char_mateo, tile_char_nyla,
-  tile_video_1, tile_video_3,
-} from "../assets/tile-bitmaps";
-// Real 3D character renders (fal Nano Banana) — crisp replacements for the dashboard tiles.
-import {
-  tile_grid_portrait, tile_grid_boy, tile_grid_heroine, tile_grid_creature, tile_grid_cyber2,
-  tile_grid_junior, tile_grid_pigslow, tile_grid_cyber, tile_grid_neon,
-} from "../assets/tile-hires";
+import { TRACE_MODE, TRACE_OPACITY, SCENES, SCENE1_START_MS } from "../constants";
+
+const TILE_CHAR_MILO = "/assets/tile-char-milo.jpg";
+const TILE_CHAR_MATEO = "/assets/tile-char-mateo.jpg";
+const TILE_CHAR_NYLA = "/assets/tile-char-nyla.jpg";
+const TILE_VIDEO_1 = "/assets/tile-video-1.jpg";
+const TILE_VIDEO_3 = "/assets/tile-video-3.jpg";
+const TILE_GRID_PORTRAIT = "/assets/tile-grid-portrait.jpg";
+const TILE_GRID_BOY = "/assets/tile-grid-boy.jpg";
+const TILE_GRID_HEROINE = "/assets/tile-grid-heroine.jpg";
+const TILE_GRID_CREATURE = "/assets/tile-grid-creature.jpg";
+const TILE_GRID_CYBER2 = "/assets/tile-grid-cyber2.jpg";
+const TILE_GRID_JUNIOR = "/assets/tile-grid-junior.jpg";
+const TILE_GRID_PIGSLOW = "/assets/tile-grid-pigslow.jpg";
+const TILE_GRID_CYBER = "/assets/tile-grid-cyber.jpg";
+const TILE_GRID_NEON = "/assets/tile-grid-neon.jpg";
 
 // ─── Inline SVG icons ──────────────────────────────────────────────────────
 
@@ -143,424 +144,118 @@ const PurpleCursor = () => (
 
 // ─── Layout constants ─────────────────────────────────────────────────────────
 
-const STRIP_HEIGHT = 175;   // compact two-row bar (was 430 — that created a huge empty black void)
-const STRIP_WIDTH  = 1860;
-const STRIP_LEFT   = 30;
-const STRIP_TOP    = 220;
+const STRIP_HEIGHT = 175; // compact two-row bar
+const STRIP_WIDTH = 1860;
+const STRIP_LEFT = 30;
+const STRIP_TOP = 220;
 
-// Extended panel dimensions (after Assets click)
-// Reference: the dashboard is a TALL window anchored near the top of the frame
-// that BLEEDS off the bottom edge (Videos row only half-visible at the very bottom).
-// So PANEL_FULL_TOP sits high and PANEL_FULL_HEIGHT is large enough to overflow 1080.
+// Extended panel dimensions (after Assets click) — width/left stay constant, only
+// height/top change (a tall window anchored near the top that bleeds off the bottom).
 const PANEL_FULL_HEIGHT = 1308;
-const PANEL_FULL_WIDTH  = 1860;
-const PANEL_FULL_LEFT   = 30;
-const PANEL_FULL_TOP    = 14;
+const PANEL_FULL_TOP = 14;
 
 const SIDEBAR_WIDTH = 210;
 
-// ─── Camera: LEFT-anchored zoom + rightward pan ───────────────────────────────
-//
-// Reference analysis:
-//   r_001: full bar in frame, scale 1.0, transformOrigin LEFT edge
-//   r_004: ~1.5×, fal logo near left edge, bar bleeds right, Explore centered
-//   r_008: ~1.7×, Generate centered on screen, right tabs cut off
-//   r_016: ~1.7×, Assets centered, fal logo+wordmark off-screen LEFT
-//
-// Model: transformOrigin = "0% <navY%"  (left edge of canvas, nav bar Y center)
-// Scale: 1.0 → 1.7 from 0ms → 2100ms (easeInOutCubic)
-// Pan tx: translate so the ACTIVE TAB CENTER lands at ~50% screen width
-//   With left-origin zoom, a native point at (nx, ny) appears at screen:
-//     screen_x = nx * scale + tx
-//   To put nx at screen center (960px):
-//     tx = 960 - nx * scale
-//   But we want left-of-center targeting (~640px) to feel natural:
-//     tx = TARGET_SX - nx * scale
-//
-// At scale 1.0, tx = 0 → Home is at its natural left position ✓
-// At scale 1.7, tx = 640 - 140*1.7 = 640 - 238 = 402  (Home still near left on screen)
-// At scale 1.7 with Generate (nx=545), tx = 640 - 545*1.7 = 640-926.5 = -286.5
-//   → camera has shifted so Generate is centered, fal has moved left+off
-
+// ─── Camera: LEFT-anchored zoom + rightward pan (see styles.css `scene1-camera`) ───
 // Nav bar Y center for origin anchor (strip top + half strip height)
 const NAV_CENTER_Y_PCT = ((STRIP_TOP + STRIP_HEIGHT / 2) / 1080) * 100; // ~27.3%
 
-// Camera timeline — ONE smooth continuous push-in (no per-tab tracking "jump").
-// The camera glides from full-bar (scale 1.0, no pan) to an Assets-framed peak
-// (scale Z_PEAK, panned so Assets sits center-screen) over a single eased curve.
-// The cursor hops tab→tab ON TOP of this calm push; the camera never lurches to
-// chase the cursor.
-const ZOOM_IN_START = 0;
-const CAM_PUSH_END  = 2900; // push-in completes just after the cursor lands on Assets
-const Z_START = 1.0;
-const Z_PEAK  = 1.5;        // gentler than before (was 1.7) → calmer
-const CAM_PEAK_TX = -357;   // at Z_PEAK this frames the Assets tab (nx≈758) ~center screen
-
-// After Assets click, zoom OUT to frame the full (tall) dashboard window
-const ZOOM_OUT_START = 4000;
-const ZOOM_OUT_END   = 5400;
-const Z_PANEL = 0.86;       // dashboard hold scale (panel ≈1600px wide on screen)
-const HOLD_TX  = 134.4;     // centers the 1860-wide panel horizontally at Z_PANEL
-
-// ─── Tab native X centers (in 1920px coordinate space) ───────────────────────
-// Panel at x=30, tab row padding 36px → tab row starts at x=66
-// Per-tab measured widths (icon 30px + gap 8px + text + padding 24px):
-//   Home=148, Explore=213, Generate=235, Assets=192, Serverless=278, Compute=213, Workflows=256, Settings=235
-const TAB_WIDTHS_NO_ASSETS = [148, 213, 235, 278, 213, 256, 235]; // without Assets
+// ─── Tab native X centers (in 1920px coordinate space) — used only by the cursor's
+// own addFrameTask below; every other consumer of these positions (underline, tab
+// color states) is now a fixed CSS keyframe in styles.css. ───
 const TAB_CENTER_X_NATIVE = [
-  66 + 74,        // home:      140px
+  66 + 74, // home:      140px
   66 + 148 + 107, // explore:   321px
   66 + 361 + 118, // generate:  545px
-  66 + 596 + 96,  // assets:    758px (used AFTER Assets inserts)
-  66 + 788 + 139, // serverless: 993px (with Assets inserted)
+  66 + 596 + 96, // assets:    758px (used AFTER Assets inserts)
 ];
-void TAB_WIDTHS_NO_ASSETS; // suppress unused warning
 
 // Cursor Y in native space — just below the tab underline
 const NAV_Y_NATIVE = STRIP_TOP + STRIP_HEIGHT - 20;
 
-// ─── Nav cursor walk timing ───────────────────────────────────────────────────
-// Fast arcs: each hop ~300–400ms, holds ~500ms
-// Home active:     0 – 400ms
-// Arc H→E:       400 – 750ms   (350ms)
-// Explore active: 750 – 1200ms
-// Arc E→G:      1200 – 1550ms  (350ms)
-// Generate active: 1550 – 2100ms
-// Assets INSERT: 2000 – 2600ms  (Assets tab width/opacity animates in)
-// Arc G→A:      2100 – 2500ms  (400ms, overlaps insert)
-// Assets active: 2500 – 4000ms
+// ─── Nav cursor walk timing — also drives the CSS tab-color / underline / Assets-insert
+// keyframes in styles.css (percentages there = these constants / SCENE_DURATION). ───
+const HOP_HE_START = 500;
+const HOP_HE_END = 850;
+const HOP_EG_START = 1400;
+const HOP_EG_END = 1750;
+const HOP_GA_START = 2400;
+const HOP_GA_END = 2850;
 
-// TICK-PRECISE: the Assets tab INSERT window is bolted to the G→A cursor arc.
-// The tab grows in (dim/gray) exactly as the cursor sweeps toward it, and the
-// instant the cursor LANDS (HOP_GA_END) the tab activates: white text + underline
-// arrives + Beta badge pops — all on the SAME frame. Nothing lights up early.
-const HOP_HE_START = 500;  const HOP_HE_END = 850;
-const HOP_EG_START = 1400; const HOP_EG_END = 1750;
-const HOP_GA_START = 2400; const HOP_GA_END = 2850;
-const ASSETS_INSERT_START = 2400;  // == HOP_GA_START (insert begins as cursor leaves Generate)
-const ASSETS_INSERT_END   = 2850;  // == HOP_GA_END   (insert completes as cursor lands)
-const ASSETS_ACTIVE_MS    = 2850;  // == HOP_GA_END   (the exact land tick)
+const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 // ─── Tab definitions ─────────────────────────────────────────────────────────
 const TAB_INFO = [
-  { id: "home",       label: "Home"       },
-  { id: "explore",    label: "Explore"    },
-  { id: "generate",   label: "Generate"   },
-  { id: "assets",     label: "Assets"     },
+  { id: "home", label: "Home" },
+  { id: "explore", label: "Explore" },
+  { id: "generate", label: "Generate" },
+  { id: "assets", label: "Assets" },
   { id: "serverless", label: "Serverless" },
-  { id: "compute",    label: "Compute"    },
-  { id: "workflows",  label: "Workflows"  },
-  { id: "settings",   label: "Settings"   },
+  { id: "compute", label: "Compute" },
+  { id: "workflows", label: "Workflows" },
+  { id: "settings", label: "Settings" },
 ];
 
-// Underline positions relative to left:36 anchor in the tab row container.
-// Note: after Assets inserts, all tabs after Generate shift right by ~192px.
-// We handle the underline via getBoundingClientRect in onFrame instead of hardcoded positions.
-// Fallback static positions (pre-Assets-insert = no Assets in layout):
-const UNDERLINE_POS_PRE: Array<{ x: number; w: number }> = [
-  { x: 0,   w: 148 }, // home
-  { x: 148, w: 213 }, // explore
-  { x: 361, w: 235 }, // generate
-];
-// Post-insert (Assets present):
-const UNDERLINE_POS_POST: Array<{ x: number; w: number }> = [
-  { x: 0,   w: 148 }, // home
-  { x: 148, w: 213 }, // explore
-  { x: 361, w: 235 }, // generate
-  { x: 596, w: 192 }, // assets
-];
-
-const easeInOut = (t: number) =>
-  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
-
-// A tab lights up the instant the cursor LANDS on it (hop END), never when the
-// cursor merely STARTS moving toward it. This keeps every activation tick-precise.
-function getActiveTabIdx(ms: number): number {
-  if (ms < HOP_HE_END) return 0;   // Home    — until cursor lands on Explore
-  if (ms < HOP_EG_END) return 1;   // Explore — until cursor lands on Generate
-  if (ms < HOP_GA_END) return 2;   // Generate— until cursor lands on Assets
-  return 3;                        // Assets
-}
-
-const CONTENT_TILE_COUNT = 14;
 const TILE_STAGGER_MS = 70;
 const TILE_REVEAL_DUR = 320;
 const TILE_CASCADE_START = 4500; // fades in with the dashboard reveal
 
 const PRIMARY_VIOLET = "#7C3AED";
+// The "active" tab color (#ffffff) only ever appears inside the CSS keyframes in
+// styles.css (scene1-tab-*-color) — there's no JS consumer for it, so it isn't
+// duplicated here as a constant.
+const INACTIVE_COLOR = "#5a6272";
 
 // Scene total duration — 8000ms to allow ~3s of dashboard hold
-const SCENE_DURATION = 8000;
+const SCENE_DURATION = SCENES.scene1.duration;
 
 export function Scene1() {
-  const tabRefs         = useRef<(HTMLDivElement | null)[]>(Array(8).fill(null));
-  const underlineRef    = useRef<HTMLDivElement>(null);
-  const betaBadgeRef    = useRef<HTMLSpanElement>(null);
-  const contentRef      = useRef<HTMLDivElement>(null);
-  const cursorRef       = useRef<HTMLDivElement>(null);
-  const panelRef        = useRef<HTMLDivElement>(null);
-  const cameraRef       = useRef<HTMLDivElement>(null);
-  const sceneRef        = useRef<HTMLDivElement>(null);
-  const tileRefs        = useRef<Array<HTMLDivElement | null>>(Array(CONTENT_TILE_COUNT).fill(null));
-
-  const ACTIVE_COLOR   = "#ffffff";
-  const INACTIVE_COLOR = "#5a6272";
+  // The cursor's arced hop + continuous jitter is the one effect kept as a scene-scoped
+  // addFrameTask — see the file header comment for why.
+  const cursorRef = useRef<HTMLDivElement>(null);
 
   const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    const scene   = sceneRef.current;
-    const camera  = cameraRef.current;
-    const panel   = panelRef.current;
-    const cursor  = cursorRef.current;
-    const underline = underlineRef.current;
-    const betaBadge = betaBadgeRef.current;
-    const content = contentRef.current;
+    const cursor = cursorRef.current;
+    if (!cursor) return;
 
-    // ── Panel size animation (strip → full dashboard) ──
-    if (panel) {
-      const GROW_START = 4000;
-      const GROW_END   = 5400;
+    const baseY = NAV_Y_NATIVE;
+    let cx = TAB_CENTER_X_NATIVE[0] - 8;
+    let cy = baseY;
+    const ARC = 35; // arc height for bezier (upward arc — control point is ABOVE the straight line)
 
-      if (ms < GROW_START) {
-        panel.style.width   = `${STRIP_WIDTH}px`;
-        panel.style.height  = `${STRIP_HEIGHT}px`;
-        panel.style.left    = `${STRIP_LEFT}px`;
-        panel.style.top     = `${STRIP_TOP}px`;
-      } else {
-        const t = track(ms, GROW_START, GROW_END, easeInOut);
-        const w = Math.round(lerp(STRIP_WIDTH, PANEL_FULL_WIDTH, t));
-        const h = Math.round(lerp(STRIP_HEIGHT, PANEL_FULL_HEIGHT, t));
-        const l = Math.round(lerp(STRIP_LEFT, PANEL_FULL_LEFT, t));
-        const topPos = Math.round(lerp(STRIP_TOP, PANEL_FULL_TOP, t));
-        panel.style.width  = `${w}px`;
-        panel.style.height = `${h}px`;
-        panel.style.left   = `${l}px`;
-        panel.style.top    = `${topPos}px`;
-      }
+    if (ms >= HOP_HE_START && ms < HOP_HE_END) {
+      const t = easeInOut(clamp((ms - HOP_HE_START) / (HOP_HE_END - HOP_HE_START)));
+      const fromX = TAB_CENTER_X_NATIVE[0] - 8;
+      const toX = TAB_CENTER_X_NATIVE[1] - 8;
+      const [bx, by] = bez(t, [fromX, baseY], [(fromX + toX) / 2, baseY - ARC], [toX, baseY]);
+      cx = bx; cy = by;
+    } else if (ms < HOP_HE_START) {
+      cx = TAB_CENTER_X_NATIVE[0] - 8; cy = baseY;
+    } else if (ms >= HOP_EG_START && ms < HOP_EG_END) {
+      const t = easeInOut(clamp((ms - HOP_EG_START) / (HOP_EG_END - HOP_EG_START)));
+      const fromX = TAB_CENTER_X_NATIVE[1] - 8;
+      const toX = TAB_CENTER_X_NATIVE[2] - 8;
+      const [bx, by] = bez(t, [fromX, baseY], [(fromX + toX) / 2, baseY - ARC], [toX, baseY]);
+      cx = bx; cy = by;
+    } else if (ms >= HOP_HE_END && ms < HOP_EG_START) {
+      cx = TAB_CENTER_X_NATIVE[1] - 8; cy = baseY;
+    } else if (ms >= HOP_GA_START && ms < HOP_GA_END) {
+      const t = easeInOut(clamp((ms - HOP_GA_START) / (HOP_GA_END - HOP_GA_START)));
+      const fromX = TAB_CENTER_X_NATIVE[2] - 8;
+      const toX = TAB_CENTER_X_NATIVE[3] - 8;
+      const [bx, by] = bez(t, [fromX, baseY], [(fromX + toX) / 2, baseY - ARC], [toX, baseY]);
+      cx = bx; cy = by;
+    } else if (ms >= HOP_EG_END && ms < HOP_GA_START) {
+      cx = TAB_CENTER_X_NATIVE[2] - 8; cy = baseY;
+    } else {
+      cx = TAB_CENTER_X_NATIVE[3] - 8; cy = baseY;
     }
 
-    // ── Scene fade out — start at 7600ms (400ms before cut at 8000ms) ──
-    if (scene) {
-      const fadeT = ms > 7600 ? clamp((ms - 7600) / 400) : 0;
-      scene.style.opacity = String(1 - fadeT);
-    }
+    // Subtle alive drift (tiny amplitude so it reads as fluid not jittery)
+    cx += Math.sin(ms / 700) * 1.5;
+    cy += Math.cos(ms / 600) * 1.0;
 
-    // ── Assets tab insertion: width + opacity animate in at ASSETS_INSERT_START ──
-    const assetsTabEl = tabRefs.current[3]; // Assets is index 3
-    if (assetsTabEl) {
-      if (ms < ASSETS_INSERT_START) {
-        assetsTabEl.style.maxWidth = "0px";
-        assetsTabEl.style.opacity = "0";
-        assetsTabEl.style.overflow = "hidden";
-        assetsTabEl.style.padding = "0";
-      } else if (ms < ASSETS_INSERT_END) {
-        const t = easeOutCubic(clamp((ms - ASSETS_INSERT_START) / (ASSETS_INSERT_END - ASSETS_INSERT_START)));
-        assetsTabEl.style.maxWidth = `${lerp(0, 260, t)}px`;
-        assetsTabEl.style.opacity = String(t);
-        assetsTabEl.style.overflow = "hidden";
-        assetsTabEl.style.padding = `0 ${lerp(0, 12, t)}px`;
-        assetsTabEl.style.paddingBottom = "20px";
-      } else {
-        assetsTabEl.style.maxWidth = "260px";
-        assetsTabEl.style.opacity = "1";
-        assetsTabEl.style.overflow = "visible";
-        assetsTabEl.style.padding = "0 12px";
-        assetsTabEl.style.paddingBottom = "20px";
-      }
-    }
-
-    // ── Tab color states — NO pill background, only color brighten ──
-    const activeIdx = getActiveTabIdx(ms);
-    TAB_INFO.forEach((tab, i) => {
-      const el = tabRefs.current[i];
-      if (!el) return;
-      const isActive = i === activeIdx;
-      el.style.color = isActive ? ACTIVE_COLOR : INACTIVE_COLOR;
-      el.style.background = "transparent";
-      el.style.fontWeight = isActive ? "600" : "500";
-    });
-
-    // ── Underline slide — tracks active tab through the Assets insertion reflow ──
-    // We use pre/post position arrays. During Assets insert (2000–2600ms) the tab
-    // positions shift, so we blend the underline smoothly with the cursor arc.
-    if (underline) {
-      let ulX = 0;
-      let ulW = UNDERLINE_POS_PRE[0].w;
-
-      if (ms < HOP_HE_START) {
-        // Home
-        ulX = UNDERLINE_POS_PRE[0].x; ulW = UNDERLINE_POS_PRE[0].w;
-      } else if (ms < HOP_HE_END) {
-        // Sliding H→E
-        const t = easeOutCubic(clamp((ms - HOP_HE_START) / (HOP_HE_END - HOP_HE_START)));
-        ulX = lerp(UNDERLINE_POS_PRE[0].x, UNDERLINE_POS_PRE[1].x, t);
-        ulW = lerp(UNDERLINE_POS_PRE[0].w, UNDERLINE_POS_PRE[1].w, t);
-      } else if (ms < HOP_EG_START) {
-        // Explore
-        ulX = UNDERLINE_POS_PRE[1].x; ulW = UNDERLINE_POS_PRE[1].w;
-      } else if (ms < HOP_EG_END) {
-        // Sliding E→G
-        const t = easeOutCubic(clamp((ms - HOP_EG_START) / (HOP_EG_END - HOP_EG_START)));
-        ulX = lerp(UNDERLINE_POS_PRE[1].x, UNDERLINE_POS_PRE[2].x, t);
-        ulW = lerp(UNDERLINE_POS_PRE[1].w, UNDERLINE_POS_PRE[2].w, t);
-      } else if (ms < HOP_GA_START) {
-        // Generate hold
-        ulX = UNDERLINE_POS_PRE[2].x; ulW = UNDERLINE_POS_PRE[2].w;
-      } else if (ms < HOP_GA_END) {
-        // Sliding G→A (Assets inserting simultaneously)
-        const t = easeOutCubic(clamp((ms - HOP_GA_START) / (HOP_GA_END - HOP_GA_START)));
-        ulX = lerp(UNDERLINE_POS_PRE[2].x, UNDERLINE_POS_POST[3].x, t);
-        ulW = lerp(UNDERLINE_POS_PRE[2].w, UNDERLINE_POS_POST[3].w, t);
-      } else {
-        // Assets
-        ulX = UNDERLINE_POS_POST[3].x; ulW = UNDERLINE_POS_POST[3].w;
-      }
-
-      underline.style.transform = `translateX(${ulX}px)`;
-      underline.style.width = `${ulW}px`;
-    }
-
-    // ── Beta badge pop-in at ASSETS_ACTIVE_MS ──
-    if (betaBadge) {
-      if (ms < ASSETS_ACTIVE_MS) {
-        betaBadge.style.opacity = "0";
-        betaBadge.style.transform = "scale(0.4)";
-      } else {
-        const t = track(ms, ASSETS_ACTIVE_MS, ASSETS_ACTIVE_MS + 350, outBack);
-        betaBadge.style.opacity = String(clamp(t * 3)); // snap to full opacity fast
-        betaBadge.style.transform = `scale(${lerp(0.4, 1.0, t)})`;
-      }
-    }
-
-    // ── Camera: ONE smooth continuous push-in, then a calm zoom-out to dashboard ──
-    // No per-tab tracking. The camera glides from the full bar to an Assets-framed
-    // peak on a single eased curve, so it never lurches/jumps to chase the cursor.
-    // The cursor hops tab→tab ON TOP of this calm push.
-    if (camera) {
-      camera.style.transformOrigin = `0% ${NAV_CENTER_Y_PCT.toFixed(1)}%`;
-      camera.style.perspective = "none";
-
-      if (ms < CAM_PUSH_END) {
-        // Continuous push-in: scale 1.0→Z_PEAK and pan 0→CAM_PEAK_TX on ONE curve
-        const p = easeInOut(clamp((ms - ZOOM_IN_START) / (CAM_PUSH_END - ZOOM_IN_START)));
-        const scale = lerp(Z_START, Z_PEAK, p);
-        const tx = lerp(0, CAM_PEAK_TX, p);
-        camera.style.transform = `translate(${tx.toFixed(1)}px, 0px) scale(${scale.toFixed(4)})`;
-
-      } else if (ms < ZOOM_OUT_START) {
-        // Hold at the Assets-framed peak
-        camera.style.transform = `translate(${CAM_PEAK_TX}px, 0px) scale(${Z_PEAK})`;
-
-      } else if (ms < ZOOM_OUT_END) {
-        // Zoom OUT to frame the tall dashboard window (flat, no tilt)
-        const q = easeInOut(clamp((ms - ZOOM_OUT_START) / (ZOOM_OUT_END - ZOOM_OUT_START)));
-        const scale = lerp(Z_PEAK, Z_PANEL, q);
-        const tx = lerp(CAM_PEAK_TX, HOLD_TX, q);
-        camera.style.transform = `translate(${tx.toFixed(1)}px, 0px) scale(${scale.toFixed(4)})`;
-
-      } else {
-        // Dashboard hold: flat, face-on, centered. The panel itself is sized tall so
-        // it anchors near the top of the frame and bleeds off the bottom edge.
-        camera.style.transform = `translate(${HOLD_TX}px, 0px) scale(${Z_PANEL})`;
-      }
-    }
-
-    // ── Cursor: fast arced bezier paths (cbez) ──
-    if (cursor) {
-      // Fade in
-      if (ms < 150) {
-        cursor.style.opacity = "0";
-      } else if (ms < 450) {
-        cursor.style.opacity = String(easeOutCubic(clamp((ms - 150) / 300)));
-      } else if (ms >= 4000) {
-        cursor.style.opacity = String(Math.max(0, 1 - easeOutCubic(clamp((ms - 4000) / 350))));
-      } else {
-        cursor.style.opacity = "1";
-      }
-
-      // Native-space cursor position: sits just below the tab label baseline
-      const baseY = NAV_Y_NATIVE;
-      let cx = TAB_CENTER_X_NATIVE[0] - 8;
-      let cy = baseY;
-
-      // Arc height for bezier (upward arc — control point is ABOVE the straight line)
-      const ARC = 35;
-
-      if (ms >= HOP_HE_START && ms < HOP_HE_END) {
-        // H→E arc
-        const t = easeInOut(clamp((ms - HOP_HE_START) / (HOP_HE_END - HOP_HE_START)));
-        const fromX = TAB_CENTER_X_NATIVE[0] - 8;
-        const toX   = TAB_CENTER_X_NATIVE[1] - 8;
-        const [bx, by] = bez(t,
-          [fromX, baseY],
-          [(fromX + toX) / 2, baseY - ARC],
-          [toX, baseY]
-        );
-        cx = bx; cy = by;
-      } else if (ms < HOP_HE_START) {
-        cx = TAB_CENTER_X_NATIVE[0] - 8; cy = baseY;
-      } else if (ms >= HOP_EG_START && ms < HOP_EG_END) {
-        // E→G arc
-        const t = easeInOut(clamp((ms - HOP_EG_START) / (HOP_EG_END - HOP_EG_START)));
-        const fromX = TAB_CENTER_X_NATIVE[1] - 8;
-        const toX   = TAB_CENTER_X_NATIVE[2] - 8;
-        const [bx, by] = bez(t,
-          [fromX, baseY],
-          [(fromX + toX) / 2, baseY - ARC],
-          [toX, baseY]
-        );
-        cx = bx; cy = by;
-      } else if (ms >= HOP_HE_END && ms < HOP_EG_START) {
-        cx = TAB_CENTER_X_NATIVE[1] - 8; cy = baseY;
-      } else if (ms >= HOP_GA_START && ms < HOP_GA_END) {
-        // G→A arc (Assets inserting live)
-        const t = easeInOut(clamp((ms - HOP_GA_START) / (HOP_GA_END - HOP_GA_START)));
-        const fromX = TAB_CENTER_X_NATIVE[2] - 8;
-        const toX   = TAB_CENTER_X_NATIVE[3] - 8;
-        const [bx, by] = bez(t,
-          [fromX, baseY],
-          [(fromX + toX) / 2, baseY - ARC],
-          [toX, baseY]
-        );
-        cx = bx; cy = by;
-      } else if (ms >= HOP_EG_END && ms < HOP_GA_START) {
-        cx = TAB_CENTER_X_NATIVE[2] - 8; cy = baseY;
-      } else {
-        cx = TAB_CENTER_X_NATIVE[3] - 8; cy = baseY;
-      }
-
-      // Subtle alive drift (tiny amplitude so it reads as fluid not jittery)
-      cx += Math.sin(ms / 700) * 1.5;
-      cy += Math.cos(ms / 600) * 1.0;
-
-      cursor.style.transform = `translate(${cx}px, ${cy}px)`;
-    }
-
-    // ── Content container fade-in ──
-    if (content) {
-      if (ms < 4500) {
-        content.style.opacity = "0";
-      } else {
-        const fadeIn = clamp((ms - 4500) / 400);
-        content.style.opacity = String(fadeIn);
-      }
-    }
-
-    // ── Staggered tile streaming reveals ──
-    for (let i = 0; i < CONTENT_TILE_COUNT; i++) {
-      const tile = tileRefs.current[i];
-      if (!tile) continue;
-      const tileStart = TILE_CASCADE_START + i * TILE_STAGGER_MS;
-      const t = clamp((ms - tileStart) / TILE_REVEAL_DUR);
-      const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-      if (ms < tileStart) {
-        tile.style.opacity = "0";
-        tile.style.transform = "scale(0.94)";
-      } else {
-        tile.style.opacity = String(eased);
-        tile.style.transform = `scale(${lerp(0.94, 1, eased)})`;
-      }
-    }
+    cursor.style.transform = `translate(${cx}px, ${cy}px)`;
   }, []);
 
   return (
@@ -575,31 +270,33 @@ export function Scene1() {
         overflow: "hidden",
       }}
     >
-      <TraceLayer sceneStartMs={0} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
+      <TraceLayer sceneStartMs={SCENE1_START_MS} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
 
-      {/* Scene wrapper — opacity controlled for fade-out */}
+      {/* Scene wrapper — fades out in the last 400ms via `scene1-fadeout` */}
       <div
-        ref={sceneRef}
-        style={{ position: "absolute", inset: 0, zIndex: 2 }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 2,
+          animation: "scene1-fadeout 400ms 7600ms linear forwards",
+        }}
       >
-        {/* Camera layer */}
+        {/* Camera layer — one continuous push-in + zoom-out, see `scene1-camera` */}
         <div
-          ref={cameraRef}
           style={{
             position: "absolute",
             inset: 0,
-            transformOrigin: "50% 50%",
+            transformOrigin: `0% ${NAV_CENTER_Y_PCT.toFixed(1)}%`,
+            perspective: "none",
+            animation: `scene1-camera ${SCENE_DURATION}ms linear both`,
           }}
         >
-          {/* ===== UNIFIED PANEL (strip → full dashboard) ===== */}
+          {/* ===== UNIFIED PANEL (strip → full dashboard), see `scene1-panel` ===== */}
           <div
-            ref={panelRef}
             style={{
               position: "absolute",
               left: STRIP_LEFT,
-              top: STRIP_TOP,
               width: STRIP_WIDTH,
-              height: STRIP_HEIGHT,
               background: "#111114",
               borderRadius: 14,
               border: "1px solid #1e1e26",
@@ -608,6 +305,11 @@ export function Scene1() {
               display: "flex",
               flexDirection: "column",
               overflow: "hidden",
+              animation: `scene1-panel ${SCENE_DURATION}ms linear both`,
+              ["--panel-strip-h" as string]: `${STRIP_HEIGHT}px`,
+              ["--panel-strip-top" as string]: `${STRIP_TOP}px`,
+              ["--panel-full-h" as string]: `${PANEL_FULL_HEIGHT}px`,
+              ["--panel-full-top" as string]: `${PANEL_FULL_TOP}px`,
             }}
           >
             {/* ── NAV STRIP (always visible) — TWO-ROW layout matching reference ── */}
@@ -623,14 +325,7 @@ export function Scene1() {
               }}
             >
               {/* ── ROW 1: logo + account chip ── */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "0 36px",
-                  gap: 0,
-                }}
-              >
+              <div style={{ display: "flex", alignItems: "center", padding: "0 36px", gap: 0 }}>
                 {/* fal logo mark + wordmark */}
                 <div style={{ display: "flex", alignItems: "center", gap: 11, marginRight: 24, flexShrink: 0 }}>
                   <FalIconMark size={44} color="#ffffff" />
@@ -642,29 +337,16 @@ export function Scene1() {
                 {/* Account pill */}
                 <div
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    background: "#1a1a22",
-                    borderRadius: 10,
-                    padding: "8px 18px 8px 10px",
-                    border: "1px solid #252530",
-                    flexShrink: 0,
+                    display: "flex", alignItems: "center", gap: 10, background: "#1a1a22",
+                    borderRadius: 10, padding: "8px 18px 8px 10px", border: "1px solid #252530", flexShrink: 0,
                   }}
                 >
                   <div
                     style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 10,
+                      width: 44, height: 44, borderRadius: 10,
                       background: "linear-gradient(135deg, #60a5fa, #3b82f6)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 16,
-                      fontWeight: 700,
-                      color: "#ffffff",
-                      flexShrink: 0,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 16, fontWeight: 700, color: "#ffffff", flexShrink: 0,
                     }}
                   >
                     AS
@@ -679,70 +361,51 @@ export function Scene1() {
               </div>
 
               {/* ── ROW 2: tab row (flush to bottom of bar) ── */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "flex-end",
-                  position: "relative",
-                  height: 82,
-                  padding: "0 36px",
-                  overflow: "visible",
-                }}
-              >
-                {TAB_INFO.map((tab, i) => {
+              <div style={{ display: "flex", alignItems: "flex-end", position: "relative", height: 82, padding: "0 36px", overflow: "visible" }}>
+                {TAB_INFO.map((tab) => {
                   const isAssets = tab.id === "assets";
+                  const colorAnim =
+                    tab.id === "home" ? "scene1-tab-home-color"
+                    : tab.id === "explore" ? "scene1-tab-explore-color"
+                    : tab.id === "generate" ? "scene1-tab-generate-color"
+                    : tab.id === "assets" ? "scene1-tab-assets-color"
+                    : null;
+                  const animations = [
+                    ...(isAssets ? [`scene1-assets-tab-insert ${SCENE_DURATION}ms linear both`] : []),
+                    ...(colorAnim ? [`${colorAnim} ${SCENE_DURATION}ms linear both`] : []),
+                  ];
                   return (
                     <div
                       key={tab.id}
-                      ref={(el) => { tabRefs.current[i] = el; }}
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        padding: "0 12px",
-                        height: "100%",
-                        color: "#5a6272",
-                        fontSize: 36,
-                        fontWeight: 500,
-                        whiteSpace: "nowrap",
-                        position: "relative",
-                        flexShrink: 0,
-                        background: "transparent",
-                        paddingBottom: 20,
-                        // Assets tab starts hidden — onFrame animates maxWidth+opacity
-                        ...(isAssets ? {
-                          maxWidth: "0px",
-                          opacity: 0,
-                          overflow: "hidden",
-                          padding: "0",
-                        } : {}),
-                        willChange: "max-width, opacity",
+                        display: "flex", alignItems: "center", gap: 8, height: "100%",
+                        color: INACTIVE_COLOR, fontSize: 36, fontWeight: 500, whiteSpace: "nowrap",
+                        position: "relative", flexShrink: 0, background: "transparent",
+                        paddingTop: 0, paddingBottom: 20,
+                        paddingLeft: isAssets ? undefined : 12,
+                        paddingRight: isAssets ? undefined : 12,
+                        overflow: isAssets ? "hidden" : "visible",
+                        ...(animations.length ? { animation: animations.join(", ") } : {}),
                       }}
                     >
                       <span style={{ display: "flex", alignItems: "center", opacity: 0.75 }}>
-                        {tab.id === "home"       && <IconHome />}
-                        {tab.id === "explore"    && <IconExplore />}
-                        {tab.id === "generate"   && <IconGenerate />}
-                        {tab.id === "assets"     && <IconAssetsTab />}
+                        {tab.id === "home" && <IconHome />}
+                        {tab.id === "explore" && <IconExplore />}
+                        {tab.id === "generate" && <IconGenerate />}
+                        {tab.id === "assets" && <IconAssetsTab />}
                         {tab.id === "serverless" && <IconRocket />}
-                        {tab.id === "compute"    && <IconChip />}
-                        {tab.id === "workflows"  && <IconNodes />}
-                        {tab.id === "settings"   && <IconSettings />}
+                        {tab.id === "compute" && <IconChip />}
+                        {tab.id === "workflows" && <IconNodes />}
+                        {tab.id === "settings" && <IconSettings />}
                       </span>
                       <span>{tab.label}</span>
                       {isAssets && (
                         <span
-                          ref={betaBadgeRef}
                           style={{
-                            fontSize: 14,
-                            fontWeight: 700,
-                            color: "#a78bfa",
-                            background: "rgba(124, 58, 237, 0.22)",
-                            borderRadius: 5,
-                            padding: "2px 7px",
-                            marginLeft: 3,
-                            opacity: 0,
-                            transformOrigin: "center",
+                            fontSize: 14, fontWeight: 700, color: "#a78bfa",
+                            background: "rgba(124, 58, 237, 0.22)", borderRadius: 5,
+                            padding: "2px 7px", marginLeft: 3, transformOrigin: "center",
+                            animation: `scene1-beta-badge-fade 350ms 2850ms linear both, scene1-beta-badge-scale 350ms 2850ms cubic-bezier(0.34,1.56,0.64,1) both`,
                           }}
                         >
                           Beta
@@ -752,18 +415,12 @@ export function Scene1() {
                   );
                 })}
 
-                {/* Active underline — slides between tabs */}
+                {/* Active underline — slides between tabs, see `scene1-underline` */}
                 <div
-                  ref={underlineRef}
                   style={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 36,
-                    height: 3,
-                    width: UNDERLINE_POS_PRE[0].w,
-                    background: PRIMARY_VIOLET,
-                    borderRadius: 2,
-                    transform: `translateX(${UNDERLINE_POS_PRE[0].x}px)`,
+                    position: "absolute", bottom: 0, left: 36, height: 3,
+                    background: PRIMARY_VIOLET, borderRadius: 2,
+                    animation: `scene1-underline ${SCENE_DURATION}ms linear both`,
                   }}
                 />
               </div>
@@ -771,37 +428,14 @@ export function Scene1() {
 
             {/* ── EXPANDED BODY (sidebar + content) ── */}
             <div
-              ref={contentRef}
               style={{
-                flex: 1,
-                display: "flex",
-                opacity: 0,
-                overflow: "hidden",
-                minHeight: 0,
+                flex: 1, display: "flex", overflow: "hidden", minHeight: 0,
+                animation: "scene1-content-fade 400ms 4500ms linear both",
               }}
             >
               {/* ── LEFT SIDEBAR ── */}
-              <div
-                style={{
-                  width: SIDEBAR_WIDTH,
-                  flexShrink: 0,
-                  borderRight: "1px solid #1d1d25",
-                  padding: "16px 10px",
-                  overflowY: "hidden",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 5,
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: "#e0e0e8",
-                    marginBottom: 10,
-                    padding: "4px 8px",
-                  }}
-                >
+              <div style={{ width: SIDEBAR_WIDTH, flexShrink: 0, borderRight: "1px solid #1d1d25", padding: "16px 10px", overflowY: "hidden" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600, color: "#e0e0e8", marginBottom: 10, padding: "4px 8px" }}>
                   <span>My Assets</span>
                   <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round">
                     <path d="M2 4l4 4 4-4" />
@@ -809,31 +443,25 @@ export function Scene1() {
                 </div>
 
                 {[
-                  { label: "Home",        active: false },
-                  { label: "All media",   active: false },
-                  { label: "Characters",  active: true  },
-                  { label: "Styles",      active: false },
-                  { label: "Favorites",   count: "19"   },
-                  { label: "Archive",     count: "5,432" },
+                  { label: "Home", active: false },
+                  { label: "All media", active: false },
+                  { label: "Characters", active: true },
+                  { label: "Styles", active: false },
+                  { label: "Favorites", count: "19" },
+                  { label: "Archive", count: "5,432" },
                 ].map((item) => (
                   <div
                     key={item.label}
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "5px 8px",
-                      borderRadius: 5,
-                      fontSize: 12,
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                      padding: "5px 8px", borderRadius: 5, fontSize: 12,
                       color: item.active ? "#ffffff" : "#606878",
                       background: item.active ? "rgba(124, 58, 237, 0.18)" : "transparent",
                       marginBottom: 2,
                     }}
                   >
                     <span>{item.label}</span>
-                    {item.count && (
-                      <span style={{ fontSize: 10, color: "#404858" }}>{item.count}</span>
-                    )}
+                    {item.count && <span style={{ fontSize: 10, color: "#404858" }}>{item.count}</span>}
                   </div>
                 ))}
 
@@ -845,21 +473,10 @@ export function Scene1() {
                 {[
                   { label: "Images", count: "6,432" },
                   { label: "Videos", count: "3,106" },
-                  { label: "Audio",  count: "947"   },
-                  { label: "3D",     count: "462"   },
+                  { label: "Audio", count: "947" },
+                  { label: "3D", count: "462" },
                 ].map((item) => (
-                  <div
-                    key={item.label}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "3px 8px",
-                      fontSize: 11,
-                      color: "#606878",
-                      marginBottom: 2,
-                    }}
-                  >
+                  <div key={item.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "3px 8px", fontSize: 11, color: "#606878", marginBottom: 2 }}>
                     <span>{item.label}</span>
                     <span style={{ fontSize: 10, color: "#404858" }}>{item.count}</span>
                   </div>
@@ -871,22 +488,12 @@ export function Scene1() {
                   Collections
                 </div>
                 {[
-                  { label: "Milo Starling"  },
-                  { label: "Mateo Rivas"    },
+                  { label: "Milo Starling" },
+                  { label: "Mateo Rivas" },
                   { label: "Cpt. Nyla Ward" },
-                  { label: "Pigslow"        },
+                  { label: "Pigslow" },
                 ].map((item) => (
-                  <div
-                    key={item.label}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "3px 8px",
-                      fontSize: 11,
-                      color: "#606878",
-                      marginBottom: 2,
-                    }}
-                  >
+                  <div key={item.label} style={{ display: "flex", alignItems: "center", padding: "3px 8px", fontSize: 11, color: "#606878", marginBottom: 2 }}>
                     <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#404858", marginRight: 6 }} />
                     <span>{item.label}</span>
                   </div>
@@ -897,22 +504,11 @@ export function Scene1() {
                 </div>
                 {[
                   { label: "Product Shots - Grea...", count: "$48.01" },
-                  { label: "Social Media Assets"                      },
-                  { label: "Hero Images - Landing"                    },
+                  { label: "Social Media Assets" },
+                  { label: "Hero Images - Landing" },
                   { label: "Client Review - Batch...", count: "$3.4k" },
                 ].map((item) => (
-                  <div
-                    key={item.label}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "3px 8px",
-                      fontSize: 10,
-                      color: "#505868",
-                      marginBottom: 1,
-                    }}
-                  >
+                  <div key={item.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "3px 8px", fontSize: 10, color: "#505868", marginBottom: 1 }}>
                     <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 120 }}>{item.label}</span>
                     {item.count && <span style={{ color: "#404858", flexShrink: 0 }}>{item.count}</span>}
                   </div>
@@ -922,28 +518,8 @@ export function Scene1() {
               {/* ── MAIN CONTENT AREA ── */}
               <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                 {/* Search + toolbar row */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "12px 20px",
-                    borderBottom: "1px solid #1d1d25",
-                    gap: 10,
-                    flexShrink: 0,
-                  }}
-                >
-                  <div
-                    style={{
-                      flex: 1,
-                      background: "#0e0e16",
-                      border: "1px solid #1d1d25",
-                      borderRadius: 7,
-                      padding: "7px 12px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 7,
-                    }}
-                  >
+                <div style={{ display: "flex", alignItems: "center", padding: "12px 20px", borderBottom: "1px solid #1d1d25", gap: 10, flexShrink: 0 }}>
+                  <div style={{ flex: 1, background: "#0e0e16", border: "1px solid #1d1d25", borderRadius: 7, padding: "7px 12px", display: "flex", alignItems: "center", gap: 7 }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#404858" strokeWidth="2" strokeLinecap="round">
                       <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
                     </svg>
@@ -967,7 +543,6 @@ export function Scene1() {
 
                 {/* Scrollable content */}
                 <div style={{ flex: 1, padding: "24px 30px", overflow: "hidden" }}>
-
                   {/* Characters section */}
                   <div style={{ fontSize: 18, fontWeight: 600, color: "#e0e0e8", marginBottom: 18 }}>Characters</div>
                   <div style={{ display: "flex", gap: 22, marginBottom: 44, alignItems: "center" }}>
@@ -978,15 +553,15 @@ export function Scene1() {
                       <span style={{ fontSize: 11, color: "#404858", textAlign: "center" }}>New character</span>
                     </div>
                     {[
-                      { label: "Milo Starling",  img: tile_char_milo    },
-                      { label: "Mateo Rivas",    img: tile_char_mateo   },
-                      { label: "Cpt. Nyla Ward", img: tile_char_nyla    },
-                      { label: "Dr. Amina",      img: tile_grid_heroine },
-                      { label: "Pigslow",        img: tile_grid_pigslow },
+                      { label: "Milo Starling", img: TILE_CHAR_MILO },
+                      { label: "Mateo Rivas", img: TILE_CHAR_MATEO },
+                      { label: "Cpt. Nyla Ward", img: TILE_CHAR_NYLA },
+                      { label: "Dr. Amina", img: TILE_GRID_HEROINE },
+                      { label: "Pigslow", img: TILE_GRID_PIGSLOW },
                     ].map((char) => (
                       <div key={char.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
                         <div style={{ width: 66, height: 66, borderRadius: "50%", background: "#252530", border: "2px solid #353545", position: "relative", overflow: "hidden", flexShrink: 0 }}>
-                          <img src={char.img} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} draggable={false} />
+                          <Image src={char.img} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                           <div style={{ position: "absolute", top: 3, right: 3, width: 14, height: 14, borderRadius: 3, background: "#252530", border: "1px solid #8b5cf6", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <div style={{ width: 7, height: 7, borderRadius: 1, background: "#8b5cf6" }} />
                           </div>
@@ -1003,27 +578,20 @@ export function Scene1() {
                   </div>
                   <div style={{ display: "flex", gap: 16, marginBottom: 38 }}>
                     {[
-                      { label: "Junior Explorer",      count: "6 items",  img: tile_grid_junior  },
-                      { label: "Pigslow Explorations", count: "10 items", img: tile_grid_pigslow },
-                      { label: "Cyber Heroine",         count: "4 items",  img: tile_grid_cyber   },
-                      { label: "Neon Agent",            count: "5 items",  img: tile_grid_neon    },
+                      { label: "Junior Explorer", count: "6 items", img: TILE_GRID_JUNIOR },
+                      { label: "Pigslow Explorations", count: "10 items", img: TILE_GRID_PIGSLOW },
+                      { label: "Cyber Heroine", count: "4 items", img: TILE_GRID_CYBER },
+                      { label: "Neon Agent", count: "5 items", img: TILE_GRID_NEON },
                     ].map((col, colIdx) => (
                       <div
                         key={col.label}
-                        ref={(el) => { tileRefs.current[6 + colIdx] = el; }}
                         style={{
-                          width: 232,
-                          height: 172,
-                          borderRadius: 12,
-                          background: "#1a1a22",
-                          flexShrink: 0,
-                          position: "relative",
-                          overflow: "hidden",
-                          border: "1px solid #252530",
-                          willChange: "opacity, transform",
+                          width: 232, height: 172, borderRadius: 12, background: "#1a1a22", flexShrink: 0,
+                          position: "relative", overflow: "hidden", border: "1px solid #252530",
+                          animation: `scene1-tile-reveal ${TILE_REVEAL_DUR}ms ${TILE_CASCADE_START + (6 + colIdx) * TILE_STAGGER_MS}ms cubic-bezier(0.65,0,0.35,1) both`,
                         }}
                       >
-                        <img src={col.img} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} draggable={false} />
+                        <Image src={col.img} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%)", padding: "8px 8px 6px" }}>
                           <div style={{ fontSize: 10, fontWeight: 600, color: "#ffffff" }}>{col.label}</div>
                           <div style={{ fontSize: 9, color: "rgba(255,255,255,0.55)", marginTop: 1 }}>{col.count}</div>
@@ -1037,24 +605,20 @@ export function Scene1() {
                   <div style={{ fontSize: 17, fontWeight: 600, color: "#e0e0e8", marginBottom: 16 }}>Recently added</div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 38 }}>
                     {[
-                      { img: tile_grid_portrait, label: "Realistic male character portrait, serious expression, studio lighting", model: "Nano Banana Pro · 5h ago" },
-                      { img: tile_grid_boy,      label: "Cute 3D animated boy character, playful pose, grey hoodie",               model: "GPT Image · 2h ago"       },
-                      { img: tile_grid_cyber2,   label: "High-quality 3D animated character render of a confident young woman",    model: "seedance · 36m ago"        },
-                      { img: tile_grid_creature, label: "High-quality 3D creature render, small plush-like animal with glowing",  model: "fal-pro · 1h ago"         },
+                      { img: TILE_GRID_PORTRAIT, label: "Realistic male character portrait, serious expression, studio lighting", model: "Nano Banana Pro · 5h ago" },
+                      { img: TILE_GRID_BOY, label: "Cute 3D animated boy character, playful pose, grey hoodie", model: "GPT Image · 2h ago" },
+                      { img: TILE_GRID_CYBER2, label: "High-quality 3D animated character render of a confident young woman", model: "seedance · 36m ago" },
+                      { img: TILE_GRID_CREATURE, label: "High-quality 3D creature render, small plush-like animal with glowing", model: "fal-pro · 1h ago" },
                     ].map((item, i) => (
                       <div
                         key={i}
-                        ref={(el) => { tileRefs.current[i] = el; }}
                         style={{
-                          borderRadius: 10,
-                          overflow: "hidden",
-                          border: "1px solid #252530",
-                          position: "relative",
-                          willChange: "opacity, transform",
+                          borderRadius: 10, overflow: "hidden", border: "1px solid #252530", position: "relative",
+                          animation: `scene1-tile-reveal ${TILE_REVEAL_DUR}ms ${TILE_CASCADE_START + i * TILE_STAGGER_MS}ms cubic-bezier(0.65,0,0.35,1) both`,
                         }}
                       >
                         <div style={{ height: 172, background: "#1a1a22", position: "relative", overflow: "hidden" }}>
-                          <img src={item.img} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} draggable={false} />
+                          <Image src={item.img} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                           <div style={{ position: "absolute", top: 7, right: 7, width: 16, height: 16, borderRadius: 3, background: "#3b82f6", border: "1px solid #2563eb" }} />
                         </div>
                         <div style={{ background: "#111118", padding: "9px 11px" }}>
@@ -1071,24 +635,20 @@ export function Scene1() {
                   <div style={{ fontSize: 17, fontWeight: 600, color: "#e0e0e8", marginBottom: 16 }}>Videos</div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
                     {[
-                      { img: tile_video_1,     label: "Walk cycle animation",  model: "Kling · 2h ago"     },
-                      { img: tile_video_3,     label: "Character turnaround",  model: "seedance · 4h ago"  },
-                      { img: tile_grid_boy,    label: "Idle loop animation",   model: "Kling · 5h ago"     },
-                      { img: tile_grid_creature, label: "Creature run cycle",  model: "Veo · 6h ago"       },
+                      { img: TILE_VIDEO_1, label: "Walk cycle animation", model: "Kling · 2h ago" },
+                      { img: TILE_GRID_BOY, label: "Idle loop animation", model: "Kling · 5h ago" },
+                      { img: TILE_VIDEO_3, label: "Character turnaround", model: "seedance · 4h ago" },
+                      { img: TILE_GRID_CREATURE, label: "Creature run cycle", model: "Veo · 6h ago" },
                     ].map((item, i) => (
                       <div
                         key={i}
-                        ref={(el) => { tileRefs.current[10 + i] = el; }}
                         style={{
-                          borderRadius: 12,
-                          overflow: "hidden",
-                          border: "1px solid #252530",
-                          position: "relative",
-                          willChange: "opacity, transform",
+                          borderRadius: 12, overflow: "hidden", border: "1px solid #252530", position: "relative",
+                          animation: `scene1-tile-reveal ${TILE_REVEAL_DUR}ms ${TILE_CASCADE_START + (10 + i) * TILE_STAGGER_MS}ms cubic-bezier(0.65,0,0.35,1) both`,
                         }}
                       >
                         <div style={{ height: 150, background: "#1a1a22", position: "relative", overflow: "hidden" }}>
-                          <img src={item.img} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} draggable={false} />
+                          <Image src={item.img} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                               <div style={{ width: 0, height: 0, borderTop: "7px solid transparent", borderBottom: "7px solid transparent", borderLeft: "12px solid rgba(255,255,255,0.9)", marginLeft: 2 }} />
@@ -1108,17 +668,18 @@ export function Scene1() {
             </div>
           </div>
 
-          {/* Cursor — positioned in native 1920×1080 space, moves with camera */}
+          {/* Cursor — positioned in native 1920×1080 space, moves with camera. Position
+              (transform) is driven by the addFrameTask above; opacity is plain CSS. */}
           <div
             ref={cursorRef}
             style={{
               position: "absolute",
               top: 0,
               left: 0,
-              opacity: 0,
               pointerEvents: "none",
               zIndex: 10,
               transform: `translate(${TAB_CENTER_X_NATIVE[0]}px, ${NAV_Y_NATIVE}px)`,
+              animation: `scene1-cursor-opacity ${SCENE_DURATION}ms linear both`,
             }}
           >
             <PurpleCursor />
@@ -1126,7 +687,8 @@ export function Scene1() {
         </div>
       </div>
 
-      {/* onFrame driver */}
+      {/* Cursor position driver — the one deliberate scene-scoped addFrameTask (see
+          file header comment). Everything else in this scene is CSS-driven. */}
       <Timegroup
         mode="fixed"
         duration={`${SCENE_DURATION}ms`}
@@ -1137,5 +699,4 @@ export function Scene1() {
   );
 }
 
-// SCENE_DURATION = 8000ms
 Scene1.duration = SCENE_DURATION;
