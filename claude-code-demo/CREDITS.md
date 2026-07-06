@@ -12,7 +12,7 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `audio/music-bed.mp3`
+### `src/assets/music-bed.mp3`
 
 | | |
 |---|---|
@@ -24,13 +24,13 @@ document so downstream forkers can verify provenance.
 | **Attribution required** | ❌ No (credit appreciated) |
 | **Redistribution** | ✅ Permitted as part of derivative work |
 
-The track is a slow-burn cinematic bed that pairs well with the orchestrated-agents narrative. Replace freely with anything from Pixabay, [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/) — keep the filename `music-bed.mp3` or update `add-sfx-v11.sh` accordingly.
+The track is a slow-burn cinematic bed that pairs well with the orchestrated-agents narrative. Replace freely with anything from Pixabay, [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/) — keep the filename `music-bed.mp3` or update the `<Audio>` reference in `src/Video.tsx` accordingly. Note the committed file already has its fade-in/fade-out and limiting baked in (see `src/Video.tsx` for the `<Audio>` usage) — a replacement track should be pre-processed the same way before dropping it in.
 
 ---
 
 ## SFX
 
-### `audio/keyboard.wav`
+### `src/assets/sfx/keyboard.wav`
 
 | | |
 |---|---|
@@ -39,7 +39,7 @@ The track is a slow-burn cinematic bed that pairs well with the orchestrated-age
 | **License** | Royalty-free, commercial use cleared |
 | **Used for** | Hero-prompt typewriter (Scene 1) and second-prompt typewriter (Scene 4) |
 
-### `audio/punch-whoosh.wav`
+### `src/assets/sfx/punch-whoosh.wav`
 
 | | |
 |---|---|
@@ -48,22 +48,13 @@ The track is a slow-burn cinematic bed that pairs well with the orchestrated-age
 | **License** | Royalty-free, commercial use cleared |
 | **Used for** | Four arm-pull impact cues at master 13.1s / 14.1s / 15.1s / 16.1s |
 
-### `audio/click-hd-loud.mp3`
-
-| | |
-|---|---|
-| **Type** | UI click (HD, high-headroom) |
-| **Source** | "Click Sound Effect (HD)" — separately sourced free SFX |
-| **License** | Royalty-free, commercial use cleared |
-| **Used for** | Not used in this video's mux; included for fork consistency with sibling templates |
-
 ---
 
 ## Want to swap audio?
 
-1. Drop your replacement file in `audio/` (match filename or update `add-sfx-v11.sh`).
+1. Drop your replacement file in `src/assets/` (or `src/assets/sfx/` for cues) and update the corresponding `<Audio src="...">` reference in `src/Video.tsx` / the relevant scene file.
 2. Update the corresponding row above with source + license info.
-3. Re-run `bash add-sfx-v11.sh`.
+3. Re-render with `npm run render`.
 
 For 100% safe royalty-free sources:
 

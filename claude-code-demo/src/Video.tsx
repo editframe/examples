@@ -1,11 +1,14 @@
 import React from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import Scene1_Demo from "./scenes/Scene1_Demo";
 import Scene2_Reveal from "./scenes/Scene2_Reveal";
 import Scene3_ArmPull from "./scenes/Scene3_ArmPull";
 import Scene4_SecondPrompt from "./scenes/Scene4_SecondPrompt";
 import Scene5_Curtain from "./scenes/Scene5_Curtain";
 import Scene6_LogoCard from "./scenes/Scene6_LogoCard";
+
+const MUSIC = "/assets/music-bed.mp3";
+const TOTAL_MS = 36000;
 
 /**
  * Claude Code — Agent View (v4)
@@ -41,6 +44,10 @@ export const Video: React.FC = () => (
     <Scene4_SecondPrompt />
     <Scene5_Curtain />
     <Scene6_LogoCard />
+
+    {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the
+        composition's total runtime regardless of the source file's own length. */}
+    <Audio src={MUSIC} volume={1} duration={`${TOTAL_MS}ms`} />
   </Timegroup>
 );
 

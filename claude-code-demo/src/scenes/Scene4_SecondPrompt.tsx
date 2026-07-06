@@ -1,5 +1,5 @@
 import React, { useCallback, useRef } from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import PaperBackground from "../components/PaperBackground";
 import Terminal from "../components/Terminal";
 import Mascot from "../components/Mascot";
@@ -260,6 +260,9 @@ export const Scene4_SecondPrompt: React.FC = () => {
           </Terminal>
         </div>
       </div>
+
+      {/* Second-prompt typewriter keystrokes (master 22.7s → local 4.2s) */}
+      <Audio src="/assets/sfx/keyboard.wav" offset="4200ms" duration="1.1s" volume={0.35} />
     </Timegroup>
   );
 };
