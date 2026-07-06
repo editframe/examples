@@ -42,7 +42,7 @@ used or included.** It reproduces the **first 25.0s** of Claude's Opus 4.8 launc
 
 ```bash
 npm install
-NO_COLOR=1 FORCE_COLOR=0 npm run render    # → output/demo-silent.mp4
+NO_COLOR=1 FORCE_COLOR=0 npm run render    # → output/demo.mp4 (silent, by design)
 ```
 
 > **Windows quirk:** the Editframe CLI's Vite spawn parses ANSI-colored stdout — the `NO_COLOR=1 FORCE_COLOR=0`
