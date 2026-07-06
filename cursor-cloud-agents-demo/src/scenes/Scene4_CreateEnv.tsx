@@ -305,7 +305,7 @@ export function Scene4_CreateEnv() {
       <TraceLayer sceneStartMs={START_MASTER} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
 
       {/* "Start Agent" button click — global 8000ms (this scene starts at 6500ms master) */}
-      <Audio src="/assets/sfx/click.mp3" offset="1500ms" sourceIn="0.6s" duration="0.3s" volume={2.2} />
+      <Audio src="/assets/sfx/click.mp3" offset="1500ms" sourceIn="0.6s" duration="0.3s" volume={1} />
     </Timegroup>
   );
 }
