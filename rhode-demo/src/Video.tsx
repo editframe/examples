@@ -1,5 +1,5 @@
 import React from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { Hook } from "./scenes/Hook";
 import { Hero } from "./scenes/Hero";
 import { Application } from "./scenes/Application";
@@ -8,7 +8,9 @@ import { Range } from "./scenes/Range";
 import { Offer } from "./scenes/Offer";
 import { Cta } from "./scenes/Cta";
 import { DewyBridge } from "./components/DewyBridge";
-import { OAT, GRAIN, OVERLAP_MS } from "./constants";
+import { OAT, GRAIN, OVERLAP_MS, DURATION_MS } from "./constants";
+
+const MUSIC = "/assets/music-bed.mp3";
 
 /**
  * rhode — "summer '26" eCommerce product ad. 1080×1920 portrait @ 30fps, ~20s total.
@@ -52,5 +54,9 @@ export const Video: React.FC = () => (
       className="absolute inset-0 pointer-events-none"
       style={{ zIndex: 41, background: "radial-gradient(130% 100% at 50% 45%, rgba(0,0,0,0) 60%, rgba(42,35,32,0.16) 100%)" }}
     />
+
+    {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the
+        composition's total runtime regardless of the source file's own length. */}
+    <Audio src={MUSIC} volume={1} duration={`${DURATION_MS}ms`} />
   </Timegroup>
 );

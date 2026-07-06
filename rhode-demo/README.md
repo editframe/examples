@@ -31,16 +31,15 @@ A kinetic-premium DTC beauty ad: the lowercase "rhode" wordmark draws on, Highli
 
 ```bash
 npm install
-NO_COLOR=1 FORCE_COLOR=0 npm run render    # → output/demo-silent.mp4
-bash add-audio.sh                          # → output/demo.mp4  (music muxed)
+npm start             # Editframe workbench on localhost
+npm run render        # -> output/demo.mp4 (native, single pass)
 ```
 
-The pipeline is two steps: Editframe renders the silent composition to
-`output/demo-silent.mp4`, then `add-audio.sh` muxes the music bed onto it to
-produce the committed `output/demo.mp4`.
+> **Windows:** prefix render with `NO_COLOR=1 FORCE_COLOR=0` to avoid an ANSI hang.
 
-> **Windows quirk:** the Editframe CLI's Vite spawn parses ANSI-colored stdout. The
-> `NO_COLOR=1 FORCE_COLOR=0` prefix is required or render init times out.
+The music bed plays as a single `<Audio>` element spanning the whole composition
+(`src/Video.tsx`) — audio sits on the composition timeline alongside everything else,
+no post-render mux step.
 
 ---
 
@@ -62,12 +61,12 @@ produce the committed `output/demo.mp4`.
 ## Audio
 
 A single music bed runs under the full 20s — loudnorm-normalized (−16 LUFS) with a 0.6s
-fade-in and a 1.5s fade-out. This cut is **music only**; there are no sound effects. The
-mux is reproduced by [`add-audio.sh`](add-audio.sh). See [`CREDITS.md`](CREDITS.md) for provenance.
+fade-in and a 1.5s fade-out baked directly into the committed asset. This cut is
+**music only**; there are no sound effects. See [`CREDITS.md`](CREDITS.md) for provenance.
 
 | Cue | Master ms | Source file |
 |---|---|---|
-| Music bed | `0 – 20000` | `audio/music-bed.mp3` (loudnorm −16, fade-in 0.6s, fade-out 18.5–20.0s) |
+| Music bed | `0 – 20000` | `src/assets/music-bed.mp3` (loudnorm −16, fade-in 0.6s, fade-out 18.5–20.0s) |
 
 ---
 
@@ -101,25 +100,22 @@ the source of truth for the tokens; full spec in [`brand-rules-rhode.md`](brand-
 ├── BRIEF.md                   ← creative brief + beat map + video-well spec
 ├── CREDITS.md                 ← audio provenance + licenses
 ├── brand-rules-rhode.md       ← Rhode brand spec (canonical: src/Video.tsx tokens)
-├── add-audio.sh               ← ffmpeg mux: music bed → output/demo.mp4
 ├── .env.example               ← env vars (none required to render)
 ├── index.html
 ├── package.json
 ├── package-lock.json
 ├── vite.config.ts
 ├── tsconfig.json
-├── audio/                     ← music bed (commercial-cleared)  (+ audio/README.md)
-│   └── music-bed.mp3
 ├── output/
 │   └── demo.mp4               ← final shipped render (1080×1920, with audio)
 └── src/
     ├── Video.tsx              ← composition root: one root Timegroup (mode="contain")
-    │                             wrapping a sequenced Timegroup of scenes + DewyBridge
+    │                             wrapping a sequenced Timegroup of scenes + DewyBridge + Audio
     ├── main.tsx               ← TimelineRoot mount
     ├── styles.css             ← all @keyframes (shared Reveal/wipe/bob + per-scene ones)
     ├── constants.ts           ← palette, well specs, SCENES (durations + overlap math)
     ├── assets/                ← product PNGs + campaign lifestyle/macro stills (real
-    │                             files — no base64 in source)
+    │                             files — no base64 in source) + music-bed.mp3
     ├── scenes/                ← one file per beat, each its own `<Timegroup mode="fixed">`
     │   ├── Hook.tsx
     │   ├── Hero.tsx
@@ -142,8 +138,8 @@ the source of truth for the tokens; full spec in [`brand-rules-rhode.md`](brand-
 git clone https://github.com/editframe/rhode-demo.git
 cd rhode-demo
 npm install
-NO_COLOR=1 FORCE_COLOR=0 npm run render
-bash add-audio.sh
+npm start
+npm run render
 ```
 
 1. **Swap the story** — each beat is its own `<Timegroup mode="fixed">` under
@@ -156,9 +152,9 @@ bash add-audio.sh
    shadows on text.
 3. **Re-skin assets** — drop new product/lifestyle imagery into `src/assets/` and point
    the relevant scene's `<Image src="/assets/...">` at the new file.
-4. **Swap the music** — drop a replacement `music-bed.mp3` into `audio/` (or update the
-   `MUSIC=` variable in [`add-audio.sh`](add-audio.sh)); log it in [`CREDITS.md`](CREDITS.md).
-5. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render`, then `bash add-audio.sh`.
+4. **Swap the music** — replace `src/assets/music-bed.mp3` and adjust the `<Audio>`
+   `volume` in `src/Video.tsx`; log it in [`CREDITS.md`](CREDITS.md).
+5. **Render** — `npm run render`.
 
 ---
 

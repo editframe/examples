@@ -30,8 +30,8 @@ export const SERIF = "'Source Serif 4', Georgia, 'Times New Roman', serif";
 // ── VIDEO WELL 1 (Application beat) — exact, non-negotiable ──
 // inner rect x=220, y=560, width=640, height=1040, corner radius 40. Flat cream
 // #EDE6DA placeholder — real footage is composited in afterward, outside this
-// composition (see README "Quick start" / add-audio.sh's sibling render step);
-// the well rect itself never transforms once the frame is on screen.
+// composition (see README); the well rect itself never transforms once the
+// frame is on screen.
 export const WELL_X = 220;
 export const WELL_Y = 560;
 export const WELL_W = 640;
@@ -65,7 +65,7 @@ export const GRAIN =
  * incoming scene plays the head of its own. `duration` below already accounts for
  * that: every scene after the first is `nominal + OVERLAP_MS` so its own "solo"
  * screen time still matches the original cut. Net result: the 7 sequenced
- * durations minus 6 overlaps sum to exactly 20000ms (the original total runtime).
+ * durations minus 6 overlaps sum to exactly `DURATION_MS`.
  *
  * The original single `onFrame` cut also had an eighth beat, "Dewy Texture"
  * (~9.0–10.5s), that isn't in this list — it's a short cross-fade bridge that
@@ -75,6 +75,8 @@ export const GRAIN =
  * on the whole composition's own local clock — see that component's doc comment.
  */
 export const OVERLAP_MS = 200;
+
+export const DURATION_MS = 20000;   // sum(SCENES.*.duration) - 6*OVERLAP_MS
 
 export const SCENES = {
   hook: { duration: 1950, label: "wordmark draw-in, limited edition / summer '26" },
