@@ -14,3 +14,11 @@
  */
 export const TRACE_MODE: boolean = false;
 export const TRACE_OPACITY: number = 0.5;
+
+/**
+ * Shared crossfade window (ms) for the root `<Timegroup mode="sequence">` in Video.tsx.
+ * Every scene's own declared duration = its original solo screen time + OVERLAP_MS,
+ * once, except the first scene (see each scene file's own duration constant, and
+ * REFACTOR-PATTERNS.md 2b for the derivation this keeps exact).
+ */
+export const OVERLAP_MS = 600;

@@ -1,34 +1,33 @@
 /**
- * Scene 6 — ARQOS Dashboard → Valuation Reviewer zoom → Claude outro (cream bg)
+ * ArqosDashboard — ARQOS Dashboard → Valuation Reviewer zoom → Claude outro (cream bg)
  *
- * Round 6 fixes:
- *   FIX D: REMOVED the 4 black border-edge divs (bTopRef/bBottomRef/bLeftRef/bRightRef).
- *           The orange outline on the VR card is the ONLY outline. No second black box.
- *   FIX E: Final lockup is on CREAM/WHITE background (#EAE8DE), NOT orange.
- *          - The VR card face (near-white #FFF9F7) EXPANDS to fill the frame
- *          - Orange bg fades out as card face expands
- *          - Final: cream bg + ORANGE asterisk (#D87757) + BLACK "Claude" (#1A1410)
+ * Beat breakdown (scene-local ms, already shifted +OVERLAP_MS from the original
+ * absolute-master numbers — see REFACTOR-PATTERNS.md 2b):
+ *   600–1200ms    — ARQOS dashboard card pops up (scale 0.72→1.0 + opacity 0→1)
+ *   1200–2600ms   — hold dashboard on orange bg
+ *   2600–4600ms   — zoom into VR card (scale 1→3.0), card fills frame
+ *   4600–5800ms   — VR card contents crossfade → Claude lockup inside card
+ *   5800–7000ms   — orange bg fades out → cream fills frame (card face expands)
+ *   6600–7800ms   — zoomed Claude lockup fades to final
+ *   7800–8100ms   — Hold: Claude lockup on cream bg
  *
- * Beat breakdown (scene-local ms):
- *   0–600ms      — ARQOS dashboard card pops up (scale 0.7→1.0 + opacity 0→1)
- *   600–2000ms   — hold dashboard on orange bg
- *   2000–4000ms  — zoom into VR card (scale 1→3.0), card fills frame
- *   4000–5200ms  — VR card contents crossfade → Claude lockup inside card
- *   5200–6400ms  — orange bg fades out → cream fills frame (card face expands)
- *   6000–7200ms  — zoomed Claude lockup fades to final
- *   7200–7500ms  — Hold: Claude lockup on cream bg
+ * The ORANGE background at scene-start matches ManagedAgents' background exactly, so
+ * this scene's incoming boundary needs no crossfade treatment (see ManagedAgents.tsx) —
+ * the orange simply persists uninterrupted across the cut.
  *
- * Duration: 7500ms
+ * Every beat here is a one-shot fade/scale/crossfade — no continuous or per-frame
+ * motion — so each is its own small `@keyframes` pair (see styles.css) instead of an
+ * `onFrame` switchboard.
+ *
+ * Duration: 7500 + OVERLAP_MS = 8100ms
  */
-import React, { useCallback, useRef } from "react";
+import React from "react";
 import { Timegroup } from "@editframe/react";
 import { TraceLayer } from "../components/TraceLayer";
-import { track, lerp } from "../components/helpers";
-import { TRACE_MODE, TRACE_OPACITY } from "../constants";
-import { eases } from "animejs";
+import { TRACE_MODE, TRACE_OPACITY, OVERLAP_MS } from "../constants";
 
-export const SCENE6_START    = 15500;
-export const SCENE6_DURATION = 7500;
+export const ARQOS_START    = 15500;
+export const ARQOS_DURATION = 7500 + OVERLAP_MS; // 8100
 
 // ── Dashboard card dimensions ──
 const PANEL_W    = 1620;
@@ -44,7 +43,7 @@ const CARD_H          = 196;
 const AVAILABLE_W = PANEL_W - GRID_PADDING * 2 - GRID_GAP * 2;
 const COL_W       = AVAILABLE_W / 3;
 
-// VR card: row 0, col 2  (LOCAL coordinates within the panel)
+// VR card: row 0, col 2 (LOCAL coordinates within the panel)
 const VR_COL  = 2;
 const VR_ROW  = 0;
 
@@ -55,6 +54,16 @@ const VR_LOCAL_CX = VR_LOCAL_LEFT + COL_W / 2;
 const VR_LOCAL_CY = VR_LOCAL_TOP  + CARD_H / 2;
 
 const ZOOM_TARGET = 3.0;
+const ZOOM_TX = PANEL_W / 2 - VR_LOCAL_CX * ZOOM_TARGET;
+const ZOOM_TY = PANEL_H / 2 - VR_LOCAL_CY * ZOOM_TARGET;
+
+// Beat timings (scene-local ms, +OVERLAP_MS already applied)
+const DASH_POP_START   = 0 + OVERLAP_MS,    DASH_POP_END   = 600 + OVERLAP_MS;
+const ZOOM_START       = 2000 + OVERLAP_MS, ZOOM_END       = 4000 + OVERLAP_MS;
+const MORPH_START      = 4000 + OVERLAP_MS, MORPH_END      = 5200 + OVERLAP_MS;
+const BG_FADE_START    = 5200 + OVERLAP_MS, BG_FADE_END    = 6400 + OVERLAP_MS;
+const DASH_OUT_START   = 5400 + OVERLAP_MS, DASH_OUT_END   = 6200 + OVERLAP_MS;
+const LOCKUP_START     = 6000 + OVERLAP_MS, LOCKUP_END     = 7200 + OVERLAP_MS;
 
 // Agent cards
 const agentCards = [
@@ -66,130 +75,71 @@ const agentCards = [
   { icon: null, name: null,                   desc: "Deploy a new agent\nfrom template",                                            runs: null,  status: null,           statusColor: null,      active: false, empty: true,  badge: null },
 ];
 
-export function Scene6_ArqosDashboard(): React.ReactElement {
-  const dashboardRef   = useRef<HTMLDivElement>(null);
-  const zoomRef        = useRef<HTMLDivElement>(null);
-  const vrOrigRef      = useRef<HTMLDivElement>(null);
-  const vrClaudeRef    = useRef<HTMLDivElement>(null);
-  const claudeRef      = useRef<HTMLDivElement>(null);
-  const orangeBgRef    = useRef<HTMLDivElement>(null);
-  const creamBgRef     = useRef<HTMLDivElement>(null);
-
-  const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    // ─── Dashboard POP UP (0–600ms) ───
-    if (dashboardRef.current) {
-      const popT  = track(ms, 0, 600, eases.outCubic);
-      const scale = lerp(0.72, 1.0, popT);
-      const opacity = lerp(0, 1, popT);
-      dashboardRef.current.style.transform = `translate(-50%, -50%) scale(${scale})`;
-      dashboardRef.current.style.opacity   = String(opacity);
-    }
-
-    // ─── Zoom into VR card (2000–4000ms) ───
-    if (zoomRef.current) {
-      const zoomT = track(ms, 2000, 4000, eases.inOutCubic);
-      const scale = lerp(1.0, ZOOM_TARGET, zoomT);
-      const txFull = PANEL_W / 2 - VR_LOCAL_CX * ZOOM_TARGET;
-      const tyFull = PANEL_H / 2 - VR_LOCAL_CY * ZOOM_TARGET;
-      const tx = lerp(0, txFull, zoomT);
-      const ty = lerp(0, tyFull, zoomT);
-      zoomRef.current.style.transformOrigin = "0 0";
-      zoomRef.current.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
-    }
-
-    // ─── VR card crossfade: original content → Claude lockup inside card (4000–5200ms) ───
-    const morphT = track(ms, 4000, 5200, eases.inOutCubic);
-    if (vrOrigRef.current)    vrOrigRef.current.style.opacity    = String(1 - morphT);
-    if (vrClaudeRef.current)  vrClaudeRef.current.style.opacity  = String(morphT);
-
-    // ─── FIX E: Orange bg fades OUT, cream bg fades IN (5200–6400ms) ───
-    // This replaces the old "4 black border edges slide off" mechanic.
-    // Instead the orange BG simply dissolves to cream as the VR card face "is" the new bg.
-    const bgFadeT = track(ms, 5200, 6400, eases.inOutCubic);
-    if (orangeBgRef.current) {
-      orangeBgRef.current.style.opacity = String(Math.max(0, 1 - bgFadeT));
-    }
-    if (creamBgRef.current) {
-      creamBgRef.current.style.opacity = String(bgFadeT);
-    }
-
-    // ─── Dashboard fades OUT (5400–6200ms) ───
-    if (dashboardRef.current && ms > 4000) {
-      const dashOutT = track(ms, 5400, 6200, eases.inCubic);
-      dashboardRef.current.style.opacity = String(Math.max(0, 1 - dashOutT));
-    }
-
-    // ─── FIX E: Final Claude lockup fades in on CREAM bg (6000–7200ms) ───
-    if (claudeRef.current) {
-      const lockT = track(ms, 6000, 7200, eases.outCubic);
-      claudeRef.current.style.opacity   = String(lockT);
-      claudeRef.current.style.transform = `translate(-50%, -50%) scale(${lerp(0.90, 1.0, lockT)})`;
-    }
-  }, []);
-
+export function ArqosDashboard(): React.ReactElement {
   return (
     <Timegroup
       mode="fixed"
-      duration={`${SCENE6_DURATION}ms`}
-      onFrame={onFrame as any}
+      duration={`${ARQOS_DURATION}ms`}
       className="absolute inset-0"
       style={{ position: "absolute", inset: 0, width: 1920, height: 1080, overflow: "hidden" }}
     >
-      <TraceLayer sceneStartMs={SCENE6_START} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
+      <TraceLayer sceneStartMs={ARQOS_START - OVERLAP_MS} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
 
-      {/* ORANGE BG — fades out during the card-to-cream transition */}
+      {/* ORANGE BG — matches ManagedAgents exactly, persists uninterrupted across the cut,
+          then fades out during the card-to-cream transition */}
       {!TRACE_MODE && (
         <div
-          ref={orangeBgRef}
           style={{
             position: "absolute", inset: 0,
             background: "#D87757",
             zIndex: 1,
+            animation: `orange-bg-fade-out ${BG_FADE_END - BG_FADE_START}ms ${BG_FADE_START}ms cubic-bezier(0.45,0,0.55,1) forwards`,
           }}
         />
       )}
 
-      {/* OUTRO BG — fades in as orange fades out → final lockup background.
-          ROUND-7 FIX (comment #4): pure WHITE (#FFFFFF), not beige — so the final
-          Claude lockup background matches the near-white card face that expands
-          ("the transition inside the box"). No beige outro. */}
+      {/* OUTRO BG — fades in as orange fades out → final lockup background. Pure WHITE
+          (#FFFFFF), not beige — matches the near-white card face that expands into it. */}
       {!TRACE_MODE && (
         <div
-          ref={creamBgRef}
           style={{
             position: "absolute", inset: 0,
             background: "#FFFFFF",
             zIndex: 2,
-            opacity: 0,
+            animation: `cream-bg-fade-in ${BG_FADE_END - BG_FADE_START}ms ${BG_FADE_START}ms cubic-bezier(0.45,0,0.55,1) both`,
           }}
         />
       )}
 
       {/* DASHBOARD CARD — centered */}
       <div
-        ref={dashboardRef}
         style={{
           position: "absolute",
           left: "50%",
           top: "50%",
-          transform: "translate(-50%, -50%) scale(0.72)",
-          opacity: 0,
           zIndex: 3,
           width: PANEL_W,
           height: PANEL_H,
           overflow: "visible",
-          willChange: "transform, opacity",
+          animation: [
+            `dash-pop-in ${DASH_POP_END - DASH_POP_START}ms ${DASH_POP_START}ms cubic-bezier(0.33,1,0.68,1) both`,
+            `dash-fade-out ${DASH_OUT_END - DASH_OUT_START}ms ${DASH_OUT_START}ms cubic-bezier(0.32,0,0.67,0) forwards`,
+          ].join(", "),
         }}
       >
         {/* Zoom container */}
         <div
-          ref={zoomRef}
-          style={{
-            position: "absolute",
-            inset: 0,
-            transformOrigin: "0 0",
-            willChange: "transform",
-          }}
+          style={
+            {
+              position: "absolute",
+              inset: 0,
+              transformOrigin: "0 0",
+              "--zoom-tx": `${ZOOM_TX}px`,
+              "--zoom-ty": `${ZOOM_TY}px`,
+              "--zoom-scale": ZOOM_TARGET,
+              animation: `dash-zoom ${ZOOM_END - ZOOM_START}ms ${ZOOM_START}ms cubic-bezier(0.45,0,0.55,1) both`,
+            } as React.CSSProperties
+          }
         >
           {/* Dashboard panel card */}
           <div style={{
@@ -259,9 +209,6 @@ export function Scene6_ArqosDashboard(): React.ReactElement {
                     <div
                       key={i}
                       style={{
-                        /* ROUND-7 FIX (comment #4): VR card face is pure white so when it
-                           expands into the white outro bg the transition is seamless (no beige).
-                           The orange border still distinguishes it in the dashboard. */
                         background: "#FFFFFF",
                         border: card.empty ? "2px dashed #D8D4CC" : isVR ? "1.5px solid #D87757" : "1px solid #E8E4DC",
                         borderRadius: 12,
@@ -300,18 +247,23 @@ export function Scene6_ArqosDashboard(): React.ReactElement {
                           {isVR ? (
                             <div style={{ flex: 1, position: "relative" }}>
                               {/* VR original content */}
-                              <div ref={vrOrigRef} style={{ position: "absolute", inset: 0 }}>
+                              <div
+                                style={{
+                                  position: "absolute", inset: 0,
+                                  animation: `vr-orig-fade-out ${MORPH_END - MORPH_START}ms ${MORPH_START}ms cubic-bezier(0.45,0,0.55,1) forwards`,
+                                }}
+                              >
                                 <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontWeight: 500, fontSize: 18, color: "#1A1410", marginBottom: 6 }}>{card.name}</div>
                                 <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 400, fontSize: 12, color: "#6A6460", lineHeight: 1.4 }}>{card.desc}</div>
                               </div>
                               {/* Claude lockup INSIDE VR card — orange asterisk, dark Claude */}
                               <div
-                                ref={vrClaudeRef}
                                 style={{
                                   position: "absolute", inset: 0,
                                   display: "flex", flexDirection: "row",
                                   alignItems: "center", justifyContent: "center",
-                                  gap: 10, opacity: 0,
+                                  gap: 10,
+                                  animation: `vr-claude-fade-in ${MORPH_END - MORPH_START}ms ${MORPH_START}ms cubic-bezier(0.45,0,0.55,1) both`,
                                 }}
                               >
                                 <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
@@ -364,26 +316,19 @@ export function Scene6_ArqosDashboard(): React.ReactElement {
         </div>
       </div>
 
-      {/*
-        FIX E: Final Claude lockup — CREAM bg + ORANGE asterisk + BLACK "Claude"
-        Matches ref_60s.jpg exactly.
-        Fades in over cream background (zIndex 20, above cream bg layer).
-      */}
+      {/* Final Claude lockup — CREAM bg + ORANGE asterisk + BLACK "Claude", zIndex 20 above cream bg */}
       <div
-        ref={claudeRef}
         style={{
           position: "absolute",
           left: "50%",
           top: "50%",
-          transform: "translate(-50%, -50%) scale(0.90)",
           zIndex: 20,
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "center",
           gap: 28,
-          opacity: 0,
-          willChange: "opacity, transform",
+          animation: `claude-lockup-in ${LOCKUP_END - LOCKUP_START}ms ${LOCKUP_START}ms cubic-bezier(0.33,1,0.68,1) both`,
         }}
       >
         {/* Claude asterisk — ORANGE on cream bg */}
@@ -413,4 +358,4 @@ export function Scene6_ArqosDashboard(): React.ReactElement {
   );
 }
 
-Scene6_ArqosDashboard.duration = SCENE6_DURATION;
+ArqosDashboard.duration = ARQOS_DURATION;

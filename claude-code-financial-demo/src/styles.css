@@ -1,97 +1,104 @@
 @import "tailwindcss";
 
-@theme {
-  /* Scoup palette — pulled verbatim from scoup-deck-v8.html :root */
-  --color-paper:        #E8E6DC;   /* warm editorial cream */
-  --color-paper-bright: #F5F2EA;   /* lighter cream */
-  --color-ink:          #191918;   /* near-black body text */
-  --color-ink-soft:     rgba(25, 25, 24, 0.66);
-  --color-ink-mute:     rgba(25, 25, 24, 0.42);
-  --color-black:        #000000;
-  --color-white:        #FFFFFF;
-  --color-scoup:        #F5C518;   /* deck's actual yellow */
-  --color-scoup-soft:   rgba(245, 197, 24, 0.16);
-  --color-rule:         rgba(0, 0, 0, 0.10);
-
-  /* Claude brand colors */
-  --color-claude:       #CC785C;
-  --color-outro-burst:  #CC785C;
-
-  /* Persona accents from the deck */
-  --color-researcher:   #4fc3f7;
-  --color-journalist:   #81c784;
-  --color-editor:       #ffb74d;
-  --color-strategist:   #ce93d8;
-  --color-analyst:      #f06292;
-
-  --font-display: "Inter", "Helvetica Neue", Arial, sans-serif;
-  --font-serif:   "Tiempos", "Charter", "Georgia", serif;
-  --font-mono:    "Archivo", "JetBrains Mono", "SF Mono", monospace;
-}
-
-:root {
-  --claude: #CC785C;
-  --outro-burst: #CC785C;
-}
-
 @layer base {
   html, body, #root {
     width: 100%;
     height: 100%;
     margin: 0;
-    background: var(--color-paper);
-    color: var(--color-ink);
-    font-family: var(--font-display);
+    background: #EAE8DE;
+    color: #1A1410;
+    font-family: "Space Grotesk", Inter, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     overflow: hidden;
   }
 }
 
-@layer utilities {
-  /* Editorial card on cream — used for most light slides */
-  .editorial-card {
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow:
-      0 1px 0 rgba(0, 0, 0, 0.02),
-      0 12px 32px -8px rgba(0, 0, 0, 0.12);
-  }
+/* === Reveal component (src/components/Reveal.tsx) — one-shot fade + float, no JS === */
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(var(--reveal-y, 20px)); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes reveal-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(var(--reveal-exit-y, 0px)); }
+}
 
-  /* Dark editorial card — black with thin gold rule */
-  .editorial-card-dark {
-    background: #0E0E0D;
-    border: 1px solid rgba(245, 197, 24, 0.2);
-    box-shadow:
-      0 1px 0 rgba(255, 255, 255, 0.04) inset,
-      0 16px 40px -8px rgba(0, 0, 0, 0.6);
+/* === TitleAndPillsScroll scene (src/scenes/TitleAndPillsScroll.tsx) === */
+@keyframes pills-column-scroll {
+  from { transform: translateX(-50%) translateY(var(--pills-start-y)); }
+  to   { transform: translateX(-50%) translateY(var(--pills-end-y)); }
+}
+/* Shared by every pill except the last: a brief highlight bump as it crosses center. */
+@keyframes pill-bump {
+  0%, 100% {
+    background: rgba(238, 209, 193, 0.4);
+    color: rgba(42, 40, 37, 0.6);
+    font-weight: 400;
+    font-size: 40px;
+    border-color: rgba(216, 119, 87, 0.15);
   }
+  50% {
+    background: #D87757;
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 42px;
+    border-color: transparent;
+  }
+}
+/* Last pill: settles into the highlighted state and holds (scroll ends centered on it). */
+@keyframes pill-settle {
+  from {
+    background: rgba(238, 209, 193, 0.4);
+    color: rgba(42, 40, 37, 0.6);
+    font-weight: 400;
+    font-size: 40px;
+    border-color: rgba(216, 119, 87, 0.15);
+  }
+  to {
+    background: #D87757;
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 42px;
+    border-color: transparent;
+  }
+}
 
-  /* Yellow underline emphasis — like the deck headlines */
-  .yellow-underline {
-    background-image:
-      linear-gradient(transparent 72%, var(--color-scoup) 72%, var(--color-scoup) 92%, transparent 92%);
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-    display: inline;
-    padding: 0 2px;
-  }
+/* === ManagedAgents scene (src/scenes/ManagedAgents.tsx) === */
+@keyframes mg-bg-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 
-  /* Scene label — small caps, spaced */
-  .scene-label {
-    font-family: var(--font-display);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-  }
-
-  /* Newsprint texture overlay (very subtle) */
-  .newsprint {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.05;
-    mix-blend-mode: multiply;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
+/* === ArqosDashboard scene (src/scenes/ArqosDashboard.tsx) === */
+@keyframes dash-pop-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.72); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes dash-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes dash-zoom {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(var(--zoom-tx), var(--zoom-ty)) scale(var(--zoom-scale)); }
+}
+@keyframes vr-orig-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes vr-claude-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes orange-bg-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes cream-bg-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes claude-lockup-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.90); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }

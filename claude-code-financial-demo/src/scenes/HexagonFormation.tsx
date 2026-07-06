@@ -1,10 +1,7 @@
 /**
- * Scene 1 — Coral node-graph that forms flat (2D) then turns into a REAL 3D
- * wireframe (Round 7 — user comment #1).
+ * HexagonFormation — coral node-graph that forms flat (2D) then turns into a REAL 3D
+ * wireframe hexagonal prism, then collapses to center and fades out.
  *
- * Previously the "3D turn" was a fake 2D scaleX/scaleY skew → it looked completely
- * flat. Now the graph is genuinely extruded into a 3D hexagonal-prism wireframe and
- * rotated in 3D via software perspective projection:
  *   • Form (0–800ms): the FRONT hexagon graph draws in, perfectly flat (2D).
  *   • Turn (820–1560ms): DEPTH grows from 0 and the prism ROTATES in 3D. Because
  *     depth starts at exactly 0, the first frame of the turn is identical to the
@@ -14,7 +11,17 @@
  *
  * Real perspective (closer vertices larger) makes it read as a true 3D object.
  *
- * 1920×1080 @ 30fps, bg #EAE8DE
+ * NOTE ON addFrameTask: every vertex is a software 3D→2D perspective projection
+ * (rotation matrices around X/Y + a focal-length divide) recomputed per frame from a
+ * single depth/rotation/collapse state. There is no CSS closed form for "N points on a
+ * rotating extruded prism, individually perspective-projected onto 2D SVG coordinates
+ * every frame" — CSS 3D transforms don't apply per-vertex to SVG `<circle>`/`<line>`
+ * coordinates the way this projection does. Re-deriving this as real `transform-style:
+ * preserve-3d` div geometry would be a from-scratch rebuild with real risk of visual
+ * regression, so this is the one deliberately-kept, scene-scoped `addFrameTask` in this
+ * composition (see REFACTOR-PATTERNS.md 2b, priority 5).
+ *
+ * 1920×1080 @ 30fps, bg #EAE8DE. First scene — its own local clock is the master clock.
  */
 import React, { useCallback, useRef } from "react";
 import { Timegroup } from "@editframe/react";
@@ -23,7 +30,8 @@ import { track, lerp, clamp, easeOutBack } from "../components/helpers";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { eases } from "animejs";
 
-export const SCENE1_DURATION = 1900;
+export const HEXAGON_DURATION = 1900;
+export const HEXAGON_START = 0;
 
 const CORAL = "#D87757";
 
@@ -56,7 +64,6 @@ const EDGES: Edge[] = [
   ...FRONT_PAIRS.map(([a,b]) => ({ a: a+7, b: b+7, kind: "back" as EdgeKind })),
   ...[0,1,2,3,4,5,6].map(i => ({ a: i, b: i+7, kind: "conn" as EdgeKind })),
 ];
-const FRONT_EDGE_COUNT = FRONT_PAIRS.length; // 12
 
 // ── Timeline ──
 const NODE_CENTER_END   = 180;
@@ -80,7 +87,7 @@ const FOCAL          = 1500;  // perspective focal length (gentle)
 
 const DEG = Math.PI / 180;
 
-export function Scene1_WireframeCube(): React.ReactElement {
+export function HexagonFormation(): React.ReactElement {
   const nodeRefs = useRef<(SVGCircleElement | null)[]>([]);  // 14
   const edgeRefs = useRef<(SVGLineElement | null)[]>([]);    // 31
   const wrapRef  = useRef<HTMLDivElement>(null);
@@ -188,12 +195,12 @@ export function Scene1_WireframeCube(): React.ReactElement {
   return (
     <Timegroup
       mode="fixed"
-      duration={`${SCENE1_DURATION}ms`}
+      duration={`${HEXAGON_DURATION}ms`}
       onFrame={onFrame as any}
       className="absolute inset-0"
       style={{ position: "absolute", inset: 0, width: 1920, height: 1080, overflow: "hidden" }}
     >
-      <TraceLayer sceneStartMs={0} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
+      <TraceLayer sceneStartMs={HEXAGON_START} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
 
       {!TRACE_MODE && (
         <div style={{ position: "absolute", inset: 0, background: "#EAE8DE", zIndex: 1 }} />
@@ -238,4 +245,4 @@ export function Scene1_WireframeCube(): React.ReactElement {
   );
 }
 
-Scene1_WireframeCube.duration = SCENE1_DURATION;
+HexagonFormation.duration = HEXAGON_DURATION;
