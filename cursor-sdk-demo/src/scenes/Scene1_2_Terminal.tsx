@@ -32,7 +32,7 @@
  */
 
 import React from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
 
@@ -118,6 +118,15 @@ export function Scene1_2_Terminal() {
       }}
     >
       <TraceLayer sceneStartMs={SCENE_START} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
+
+      {/* Keyboard SFX — human-typed "uv add cursor-sdk", matches the typewriter reveal
+          exactly (TYPE_START, COMMAND_FULL.length * MS_PER_CHAR). */}
+      <Audio
+        src="/assets/sfx/keyboard.wav"
+        offset={`${TYPE_START}ms`}
+        duration={`${COMMAND_FULL.length * MS_PER_CHAR}ms`}
+        volume={0.7}
+      />
 
       {/* BLOCK CONTAINER — centered in frame, left-aligned internally */}
       <div style={outerStyle}>

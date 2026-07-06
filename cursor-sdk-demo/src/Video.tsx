@@ -15,7 +15,8 @@
  * viewport-follow scroll smoothing (see each file's own comment for why).
  */
 import React from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
+import { TOTAL_MS } from "./constants";
 import { Scene1_2_Terminal } from "./scenes/Scene1_2_Terminal";
 import { Scene3_ComposerText } from "./scenes/Scene3_ComposerText";
 import { Scene4_CodeBlock } from "./scenes/Scene4_CodeBlock";
@@ -23,6 +24,8 @@ import { Scene5_TerminalRun } from "./scenes/Scene5_TerminalRun";
 import { Scene6_TitleCard } from "./scenes/Scene6_TitleCard";
 import { Scene7_NowAvailable } from "./scenes/Scene7_NowAvailable";
 import { Scene8_LogoOutro } from "./scenes/Scene8_LogoOutro";
+
+const MUSIC = "/assets/music-bed.mp3";
 
 export const Video: React.FC = () => (
   <Timegroup
@@ -41,5 +44,9 @@ export const Video: React.FC = () => (
     <Scene6_TitleCard />
     <Scene7_NowAvailable />
     <Scene8_LogoOutro />
+
+    {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the
+        composition's total runtime regardless of the source file's own length. */}
+    <Audio src={MUSIC} volume={1} duration={`${TOTAL_MS}ms`} />
   </Timegroup>
 );

@@ -35,7 +35,7 @@
  */
 
 import React, { useRef, useCallback } from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
 import { clamp, lerp } from "../components/helpers";
@@ -74,6 +74,11 @@ const PHASE3_END   = SCENE_DUR; // 10000ms
 
 // Slow typing speed for Phase 1 (human) — 55ms gives 200 + 30*55 = 1850ms (finishes before PHASE1_END=2200ms)
 const SLOW_MS_PER_CHAR = 55;
+
+// Keyboard SFX cue for the human-typed `model="composer-2.5-fast"` line — scene-local
+// 200ms (global 7700ms, since Scene4 starts at SCENE_START=7500), ~1.65s duration.
+const PROMPT_SFX_OFFSET = 200;
+const PROMPT_SFX_DURATION = 1650;
 // Fast typing speed for Phase 3 (AI) — code outpaces camera to create chase effect
 const FAST_MS_PER_CHAR = 3;
 
@@ -491,6 +496,13 @@ export function Scene4_CodeBlock() {
       }}
     >
       <TraceLayer sceneStartMs={SCENE_START} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
+
+      <Audio
+        src="/assets/sfx/keyboard.wav"
+        offset={`${PROMPT_SFX_OFFSET}ms`}
+        duration={`${PROMPT_SFX_DURATION}ms`}
+        volume={0.7}
+      />
 
       {/* Container that gets scale + translate transforms */}
       <div
