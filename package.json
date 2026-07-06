@@ -1,0 +1,28 @@
+{
+  "name": "editframe-examples",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Workspace root for Editframe's example video composition templates. Each subdirectory is an independent, standalone project (own package.json, own repository) that also gets published on its own -- this root package.json exists purely to share a single node_modules across all of them for local development.",
+  "workspaces": [
+    "allbirds-tree-runner-demo",
+    "claude-code-demo",
+    "claude-code-financial-demo",
+    "claude-office-demo",
+    "claude-opus48-demo",
+    "claude-security-demo",
+    "clerk-cli-demo",
+    "codex-demo",
+    "cursor-cloud-agents-demo",
+    "cursor-jira-demo",
+    "cursor-sdk-demo",
+    "fal-ai-demo",
+    "fashionnova-the-edit-demo",
+    "figma-agent-demo",
+    "gymshark-geo-seamless-demo",
+    "linear-agents-demo",
+    "olipop-demo",
+    "rhode-demo",
+    "vercel-deploy-demo",
+    "vercel-knowledge-base-demo"
+  ]
+}
