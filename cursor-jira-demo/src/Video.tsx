@@ -34,6 +34,18 @@ import { LogoCard } from "./scenes/LogoCard";
  * Jira content now ends at video t=25s; logo card runs 25–28.5s.
  *
  * Removed in v5: CodebaseOverlay.tsx (the bouncing-codebase scene).
+ *
+ * Refactor note: the three scenes above were already their own top-level
+ * `<Timegroup mode="fixed">`s sequenced by this file's root `mode="sequence"`
+ * Timegroup — that part of REFACTOR-PATTERNS.md Part 2b already matched.
+ * What didn't: every scene's insides were a single `onFrame` switchboard
+ * writing to refs every frame. LogoCard and TicketScatter's stagger/fades
+ * (and almost all of CursorJiraScene's ~30 fade/translate/stagger elements)
+ * are now plain CSS `@keyframes`/`Reveal` components instead. The camera-rig
+ * transform in CursorJiraScene and TicketScatter's coupled 3D scatter+smash
+ * zoom stay as scoped `addFrameTask`s (see the comments in those files for
+ * why) — as does the handful of genuine dynamic TEXT CONTENT changes
+ * (composer typing, rotating agent label, reply typing) in CursorJiraScene.
  */
 export const Video = () => {
   return (

@@ -21,6 +21,16 @@ const track = (
  *   700–1800   Camera slow push toward focal ticket
  *   1800–2700  SMASH-ZOOM — focal ticket grows to fill frame
  *   2700–3500  Hand-off: morph into the Jira chrome appearing
+ *
+ * Kept as a single scoped `addFrameTask` rather than converted to CSS (see
+ * REFACTOR-PATTERNS.md Part 2b bullet 5): every one of the 9 tickets' opacity,
+ * blur, 3D position, and rotation is a function of FOUR shared eased scalars
+ * (fadeIn/push/smash/handoff) combined with that ticket's own static (x,y,z)
+ * — a coupled, multi-object procedural composite, not a one-shot reveal, a
+ * simple index-based stagger, an unconditional infinite loop, or a small
+ * fixed-stage shape morph. It doesn't fit any of the CSS buckets cleanly, and
+ * it's the very first shot of the video, so the regression risk of forcing it
+ * into `--ef-progress`-driven `calc()` chains outweighs the benefit here.
  */
 
 interface TicketDef {

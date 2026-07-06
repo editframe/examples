@@ -19,12 +19,12 @@ import {
   IconRedo,
   IconStop,
   IconTextSize,
-  IconUnderline,
   IconUndo,
   IconWand,
   IconCursorCube,
 } from "../components/JiraIcons";
 import { Sfx } from "../components/Sfx";
+import { Reveal } from "../components/Reveal";
 
 const clamp = (n: number, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, n));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -34,13 +34,6 @@ const track = (
   endMs: number,
   easeFn: (t: number) => number = eases.outCubic
 ) => easeFn(clamp((ms - startMs) / (endMs - startMs)));
-
-const outBack = (t: number, overshoot = 1.7) => {
-  const c1 = overshoot;
-  const c3 = c1 + 1;
-  const x = clamp(t);
-  return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
-};
 
 // Typed comment
 const TYPED_BODY = " can you please take a look at this for me? repo=site model=claude";
@@ -99,156 +92,24 @@ const CHIPS = ["Suggest a reply...", "Can I get more info...?", "Status update..
 const CHOSEN_REPLY = "Thanks — let me know if you need anything else before this ships.";
 
 export const CursorJiraScene: React.FC = () => {
-  // CAMERA RIG — entire page transformed for aggressive camera moves
+  // CAMERA RIG — entire page transformed for aggressive camera moves. Kept as a
+  // scoped addFrameTask (not CSS): the recenter-compensated translate/scale/origin
+  // formula is a single coupled, heavily client-iterated effect (see the v6/v7
+  // notes below) — the kind of "genuinely irreducible per-frame math" carved out
+  // by REFACTOR-PATTERNS.md Part 2b bullet 5, not a first resort.
   const cameraRigRef = useRef<HTMLDivElement>(null);
-  const motionBlurRef = useRef<HTMLDivElement>(null);
 
-  // Chrome
-  const headerRef = useRef<HTMLDivElement>(null);
-  const sidebarRef = useRef<HTMLDivElement>(null);
-  const breadcrumbRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
-
-  // Sections
-  const descRef = useRef<HTMLDivElement>(null);
-  const subtasksRef = useRef<HTMLDivElement>(null);
-  const linkedRef = useRef<HTMLDivElement>(null);
-  const activityRef = useRef<HTMLDivElement>(null);
-  const tabBarRef = useRef<HTMLDivElement>(null);
-
-  // Editor
-  const editorRef = useRef<HTMLDivElement>(null);
-  const toolbarItemRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const placeholderRef = useRef<HTMLSpanElement>(null);
-  const cursorChipRef = useRef<HTMLSpanElement>(null);
+  // Composer typing (character reveal), rotating agent-strip label, and the
+  // collapsed-input reply typing are all genuine dynamic TEXT CONTENT changes —
+  // not expressible as CSS keyframes — so they stay in the same scoped frame task.
   const typedTextRef = useRef<HTMLSpanElement>(null);
-  const caretRef = useRef<HTMLSpanElement>(null);
-  const saveBtnRef = useRef<HTMLDivElement>(null);
-  const improveRef = useRef<HTMLDivElement>(null);
-  const improveHaloRef = useRef<HTMLDivElement>(null);
-  const editorCollapsedRef = useRef<HTMLDivElement>(null);
-
-  // Agent strip
-  const agentsSectionRef = useRef<HTMLDivElement>(null);
-  const agentBorderRef = useRef<HTMLDivElement>(null);
   const agentTextRef = useRef<HTMLSpanElement>(null);
-
-  // Chips + final post
-  const chipRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const chipCursorRef = useRef<HTMLDivElement>(null);
-  const chipPulseRef = useRef<HTMLDivElement>(null);
   const collapsedInputRef = useRef<HTMLSpanElement>(null);
-  const collapsedCaretRef = useRef<HTMLSpanElement>(null);
-  const postedCommentRef = useRef<HTMLDivElement>(null);
-  const userCommentRef = useRef<HTMLDivElement>(null);
-  const cursorReplyRef = useRef<HTMLDivElement>(null);
-  const toastRef = useRef<HTMLDivElement>(null);
-
-  // Light sweep on PR reply
-  const replySweepRef = useRef<HTMLDivElement>(null);
-
-  // Right details sidebar
-  const detailsPanelRef = useRef<HTMLDivElement>(null);
 
   const handleFrame = useCallback(
     ({ ownCurrentTimeMs }: { ownCurrentTimeMs: number }) => {
       const ms = ownCurrentTimeMs;
 
-      // ----- 0–3.0s: Chrome fades in (v6: compressed from 5s → 3s per client) -----
-      const headerP = track(ms, 0, 350, eases.outQuart);
-      if (headerRef.current) {
-        headerRef.current.style.opacity = String(headerP);
-        headerRef.current.style.transform = `translateY(${lerp(-12, 0, headerP)}px)`;
-      }
-      const sideP = track(ms, 80, 480, eases.outQuart);
-      if (sidebarRef.current) {
-        sidebarRef.current.style.opacity = String(sideP);
-        sidebarRef.current.style.transform = `translateX(${lerp(-12, 0, sideP)}px)`;
-      }
-      const bP = track(ms, 250, 700, eases.outQuart);
-      if (breadcrumbRef.current) breadcrumbRef.current.style.opacity = String(bP);
-      const tP = track(ms, 400, 900, eases.outQuart);
-      if (titleRef.current) {
-        titleRef.current.style.opacity = String(tP);
-        titleRef.current.style.transform = `translateY(${lerp(8, 0, tP)}px)`;
-      }
-
-      // ----- 0.8–2.7s: Sections build downward (stagger cut in half) -----
-      const dP = track(ms, 800, 1200, eases.outQuart);
-      if (descRef.current) {
-        descRef.current.style.opacity = String(dP);
-        descRef.current.style.transform = `translateY(${lerp(10, 0, dP)}px)`;
-      }
-      const stP = track(ms, 1000, 1450, eases.outQuart);
-      if (subtasksRef.current) {
-        subtasksRef.current.style.opacity = String(stP);
-        subtasksRef.current.style.transform = `translateY(${lerp(10, 0, stP)}px)`;
-      }
-      const lP = track(ms, 1250, 1700, eases.outQuart);
-      if (linkedRef.current) {
-        linkedRef.current.style.opacity = String(lP);
-        linkedRef.current.style.transform = `translateY(${lerp(12, 0, lP)}px)`;
-      }
-      const aP = track(ms, 1500, 1950, eases.outQuart);
-      if (activityRef.current) {
-        activityRef.current.style.opacity = String(aP);
-        activityRef.current.style.transform = `translateY(${lerp(12, 0, aP)}px)`;
-      }
-      const tbP = track(ms, 1750, 2200, eases.outQuart);
-      if (tabBarRef.current) {
-        tabBarRef.current.style.opacity = String(tbP);
-        tabBarRef.current.style.transform = `translateY(${lerp(10, 0, tbP)}px)`;
-      }
-
-      // Right details sidebar — fades in alongside chrome so canvas is always full
-      const dpP = track(ms, 450, 1000, eases.outQuart);
-      if (detailsPanelRef.current) {
-        detailsPanelRef.current.style.opacity = String(dpP);
-        detailsPanelRef.current.style.transform = `translateX(${lerp(14, 0, dpP)}px)`;
-      }
-
-      // ----- 2.0–3.0s: Editor box + staggered toolbar (was 3.9–5.5s) -----
-      const eP = track(ms, 2000, 2700, eases.outCubic);
-      const collapsePMain = track(ms, 10300, 10900, eases.outCubic);
-      if (editorRef.current) {
-        const overall = eP * (1 - collapsePMain);
-        editorRef.current.style.opacity = String(overall);
-        editorRef.current.style.transform = `translateY(${lerp(
-          18,
-          0,
-          eP
-        )}px) translateY(${lerp(0, -6, collapsePMain)}px) scale(${lerp(
-          0.985,
-          1,
-          eP
-        )}) scale(${lerp(1, 0.99, collapsePMain)})`;
-        if (collapsePMain > 0.98) editorRef.current.style.pointerEvents = "none";
-      }
-      TOOLBAR.forEach((_, i) => {
-        const el = toolbarItemRefs.current[i];
-        if (!el) return;
-        const start = 2500 + i * 22; // v6: half stagger, earlier
-        const p = track(ms, start, start + 220, eases.outCubic);
-        el.style.opacity = String(p);
-        el.style.transform = `translateY(${lerp(6, 0, p)}px)`;
-      });
-      const sbP = track(ms, 3000, 3400, eases.outQuart);
-      if (saveBtnRef.current) {
-        saveBtnRef.current.style.opacity = String(sbP);
-        saveBtnRef.current.style.transform = `translateY(${lerp(6, 0, sbP)}px)`;
-      }
-
-      // ----- 3.2–9.5s: Placeholder fades, @Cursor chip, body types in -----
-      const phHide = track(ms, TYPE_START - 200, TYPE_START + 100, eases.outQuad);
-      if (placeholderRef.current) {
-        const phShow = track(ms, 3200, 3700, eases.outCubic);
-        placeholderRef.current.style.opacity = String(phShow * (1 - phHide));
-      }
-      const chipShow = track(ms, TYPE_START, TYPE_START + 260, outBack);
-      if (cursorChipRef.current) {
-        cursorChipRef.current.style.opacity = String(clamp(chipShow));
-        cursorChipRef.current.style.transform = `scale(${lerp(0.55, 1, clamp(chipShow))})`;
-      }
       const typeP = clamp((ms - (TYPE_START + 220)) / TYPE_DUR);
       const chars = Math.floor(typeP * TYPED_BODY.length);
       if (typedTextRef.current) {
@@ -257,44 +118,7 @@ export const CursorJiraScene: React.FC = () => {
           typedTextRef.current.textContent = text;
         }
       }
-      if (caretRef.current) {
-        const blink = Math.floor(ms / 480) % 2 === 0 ? 1 : 0;
-        const active = ms > 3700 && ms < 10300 ? 1 : 0;
-        caretRef.current.style.opacity = String(active * blink * 0.85);
-      }
 
-      // ----- 9.5–11s: "Improve writing" glows -----
-      const glowIn = track(ms, 9500, 10200, eases.outQuart);
-      const glowOut = track(ms, 10700, 11300, eases.outCubic);
-      const glowAlpha = glowIn * (1 - glowOut);
-      if (improveHaloRef.current) {
-        improveHaloRef.current.style.opacity = String(glowAlpha * 0.9);
-        improveHaloRef.current.style.transform = `scale(${lerp(0.9, 1.15, glowIn)})`;
-      }
-      if (improveRef.current) {
-        const pulse = 1 + Math.sin((ms - 9500) / 110) * 0.018 * glowAlpha;
-        improveRef.current.style.transform = `scale(${pulse})`;
-      }
-
-      // ----- 10.8s+: Editor collapses into "Add a comment..." -----
-      const collapsedIn = track(ms, 10800, 11300, eases.outCubic);
-      if (editorCollapsedRef.current) {
-        editorCollapsedRef.current.style.opacity = String(collapsedIn);
-        editorCollapsedRef.current.style.transform = `translateY(${lerp(8, 0, collapsedIn)}px)`;
-      }
-
-      // ----- 10.8s+: Agents section + rainbow border + rotating text -----
-      const agentIn = track(ms, 10800, 11400, eases.outCubic);
-      const agentOut = track(ms, 20500, 21200, eases.outCubic);
-      const agentVis = agentIn * (1 - agentOut);
-      if (agentsSectionRef.current) {
-        agentsSectionRef.current.style.opacity = String(agentVis);
-        agentsSectionRef.current.style.transform = `translateY(${lerp(12, 0, agentIn)}px)`;
-      }
-      if (agentBorderRef.current) {
-        const angle = ((ms / 1800) * 360) % 360;
-        agentBorderRef.current.style.setProperty("--cursor-angle", `${angle}deg`);
-      }
       if (agentTextRef.current) {
         let label = AGENT_STATES[0].text;
         for (const s of AGENT_STATES) if (ms >= s.at) label = s.text;
@@ -302,60 +126,6 @@ export const CursorJiraScene: React.FC = () => {
           agentTextRef.current.textContent = label;
         }
       }
-
-      // ----- 17.0–18.0s: Cursor flies in to "Suggest a reply..." chip -----
-      // Chip i=0 has the press at 18000-18250ms, so cursor must LAND by 17950ms.
-      // Cursor pos is relative to the chips-flex container; chip 0 sits at
-      // roughly (0, 0) → (180, 36) within the container. Click pulse fires at 18000.
-      if (chipCursorRef.current) {
-        let cx = 220, cy = 120, op = 0;
-        if (ms < 17000) {
-          op = 0;
-        } else if (ms < 17950) {
-          const t = clamp((ms - 17000) / 950);
-          const e = eases.outCubic(t);
-          cx = lerp(220, 110, e);
-          cy = lerp(120, 18, e);
-          op = clamp((ms - 17000) / 200);
-        } else if (ms < 18550) {
-          cx = 110; cy = 18; op = 1;
-        } else {
-          const t = clamp((ms - 18550) / 350);
-          cx = 110; cy = 18 + t * 8; op = 1 - t;
-        }
-        chipCursorRef.current.style.transform = `translate(${cx}px, ${cy}px)`;
-        chipCursorRef.current.style.opacity = String(op);
-      }
-      // Click pulse on chip at 18000
-      if (chipPulseRef.current) {
-        const pm = ms - 18000;
-        if (pm >= 0 && pm <= 380) {
-          const t = pm / 380;
-          const scale = 1 + t * 1.8;
-          chipPulseRef.current.style.transform = `translate(${110 - 18}px, ${18 - 18}px) scale(${scale})`;
-          chipPulseRef.current.style.opacity = String(1 - t);
-        } else {
-          chipPulseRef.current.style.opacity = "0";
-        }
-      }
-
-      // ----- 16.5–18.7s: Suggested chips pop in, one is clicked -----
-      CHIPS.forEach((_, i) => {
-        const el = chipRefs.current[i];
-        if (!el) return;
-        const start = 16500 + i * 110;
-        const p = track(ms, start, start + 360, eases.outCubic);
-        const press = i === 0 ? track(ms, 18000, 18250, eases.inOutQuad) : 0;
-        const release = i === 0 ? track(ms, 18250, 18550, eases.outQuad) : 0;
-        const scale = 1 - press * 0.1 + release * 0.1;
-        const flash = i === 0 ? press * (1 - release) : 0;
-        const disappear = i === 0 ? track(ms, 18550, 18950, eases.outQuad) : 0;
-        const otherFade = i !== 0 ? track(ms, 18550, 19050, eases.outQuad) : 0;
-        el.style.opacity = String(p * (1 - (i === 0 ? disappear : otherFade)));
-        el.style.transform = `translateY(${lerp(10, 0, p)}px) scale(${scale})`;
-        el.style.background = flash > 0 ? "#DEEBFF" : "#F4F5F7";
-        el.style.borderColor = flash > 0 ? "#B3D4FF" : "#DFE1E6";
-      });
 
       // ----- 18.7–21s: Click expands → typing chosen reply -----
       const expP = track(ms, 18700, 19500, eases.outCubic);
@@ -373,53 +143,17 @@ export const CursorJiraScene: React.FC = () => {
           collapsedInputRef.current.style.color = "#172B4D";
         }
       }
-      if (collapsedCaretRef.current) {
-        const blink = Math.floor(ms / 480) % 2 === 0 ? 1 : 0;
-        const active = ms > 18700 && ms < 20900 ? 1 : 0;
-        collapsedCaretRef.current.style.opacity = String(active * blink * 0.85);
-      }
-
-      // ----- 20.1–22s: Comment posts, Cursor reply, toast -----
-      const postIn = track(ms, 20100, 20900, eases.outCubic);
-      if (collapsedInputRef.current) {
-        if (postIn > 0.9 && collapsedInputRef.current.textContent !== "Add a comment...") {
-          collapsedInputRef.current.textContent = "Add a comment...";
-          collapsedInputRef.current.style.color = "#7A869A";
-        }
-      }
-      if (userCommentRef.current) {
-        userCommentRef.current.style.opacity = String(postIn);
-        userCommentRef.current.style.transform = `translateY(${lerp(18, 0, postIn)}px)`;
-      }
-      const replyIn = track(ms, 20600, 21400, eases.outCubic);
-      if (cursorReplyRef.current) {
-        cursorReplyRef.current.style.opacity = String(replyIn);
-        cursorReplyRef.current.style.transform = `translateY(${lerp(20, 0, replyIn)}px)`;
-      }
-      if (postedCommentRef.current) {
-        postedCommentRef.current.style.opacity = String(Math.max(postIn, replyIn));
-      }
-
-      // Toast — v7: scene now ends at 21500ms (= video 25s). Toast must
-      // appear and remain visible until the logo card cut. No out-fade.
-      const toastIn = track(ms, 20300, 21000, eases.outQuart);
-      const toastVis = toastIn;
-      if (toastRef.current) {
-        toastRef.current.style.opacity = String(toastVis);
-        toastRef.current.style.transform = `translateX(${lerp(40, 0, toastIn)}px) translateY(${lerp(
-          12,
-          0,
-          toastIn
-        )}px)`;
-      }
-
-      // ── GLOWING LIGHT SWEEP across the new Cursor PR reply ──
-      // Sweeps when the PR write-up first appears (21.1–22.1s)
-      if (replySweepRef.current) {
-        const sweepP = track(ms, 21100, 22100, eases.inOutCubic);
-        const sweepFade = track(ms, 21100, 21300, eases.outCubic) * (1 - track(ms, 21800, 22200, eases.outCubic));
-        replySweepRef.current.style.setProperty("--sweep-x", `${lerp(-60, 100, sweepP)}%`);
-        replySweepRef.current.style.setProperty("--sweep-opacity", String(sweepFade * 0.9));
+      // Input clears back to placeholder once the comment "submits" — the exact
+      // ms where track(20100,20900,outCubic) crosses 0.9, matching the original
+      // postIn>0.9 reset (this runs after the typing block above, same as the
+      // original's two-block order, so it can override mid-type on this frame).
+      if (
+        ms >= 20529 &&
+        collapsedInputRef.current &&
+        collapsedInputRef.current.textContent !== "Add a comment..."
+      ) {
+        collapsedInputRef.current.textContent = "Add a comment...";
+        collapsedInputRef.current.style.color = "#7A869A";
       }
 
       // ════════════════════════════════════════════════════════════════
@@ -574,11 +308,6 @@ export const CursorJiraScene: React.FC = () => {
         cameraRigRef.current.style.transform = `translate3d(${recenterX}px, ${recenterY}px, 0) scale(${camScale})`;
       }
 
-      // Motion-blur overlay remains dormant — no whip-pan in v4 either.
-      if (motionBlurRef.current) {
-        motionBlurRef.current.style.opacity = "0";
-      }
-
       // CODEBASE WIREFRAME INTERLUDE — REMOVED 2026-05-23 per Jeremy.
       // "Cursor analyzing and the ball bounces from the boxes" was the
       // bouncing-codebase scene. It is gone. The scan is now represented
@@ -628,12 +357,12 @@ export const CursorJiraScene: React.FC = () => {
         }}
       >
 
-      <div ref={headerRef} style={{ opacity: 0, willChange: "transform, opacity" }}>
+      <Reveal enter={[0, 350]} y={-12} easeIn="out-quart">
         <JiraHeader />
-      </div>
-      <div ref={sidebarRef} style={{ opacity: 0, willChange: "transform, opacity" }}>
+      </Reveal>
+      <Reveal enter={[80, 480]} x={-12} y={0} easeIn="out-quart">
         <JiraSidebar />
-      </div>
+      </Reveal>
 
       {/* Main content scroll area — two-column: ticket body + Jira details sidebar */}
       <div
@@ -655,8 +384,10 @@ export const CursorJiraScene: React.FC = () => {
       {/* LEFT: ticket body (primary content column) */}
       <div style={{ flex: 1, minWidth: 0, maxWidth: 1280 }}>
         {/* Breadcrumb */}
-        <div
-          ref={breadcrumbRef}
+        <Reveal
+          enter={[250, 700]}
+          y={0}
+          easeIn="out-quart"
           style={{
             display: "flex",
             alignItems: "center",
@@ -664,7 +395,6 @@ export const CursorJiraScene: React.FC = () => {
             fontSize: 17,
             color: "#6B778C",
             marginBottom: 18,
-            opacity: 0,
           }}
         >
           <span>Projects</span>
@@ -684,13 +414,14 @@ export const CursorJiraScene: React.FC = () => {
             MSD-24
           </span>
           <span style={{ flex: 1 }} />
-        </div>
+        </Reveal>
 
         {/* Title row + right meta cluster */}
-        <div
-          ref={titleRef}
+        <Reveal
+          enter={[400, 900]}
+          y={8}
+          easeIn="out-quart"
           style={{
-            opacity: 0,
             marginBottom: 20,
             display: "flex",
             alignItems: "flex-start",
@@ -757,31 +488,31 @@ export const CursorJiraScene: React.FC = () => {
               </span>
             </div>
           </div>
-        </div>
+        </Reveal>
 
         {/* Description — v7: bottom margins tightened to lift comments UI higher */}
-        <div ref={descRef} style={{ opacity: 0, marginBottom: 20 }}>
+        <Reveal enter={[800, 1200]} y={10} easeIn="out-quart" style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 20, color: "#7A869A" }}>Add a description...</div>
-        </div>
+        </Reveal>
 
         {/* Subtasks */}
-        <div ref={subtasksRef} style={{ opacity: 0, marginBottom: 18 }}>
+        <Reveal enter={[1000, 1450]} y={10} easeIn="out-quart" style={{ marginBottom: 18 }}>
           <div style={{ fontSize: 20, fontWeight: 700, color: "#172B4D", marginBottom: 8 }}>
             Subtasks
           </div>
           <div style={{ fontSize: 17, color: "#6B778C" }}>Add subtask</div>
-        </div>
+        </Reveal>
 
         {/* Linked work items */}
-        <div ref={linkedRef} style={{ opacity: 0, marginBottom: 18 }}>
+        <Reveal enter={[1250, 1700]} y={12} easeIn="out-quart" style={{ marginBottom: 18 }}>
           <div style={{ fontSize: 20, fontWeight: 700, color: "#172B4D", marginBottom: 8 }}>
             Linked work items
           </div>
           <div style={{ fontSize: 17, color: "#6B778C" }}>Add linked work item</div>
-        </div>
+        </Reveal>
 
         {/* Agents section — v7: bottom margin tightened (26→10) to lift Comments UI higher per client */}
-        <div ref={agentsSectionRef} style={{ opacity: 0, marginBottom: 10 }}>
+        <Reveal enter={[10800, 11400]} exit={[20500, 21200]} y={12} easeIn="out-cubic" easeOut="out-cubic" style={{ marginBottom: 10 }}>
           <div
             style={{
               display: "flex",
@@ -799,7 +530,7 @@ export const CursorJiraScene: React.FC = () => {
               <span>Uses AI. Verify results.</span>
             </div>
           </div>
-          <div ref={agentBorderRef} className="cursor-border" style={{ width: "100%" }}>
+          <div className="cursor-border" style={{ width: "100%", animation: "cursor-angle-spin 1800ms linear infinite" }}>
             <div
               className="cursor-border-inner"
               style={{
@@ -844,24 +575,25 @@ export const CursorJiraScene: React.FC = () => {
               <IconStop size={26} />
             </div>
           </div>
-        </div>
+        </Reveal>
 
         {/* Activity heading — v7: bottom margin tightened (14→8) */}
-        <div ref={activityRef} style={{ opacity: 0, marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
+        <Reveal enter={[1500, 1950]} y={12} easeIn="out-quart" style={{ marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
             <path d="M6 9l6 6 6-6" stroke="#42526E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <div style={{ fontSize: 20, fontWeight: 700, color: "#172B4D" }}>Activity</div>
-        </div>
+        </Reveal>
 
         {/* Tab bar */}
-        <div
-          ref={tabBarRef}
+        <Reveal
+          enter={[1750, 2200]}
+          y={10}
+          easeIn="out-quart"
           style={{
             display: "flex",
             gap: 4,
             marginBottom: 14,
-            opacity: 0,
             borderBottom: "1px solid #DFE1E6",
           }}
         >
@@ -888,18 +620,24 @@ export const CursorJiraScene: React.FC = () => {
               {t.label}
             </div>
           ))}
-        </div>
+        </Reveal>
 
         {/* Editor area */}
         <div style={{ position: "relative", minHeight: 290 }}>
         {/* Expanded comment editor */}
-        <div
-          ref={editorRef}
+        <Reveal
+          enter={[2000, 2700]}
+          exit={[10300, 10900]}
+          y={18}
+          scale={0.985}
+          exitY={-6}
+          exitScale={0.99}
+          easeIn="out-cubic"
+          easeOut="out-cubic"
           style={{
             display: "flex",
             gap: 18,
             alignItems: "flex-start",
-            opacity: 0,
             position: "absolute",
             inset: 0,
           }}
@@ -928,13 +666,12 @@ export const CursorJiraScene: React.FC = () => {
                 }}
               >
                 {TOOLBAR.map((item, i) => (
-                  <div
+                  <Reveal
                     key={item.key}
-                    ref={(el) => {
-                      toolbarItemRefs.current[i] = el;
-                    }}
+                    enter={[2500 + i * 22, 2500 + i * 22 + 220]}
+                    y={6}
+                    easeIn="out-cubic"
                     style={{
-                      opacity: 0,
                       display: "flex",
                       alignItems: "center",
                       position: "relative",
@@ -955,13 +692,12 @@ export const CursorJiraScene: React.FC = () => {
                       </div>
                     ) : item.kind === "improve" ? (
                       <>
+                        {/* Glows up then back down once, ~9500–11300ms local (CSS-only). */}
                         <div
-                          ref={improveHaloRef}
                           className="improve-halo"
-                          style={{ opacity: 0 }}
+                          style={{ animation: "improve-halo-glow 1800ms 9500ms backwards" }}
                         />
                         <div
-                          ref={improveRef}
                           style={{
                             position: "relative",
                             zIndex: 1,
@@ -1008,7 +744,7 @@ export const CursorJiraScene: React.FC = () => {
                     ) : (
                       <>{item.el}</>
                     )}
-                  </div>
+                  </Reveal>
                 ))}
               </div>
 
@@ -1023,11 +759,14 @@ export const CursorJiraScene: React.FC = () => {
                   position: "relative",
                 }}
               >
-                <span
-                  ref={placeholderRef}
+                <Reveal
+                  enter={[3200, 3700]}
+                  exit={[6300, 6600]}
+                  y={0}
+                  easeIn="out-cubic"
+                  easeOut="out-quad"
                   style={{
                     color: "#7A869A",
-                    opacity: 0,
                     position: "absolute",
                     left: 22,
                     top: 20,
@@ -1035,11 +774,14 @@ export const CursorJiraScene: React.FC = () => {
                   }}
                 >
                   Type /ai to Ask Rovo or @ to mention and notify someone.
-                </span>
+                </Reveal>
 
                 <span style={{ display: "inline-flex", alignItems: "baseline" }}>
-                  <span
-                    ref={cursorChipRef}
+                  <Reveal
+                    enter={[6500, 6760]}
+                    y={0}
+                    scale={0.55}
+                    easeIn="out-back"
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
@@ -1050,30 +792,39 @@ export const CursorJiraScene: React.FC = () => {
                       color: "#172B4D",
                       fontSize: 18,
                       fontWeight: 500,
-                      opacity: 0,
                       marginRight: 4,
                     }}
                   >
                     @Cursor
-                  </span>
+                  </Reveal>
                   <span ref={typedTextRef} style={{ color: "#172B4D" }}></span>
+                  {/* Caret: outer span is an instant on/off "window" (3700–10300ms local),
+                      inner span is an infinite 480ms blink — nested so the two opacities
+                      multiply instead of one JS-driven opacity fighting a CSS one. */}
                   <span
-                    ref={caretRef}
                     style={{
                       display: "inline-block",
-                      width: 2,
-                      height: 22,
-                      background: "#172B4D",
-                      verticalAlign: "middle",
-                      marginLeft: 2,
                       opacity: 0,
+                      animation: "instant-show 1ms 3700ms linear forwards, instant-hide 1ms 10300ms linear forwards",
                     }}
-                  />
+                  >
+                    <span
+                      style={{
+                        display: "inline-block",
+                        width: 2,
+                        height: 22,
+                        background: "#172B4D",
+                        verticalAlign: "middle",
+                        marginLeft: 2,
+                        animation: "caret-blink 960ms steps(1,end) infinite",
+                      }}
+                    />
+                  </span>
                 </span>
               </div>
             </div>
 
-            <div ref={saveBtnRef} style={{ display: "flex", gap: 10, marginTop: 16, opacity: 0 }}>
+            <Reveal enter={[3000, 3400]} y={6} easeIn="out-quart" style={{ display: "flex", gap: 10, marginTop: 16 }}>
               <div
                 style={{
                   padding: "9px 20px",
@@ -1097,18 +848,19 @@ export const CursorJiraScene: React.FC = () => {
               >
                 Cancel
               </div>
-            </div>
+            </Reveal>
           </div>
-        </div>
+        </Reveal>
 
         {/* Collapsed comment input + chips */}
-        <div
-          ref={editorCollapsedRef}
+        <Reveal
+          enter={[10800, 11300]}
+          y={8}
+          easeIn="out-cubic"
           style={{
             display: "flex",
             gap: 18,
             alignItems: "flex-start",
-            opacity: 0,
             position: "absolute",
             inset: 0,
           }}
@@ -1125,47 +877,62 @@ export const CursorJiraScene: React.FC = () => {
             >
               <div style={{ fontSize: 18, color: "#7A869A", minHeight: 30 }}>
                 <span ref={collapsedInputRef}>Add a comment...</span>
+                {/* Caret: same instant-window + infinite-blink nesting pattern as the
+                    composer's caret above, just a different active window. */}
                 <span
-                  ref={collapsedCaretRef}
                   style={{
                     display: "inline-block",
-                    width: 2,
-                    height: 20,
-                    background: "#172B4D",
-                    verticalAlign: "middle",
-                    marginLeft: 2,
                     opacity: 0,
+                    animation: "instant-show 1ms 18700ms linear forwards, instant-hide 1ms 20900ms linear forwards",
                   }}
-                />
+                >
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: 2,
+                      height: 20,
+                      background: "#172B4D",
+                      verticalAlign: "middle",
+                      marginLeft: 2,
+                      animation: "caret-blink 960ms steps(1,end) infinite",
+                    }}
+                  />
+                </span>
               </div>
               <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap", position: "relative" }}>
-                {CHIPS.map((label, i) => (
-                  <div
-                    key={label}
-                    ref={(el) => {
-                      chipRefs.current[i] = el;
-                    }}
-                    style={{
-                      opacity: 0,
-                      padding: "8px 17px",
-                      background: "#F4F5F7",
-                      border: "1px solid #DFE1E6",
-                      borderRadius: 4,
-                      fontSize: 17,
-                      color: "#42526E",
-                      fontWeight: 500,
-                      transition: "background 120ms ease, border-color 120ms ease",
-                    }}
-                  >
-                    {label}
-                  </div>
-                ))}
+                {CHIPS.map((label, i) => {
+                  // Chip 0's press-flash (18000–18550ms) and the shared fade-in/out never
+                  // overlap in time (press ends exactly as the fade-out begins), so all
+                  // three animations can safely share the one element's `transform`/color
+                  // properties — no wrapper split needed here.
+                  const animations = [
+                    `chip-fade-in 360ms ${16500 + i * 110}ms cubic-bezier(0.33,1,0.68,1) backwards`,
+                    `chip-fade-out ${i === 0 ? 400 : 500}ms 18550ms cubic-bezier(0.5,1,0.89,1) forwards`,
+                  ];
+                  if (i === 0) animations.push("chip-press-flash 550ms 18000ms linear");
+                  return (
+                    <div
+                      key={label}
+                      style={{
+                        padding: "8px 17px",
+                        background: "#F4F5F7",
+                        border: "1px solid #DFE1E6",
+                        borderRadius: 4,
+                        fontSize: 17,
+                        color: "#42526E",
+                        fontWeight: 500,
+                        animation: animations.join(", "),
+                      }}
+                    >
+                      {label}
+                    </div>
+                  );
+                })}
 
                 {/* v15: macOS pointer that flies in and lands on "Suggest a reply..."
                     (chip i=0) at master 18000ms — synced with the existing chip
                     press/flash animation. Click ripple fires at the same frame. */}
                 <div
-                  ref={chipCursorRef}
                   style={{
                     position: "absolute",
                     left: 0,
@@ -1173,9 +940,10 @@ export const CursorJiraScene: React.FC = () => {
                     width: 38,
                     height: 38,
                     pointerEvents: "none",
-                    opacity: 0,
                     willChange: "transform, opacity",
                     zIndex: 5,
+                    animation:
+                      "chip-cursor-move 1900ms 17000ms linear both, chip-cursor-fade-in 200ms 17000ms linear forwards, chip-cursor-fade-out 350ms 18550ms linear forwards",
                   }}
                 >
                   <svg width="38" height="38" viewBox="0 0 24 24" fill="none">
@@ -1189,7 +957,6 @@ export const CursorJiraScene: React.FC = () => {
                   </svg>
                 </div>
                 <div
-                  ref={chipPulseRef}
                   style={{
                     position: "absolute",
                     left: 0,
@@ -1199,9 +966,9 @@ export const CursorJiraScene: React.FC = () => {
                     borderRadius: 999,
                     border: "2px solid #228DF2",
                     pointerEvents: "none",
-                    opacity: 0,
                     willChange: "transform, opacity",
                     zIndex: 4,
+                    animation: "chip-pulse 380ms 18000ms linear both",
                   }}
                 />
               </div>
@@ -1225,11 +992,12 @@ export const CursorJiraScene: React.FC = () => {
             </div>
 
             {/* Posted comments thread */}
-            <div ref={postedCommentRef} style={{ opacity: 0, marginTop: 30 }}>
-              <div
-                ref={userCommentRef}
+            <Reveal enter={[20100, 20900]} y={0} easeIn="out-cubic" style={{ marginTop: 30 }}>
+              <Reveal
+                enter={[20100, 20900]}
+                y={18}
+                easeIn="out-cubic"
                 style={{
-                  opacity: 0,
                   display: "flex",
                   gap: 18,
                   alignItems: "flex-start",
@@ -1247,13 +1015,14 @@ export const CursorJiraScene: React.FC = () => {
                     {CHOSEN_REPLY}
                   </div>
                 </div>
-              </div>
+              </Reveal>
 
               {/* Cursor's reply (PR write-up) with light sweep */}
-              <div
-                ref={cursorReplyRef}
+              <Reveal
+                enter={[20600, 21400]}
+                y={20}
+                easeIn="out-cubic"
                 style={{
-                  opacity: 0,
                   display: "flex",
                   gap: 18,
                   alignItems: "flex-start",
@@ -1261,9 +1030,8 @@ export const CursorJiraScene: React.FC = () => {
                   position: "relative",
                 }}
               >
-                {/* Glowing light sweep overlay */}
+                {/* Glowing light sweep overlay — see .glow-sweep::before in styles.css */}
                 <div
-                  ref={replySweepRef}
                   className="glow-sweep"
                   style={{
                     position: "absolute",
@@ -1327,21 +1095,23 @@ export const CursorJiraScene: React.FC = () => {
                     <span style={{ color: "#0052CC" }}>Open PR</span>
                   </div>
                 </div>
-              </div>
-            </div>
+              </Reveal>
+            </Reveal>
           </div>
-        </div>
+        </Reveal>
         </div>
         {/* END LEFT column */}
         </div>
 
         {/* RIGHT: Jira Details sidebar — fills empty space authentically */}
-        <div
-          ref={detailsPanelRef}
+        <Reveal
+          enter={[450, 1000]}
+          x={14}
+          y={0}
+          easeIn="out-quart"
           style={{
             width: 470,
             flexShrink: 0,
-            opacity: 0,
             fontFamily: "Inter, sans-serif",
             paddingTop: 10,
           }}
@@ -1504,17 +1274,19 @@ export const CursorJiraScene: React.FC = () => {
           <div style={{ fontSize: 14, color: "#6B778C", marginTop: 16, textAlign: "right" }}>
             Created May 18, 2026 · Updated just now
           </div>
-        </div>
+        </Reveal>
       </div>
 
       {/* Toast */}
-      <div
-        ref={toastRef}
+      <Reveal
+        enter={[20300, 21000]}
+        x={40}
+        y={12}
+        easeIn="out-quart"
         style={{
           position: "absolute",
           bottom: 44,
           right: 44,
-          opacity: 0,
           background: "#172B4D",
           color: "#fff",
           padding: "16px 24px",
@@ -1539,26 +1311,10 @@ export const CursorJiraScene: React.FC = () => {
           />
         </svg>
         Comment added
-      </div>
+      </Reveal>
 
       {/* CLOSE CAMERA RIG */}
       </div>
-
-      {/* MOTION BLUR overlay — for whip-pan */}
-      <div
-        ref={motionBlurRef}
-        style={{
-          position: "absolute",
-          inset: 0,
-          opacity: 0,
-          pointerEvents: "none",
-          background:
-            "linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 30%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.4) 70%, rgba(255,255,255,0) 100%)",
-          backdropFilter: "blur(6px)",
-        }}
-      />
-
-      {/* CODEBASE WIREFRAME INTERLUDE — removed per Jeremy (2026-05-23) */}
     </Timegroup>
   );
 };

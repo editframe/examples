@@ -87,7 +87,7 @@
   top: 0;
   bottom: 0;
   width: 60%;
-  left: var(--sweep-x, -60%);
+  left: -60%;
   background: linear-gradient(
     90deg,
     rgba(255, 255, 255, 0) 0%,
@@ -99,6 +99,149 @@
   filter: blur(2px);
   mix-blend-mode: screen;
   transform: skewX(-12deg);
-  opacity: var(--sweep-opacity, 0);
+  opacity: 0;
   will-change: transform, left, opacity;
+  /* Sweeps once when the PR write-up first appears (scene-local 21100–22100ms) —
+     see CursorJiraScene.tsx. Two independent envelopes (position vs. opacity),
+     so two separate animations instead of forcing one curve on both. */
+  animation:
+    sweep-move 1000ms 21100ms cubic-bezier(0.65, 0, 0.35, 1) both,
+    sweep-opacity 1100ms 21100ms both;
+}
+
+/* ---------- Reveal (see src/components/Reveal.tsx) — declarative fade + translate/scale ---------- */
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translate(var(--reveal-x, 0px), var(--reveal-y, 20px)) scale(var(--reveal-scale, 1));
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+@keyframes reveal-out {
+  from {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(var(--reveal-exit-x, 0px), var(--reveal-exit-y, 0px)) scale(var(--reveal-exit-scale, 1));
+  }
+}
+
+/* ---------- CursorJiraScene (src/scenes/CursorJiraScene.tsx) ---------- */
+
+/* Caret — infinite 50%-duty blink, gated on/off by an instant-step "window" wrapper
+   (see caretRef / collapsedCaretRef). Two nested elements so the two opacities
+   multiply (window visibility * blink phase) instead of one animation fighting another. */
+@keyframes caret-blink {
+  0%, 49.9% { opacity: 0.85; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes instant-show {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes instant-hide {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Agents pill rainbow border — full rotation every 1800ms, no JS (--cursor-angle
+   is already a registered @property above, so it interpolates smoothly). */
+@keyframes cursor-angle-spin {
+  to { --cursor-angle: 360deg; }
+}
+
+/* "Improve writing" halo — glows up then back down once, ~9500–11300ms local.
+   NOTE: `animation-timing-function` set on a keyframe controls the segment that
+   STARTS at that keyframe (through to the next one), not the segment ending there. */
+@keyframes improve-halo-glow {
+  0% {
+    /* glow-in (0→38.89%, matches eases.outQuart) */
+    opacity: 0;
+    transform: scale(0.9);
+    animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  38.89% { opacity: 0.9; transform: scale(1.15); }
+  66.67% {
+    /* glow-out (66.67%→100%, matches eases.outCubic) */
+    opacity: 0.9;
+    transform: scale(1.15);
+    animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  100% { opacity: 0; transform: scale(1.15); }
+}
+
+/* Suggested-reply chips — generic stagger fade (outer wrapper; per-chip delay set inline)
+   plus a press/flash effect scoped to chip index 0 only (inner wrapper, so the two
+   elements' `transform`s never fight over the same property — see Hero.tsx's
+   shoe-wrap/shoe-bob split in the allbirds reference for the same pattern). */
+@keyframes chip-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes chip-fade-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(0); }
+}
+@keyframes chip-press-flash {
+  0% {
+    /* press (0→45.45%, matches eases.inOutQuad) */
+    transform: scale(1);
+    background: #F4F5F7;
+    border-color: #DFE1E6;
+    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+  }
+  45.45% {
+    /* release (45.45%→100%, matches eases.outQuad) */
+    transform: scale(0.9);
+    background: #DEEBFF;
+    border-color: #B3D4FF;
+    animation-timing-function: cubic-bezier(0.5, 1, 0.89, 1);
+  }
+  100% { transform: scale(1); background: #F4F5F7; border-color: #DFE1E6; }
+}
+
+/* macOS pointer flying in to click the "Suggest a reply…" chip, then releasing.
+   Position and opacity are independent envelopes (see .glow-sweep above for why). */
+@keyframes chip-cursor-move {
+  0% {
+    /* fly-in (0→50%, matches eases.outCubic) */
+    transform: translate(220px, 120px);
+    animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  50% { transform: translate(110px, 18px); }
+  81.58% { transform: translate(110px, 18px); }
+  100% { transform: translate(110px, 26px); }
+}
+@keyframes chip-cursor-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes chip-cursor-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Click ripple on the chip — one shot, fixed position, grows and fades. */
+@keyframes chip-pulse {
+  from { transform: translate(92px, 0px) scale(1); opacity: 1; }
+  to { transform: translate(92px, 0px) scale(2.8); opacity: 0; }
+}
+
+/* Light sweep across the Cursor PR reply (see .glow-sweep::before above). */
+@keyframes sweep-move {
+  from { left: -60%; }
+  to { left: 100%; }
+}
+@keyframes sweep-opacity {
+  /* both the fade-in (0→18.18%) and fade-out (63.64%→100%) segments match eases.outCubic;
+     the hold between them (18.18%→63.64%) doesn't move, so its easing is a no-op. */
+  0% { opacity: 0; animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1); }
+  18.18% { opacity: 1; }
+  63.64% { opacity: 1; animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1); }
+  100% { opacity: 0; }
 }
