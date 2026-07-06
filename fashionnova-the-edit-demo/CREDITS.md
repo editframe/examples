@@ -12,16 +12,16 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `audio/Fashionnova Velvet_Pavement.mp3`
+### `src/assets/music-bed.mp3`
 
 | | |
 |---|---|
 | **Title** | Velvet Pavement |
 | **Type** | Music bed (purpose-built, ~25s) |
-| **Use** | Single bed laid under the full 25 seconds of the ad |
+| **Use** | Single bed (`<Audio>`) laid under the full 25 seconds of the ad, `src/Video.tsx` |
 | **License** | Royalty-free, commercial use cleared |
 | **Attribution required** | No |
-| **Mux** | `add-music.sh` — start 0s, fade-in 0.3s, fade-out 1.5s under the outro hold, peak-limited 0.97 |
+| **Treatment** | Baked once locally via ffmpeg — fade-in 0.3s, fade-out 1.5s under the outro hold, peak-limited 0.97 — before committing the file |
 
 This is the **only** audio in the video — there are **no sound effects**. The track is a
 fast, glam, black-and-white-energy bed that matches Fashion Nova's voice.
@@ -30,10 +30,10 @@ fast, glam, black-and-white-energy bed that matches Fashion Nova's voice.
 
 ## Want to swap audio?
 
-1. Drop your replacement file in `audio/` (match the filename or update the `MUSIC=` variable
-   at the top of `add-music.sh`).
+1. Replace `src/assets/music-bed.mp3` with your new track, baking in any fades/normalization
+   with a local ffmpeg pass first (the file is played back as-is, with no runtime processing).
 2. Update the row above with the new source + license info.
-3. Re-run `bash add-music.sh`.
+3. Update the `<Audio src="...">` path in `src/Video.tsx` if you renamed the file.
 
 For 100% safe royalty-free sources:
 

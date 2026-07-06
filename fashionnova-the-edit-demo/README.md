@@ -30,13 +30,12 @@ Ink bleeds through see-through FASHION NOVA letters, swing-tickets swing in on a
 
 ```bash
 npm install
-NO_COLOR=1 FORCE_COLOR=0 npm run render    # → output/demo-silent.mp4
-bash add-music.sh                          # → output/demo.mp4  (music muxed, no SFX)
+NO_COLOR=1 FORCE_COLOR=0 npm run render    # → output/demo.mp4 (native, single pass)
 ```
 
 > **Windows quirk:** Editframe CLI's Vite spawn parses ANSI-colored stdout. The `NO_COLOR=1 FORCE_COLOR=0` prefix is required or render init times out.
 
-The pipeline is a two-step composite: `npm run render` writes the silent video, then `add-music.sh` lays the music bed underneath to produce the committed `output/demo.mp4`. The committed cut already has the audio baked in — `add-music.sh` simply documents and reproduces it.
+The music bed plays as a single `<Audio>` element spanning the whole composition, so `npm run render` produces the final `output/demo.mp4` in one pass — no post-render mux step.
 
 ---
 
@@ -54,11 +53,11 @@ The pipeline is a two-step composite: `npm run render` writes the silent video, 
 
 ## Audio
 
-The soundtrack is a single **music-only** bed — the purpose-built track "Velvet Pavement" — laid under the full 25 seconds. There are **no sound effects** in this video. The mux is reproduced by [`add-music.sh`](add-music.sh), which trims the bed to length, fades it in, fades it out under the outro hold, and limits the peak.
+The soundtrack is a single **music-only** bed — the purpose-built track "Velvet Pavement" — laid under the full 25 seconds as a native `<Audio>` element in `src/Video.tsx`. There are **no sound effects** in this video. The fade-in, fade-out, and peak limiting are baked into the committed asset itself (no runtime processing).
 
 | Cue | Master ms | Source |
 |---|---|---|
-| Music bed | 0 – 25000 | `audio/Fashionnova Velvet_Pavement.mp3` (start 0s, fade-in 0.3s, fade-out 1.5s, peak-limited 0.97) |
+| Music bed | 0 – 25000 | `src/assets/music-bed.mp3` (fade-in 0.3s, fade-out 1.5s, peak-limited 0.97, baked in) |
 
 All audio is cleared for commercial use → see [`CREDITS.md`](CREDITS.md).
 
@@ -92,23 +91,20 @@ Fashion Nova is a **black & white brand** (theme `#000000`, no fixed accent colo
 ├── BRIEF.md                           ← creative brief + scene plan (the STITCH)
 ├── CREDITS.md                         ← audio provenance
 ├── brand-rules-fashionnova.md         ← brand spec (canonical: src/constants.ts)
-├── add-music.sh                       ← music mux → output/demo.mp4 (no SFX)
 ├── .env.example                       ← env vars (none required to render)
 ├── index.html
 ├── package.json
 ├── package-lock.json
 ├── vite.config.ts
 ├── tsconfig.json
-├── audio/
-│   └── Fashionnova Velvet_Pavement.mp3 ← music bed (laid under the full 25s)
 ├── output/
-│   └── demo.mp4                        ← final shipped render (music muxed)
+│   └── demo.mp4                        ← final shipped render (native render, no post-mux)
 └── src/
-    ├── Video.tsx                       ← composition root — one sequence of 5 scene Timegroups
+    ├── Video.tsx                       ← composition root — sequence of 5 scene Timegroups + Audio
     ├── main.tsx                        ← TimelineRoot mount
     ├── constants.ts                    ← palette / type / SCENES durations + overlap
     ├── styles.css                      ← Montserrat @font-face + all @keyframes + Tailwind
-    ├── assets/                         ← look photos, textures, Montserrat woff2 (real files, no base64)
+    ├── assets/                         ← look photos, textures, Montserrat woff2, music-bed.mp3 (real files, no base64)
     ├── scenes/                         ← one file per scene, each its own <Timegroup mode="fixed">
     │   ├── Cover.tsx                   ← wordmark + silver tag
     │   ├── SwingRack.tsx               ← swing-tickets drop onto the rack
@@ -134,14 +130,13 @@ git clone https://github.com/editframe/fashionnova-the-edit-demo.git
 cd fashionnova-the-edit-demo
 npm install
 NO_COLOR=1 FORCE_COLOR=0 npm run render
-bash add-music.sh
 ```
 
 1. **Swap the story** — each scene lives in its own file under `src/scenes/`, as its own `<Timegroup mode="fixed">` animated declaratively with CSS (`@keyframes` in `styles.css`, `Reveal` for one-shot callouts); retune a scene's local-ms delays or its `@keyframes` to re-cut a beat. `src/constants.ts` (`SCENES`) documents each scene's duration and the shared crossfade `overlap`.
 2. **Rebrand** — edit the palette/type/silver-accent tokens in `src/constants.ts`. Keep built graphics mono; let real photos keep their color.
 3. **Swap the looks** — replace the jpg/png files in `src/assets/` (referenced via `<Image src="/assets/...">` in the relevant scene file).
-4. **Re-time the audio** — drop a new track in `audio/` and update the filename + fades in `add-music.sh` (log it in [`CREDITS.md`](CREDITS.md)).
-5. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render`, then `bash add-music.sh`.
+4. **Swap audio** — replace `src/assets/music-bed.mp3` (bake any fades/normalization in with a local ffmpeg pass first) and adjust the `<Audio>` `volume` in `src/Video.tsx`; log in [`CREDITS.md`](CREDITS.md).
+5. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render`.
 
 ---
 

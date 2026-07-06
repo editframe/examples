@@ -1,5 +1,5 @@
 import React from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { AmbientField } from "./components/AmbientField";
 import { Hud } from "./components/Hud";
 import { Cover } from "./scenes/Cover";
@@ -7,7 +7,9 @@ import { SwingRack } from "./scenes/SwingRack";
 import { FanToEdit } from "./scenes/FanToEdit";
 import { SpecStack } from "./scenes/SpecStack";
 import { Outro } from "./scenes/Outro";
-import { OFF_WHITE, OVERLAP_MS } from "./constants";
+import { OFF_WHITE, OVERLAP_MS, DURATION_MS } from "./constants";
+
+const MUSIC = "/assets/music-bed.mp3";
 
 /**
  * FASHION NOVA — "The Edit" · 9:16 · 1080×1920 @ 30fps, ~25s total.
@@ -41,5 +43,9 @@ export const Video: React.FC = () => (
       <Hud />
       <AmbientField />
     </div>
+
+    {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the
+        composition's total runtime regardless of the source file's own length. */}
+    <Audio src={MUSIC} volume={1} duration={`${DURATION_MS}ms`} />
   </Timegroup>
 );
