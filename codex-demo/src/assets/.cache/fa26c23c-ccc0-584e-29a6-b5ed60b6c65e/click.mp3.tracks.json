@@ -1,0 +1,27 @@
+{
+  "1": {
+    "track": 1,
+    "type": "audio",
+    "channel_count": 2,
+    "sample_rate": 48000,
+    "sample_size": 0,
+    "sample_count": 77,
+    "timescale": 48000,
+    "codec": "mp4a",
+    "duration": 78848,
+    "startTimeOffsetMs": 25.057,
+    "initSegment": {
+      "offset": 0,
+      "size": 692
+    },
+    "segments": [
+      {
+        "cts": 0,
+        "dts": 0,
+        "duration": 78848,
+        "offset": 692,
+        "size": 11044
+      }
+    ]
+  }
+}
