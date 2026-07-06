@@ -22,3 +22,10 @@ export const TRACE_OPACITY: number = 0.5;
  * REFACTOR-PATTERNS.md 2b for the derivation this keeps exact).
  */
 export const OVERLAP_MS = 600;
+
+/**
+ * Total resolved runtime of the root sequence: sum(scene durations) - OVERLAP_MS*(n-1)
+ * = (1900 + 10700 + 4100 + 8100) - 600*3 = 23000. Pins the root `<Audio>`'s explicit
+ * `duration` in Video.tsx (no `mode="fit"` on `<Audio>` — see REFACTOR-PATTERNS.md 3b).
+ */
+export const DURATION_MS = 23000;

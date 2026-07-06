@@ -26,7 +26,7 @@
  * 1920×1080 @ 30fps, bg #EAE8DE
  */
 import React from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { TraceLayer } from "../components/TraceLayer";
 import { Reveal } from "../components/Reveal";
 import { TRACE_MODE, TRACE_OPACITY, OVERLAP_MS } from "../constants";
@@ -100,6 +100,22 @@ const PILL_BUMPS = PILL_CROSSING_MS.slice(0, -1).map((ms, i) => {
 });
 const LAST_PILL_CROSSING_MS = PILL_CROSSING_MS[PILL_CROSSING_MS.length - 1];
 
+const TICK = "/assets/sfx/tick.wav";
+
+/**
+ * Scroll-tick SFX — one per pill crossing center. Absolute-ms values are the `adelay`
+ * arguments hand-tuned in the retired `add-audio.sh` (a single tick sample extracted from
+ * `menu-scroll.mp3` at 3.413s, `asplit` into 11 copies). Each is ~15ms ahead of its
+ * matching `PILL_CROSSING_MS` instant to compensate for the tick sample's own attack lead,
+ * except the last, which deliberately leads the final "settle" snap by ~585ms rather than
+ * landing on it (per the original mix). Translated to this scene's local clock by
+ * subtracting its local-zero shift (`TITLE_PILLS_START - OVERLAP_MS` = 1300 — see 2b
+ * "absolute-ms → local-ms" in REFACTOR-PATTERNS.md).
+ */
+const TICK_OFFSETS_MS = [
+  6422, 6571, 6681, 6769, 6843, 6912, 6992, 7088, 7214, 7400, 7815,
+].map(ms => ms - (TITLE_PILLS_START - OVERLAP_MS));
+
 export function TitleAndPillsScroll(): React.ReactElement {
   return (
     <Timegroup
@@ -109,6 +125,10 @@ export function TitleAndPillsScroll(): React.ReactElement {
       style={{ position: "absolute", inset: 0, width: SCREEN_W, height: SCREEN_H, overflow: "hidden" }}
     >
       <TraceLayer sceneStartMs={TITLE_PILLS_START - OVERLAP_MS} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
+
+      {TICK_OFFSETS_MS.map((ms, i) => (
+        <Audio key={i} src={TICK} offset={`${ms}ms`} duration="50ms" volume={1} />
+      ))}
 
       {!TRACE_MODE && (
         <div style={{ position: "absolute", inset: 0, background: "#EAE8DE", zIndex: 1 }} />

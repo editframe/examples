@@ -24,12 +24,14 @@
  * changes — needs an explicit crossfade (see ManagedAgents.tsx).
  */
 import React from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { HexagonFormation } from "./scenes/HexagonFormation";
 import { TitleAndPillsScroll } from "./scenes/TitleAndPillsScroll";
 import { ManagedAgents } from "./scenes/ManagedAgents";
 import { ArqosDashboard } from "./scenes/ArqosDashboard";
-import { OVERLAP_MS } from "./constants";
+import { OVERLAP_MS, DURATION_MS } from "./constants";
+
+const MUSIC = "/assets/music-bed.mp3";
 
 export const Video: React.FC = () => (
   <Timegroup
@@ -44,5 +46,9 @@ export const Video: React.FC = () => (
       <ManagedAgents />
       <ArqosDashboard />
     </Timegroup>
+
+    {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the
+        composition's total runtime regardless of the source file's own length. */}
+    <Audio src={MUSIC} volume={1} duration={`${DURATION_MS}ms`} />
   </Timegroup>
 );
