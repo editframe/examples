@@ -1,5 +1,5 @@
 import React, { useCallback, useRef } from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { Reveal } from "../components/Reveal";
 import { Sfx } from "../components/Sfx";
 import { clamp, lerp, typewriter } from "../components/helpers";
@@ -298,6 +298,10 @@ export const SceneA_FigmaWindow: React.FC = () => {
       <Sfx cue="pop" at={1.8} dur={0.4} volume={0.22} />
       <Sfx cue="ping" at={6.3} dur={0.5} volume={0.26} />
       <Sfx cue="confirm" at={8.9} dur={0.5} volume={0.28} />
+      {/* Cursor-click SFX — keyed to the exact same click timestamps (4.6s, 7.0s)
+          as the cursor sweep + click-consequence choreography above. */}
+      <Audio src="/assets/sfx/click-hd-loud.mp3" offset="4.6s" duration="1.5s" volume={0.45} />
+      <Audio src="/assets/sfx/click-hd-loud.mp3" offset="7.0s" duration="1.5s" volume={0.45} />
 
       {/* ===== CAMERA RIG ===== */}
       <div

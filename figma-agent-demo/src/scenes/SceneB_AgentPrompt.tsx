@@ -1,5 +1,5 @@
 import React, { useCallback, useRef } from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { Reveal } from "../components/Reveal";
 import { Sfx } from "../components/Sfx";
 import { clamp, lerp, typewriter } from "../components/helpers";
@@ -136,6 +136,8 @@ export const SceneB_AgentPrompt: React.FC = () => {
       <Sfx cue="plop" at={0.05} dur={0.4} volume={0.32} />
       <Sfx cue="ping" at={4.3} dur={0.5} volume={0.32} />
       <Sfx cue="reveal" at={5.7} dur={0.5} volume={0.32} />
+      {/* Keyboard typing clatter under the prompt-text typewriter (0.6–3.7s local). */}
+      <Audio src="/assets/sfx/keyboard-sceneb.mp3" offset="0.6s" duration="3.1s" volume={0.28} />
 
       {/* White wash out */}
       <div

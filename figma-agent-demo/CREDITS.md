@@ -12,7 +12,7 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `audio/music-bed.mp3`
+### `src/assets/music-bed.mp3`
 
 | | |
 |---|---|
@@ -24,13 +24,13 @@ document so downstream forkers can verify provenance.
 | **Attribution required** | ❌ No (credit appreciated) |
 | **Redistribution** | ✅ Permitted as part of derivative work |
 
-A bright, optimistic, lightly bouncy bed that matches Figma's collaborative, creative tone. Replace freely with anything from Pixabay, [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/) — keep the filename `music-bed.mp3` or update `add-sfx-v12.sh` accordingly.
+A bright, optimistic, lightly bouncy bed that matches Figma's collaborative, creative tone. Baked as a finished asset (trimmed to 30.8s, faded out from 28.8s, volume-scaled) and played as a single `<Audio>` on the composition root — see `src/Video.tsx`.
 
 ---
 
 ## SFX
 
-### `audio/keyboard.wav`
+### `src/assets/sfx/keyboard-sceneb.mp3`, `src/assets/sfx/keyboard-scenec.mp3`
 
 | | |
 |---|---|
@@ -39,22 +39,33 @@ A bright, optimistic, lightly bouncy bed that matches Figma's collaborative, cre
 | **License** | Royalty-free, commercial use cleared |
 | **Used for** | SceneB agent prompt typing (10.6–13.7s) and SceneC chat input typing (23.3–25.9s) |
 
-### `audio/click-hd-loud.mp3`
+Both files are the same source clip (`keyboard.wav`), looped and trimmed once to the exact cue duration needed in each scene (`src/scenes/SceneB_AgentPrompt.tsx`, `src/scenes/SceneC_ThenGoDeep.tsx`).
+
+### `src/assets/sfx/click-hd-loud.mp3`
 
 | | |
 |---|---|
 | **Type** | UI click (HD, high-headroom) |
 | **Source** | "Click Sound Effect (HD)" — separately sourced free SFX |
 | **License** | Royalty-free, commercial use cleared |
-| **Used for** | Three click cues in SceneA: Progress Card row select (4.6s), Fill swatch → picker (7.0s), color picker hue drag start (14.3s) |
+| **Used for** | Two click cues in SceneA: Progress Card row select (4.6s), Fill swatch → color picker (7.0s) — see `src/scenes/SceneA_FigmaWindow.tsx` |
+
+### `src/assets/sfx/{reveal,pop,ping,confirm,plop}.mp3`
+
+| | |
+|---|---|
+| **Type** | UI reveal / pop / ping / confirm / plop cues |
+| **Source** | Free UI SFX collection |
+| **License** | Royalty-free, commercial use cleared |
+| **Used for** | Per-scene beat accents, dispatched via `src/components/Sfx.tsx` |
 
 ---
 
 ## Want to swap audio?
 
-1. Drop your replacement file in `audio/` (match filename or update `add-sfx-v12.sh`).
-2. Update the corresponding row above with source + license info.
-3. Re-run `bash add-sfx-v12.sh`.
+1. Drop your replacement file in `src/assets/` (or `src/assets/sfx/`).
+2. Update the corresponding `<Audio>`/`<Sfx>` reference in `src/Video.tsx` or the relevant scene.
+3. Update the corresponding row above with source + license info.
 
 For 100% safe royalty-free sources:
 

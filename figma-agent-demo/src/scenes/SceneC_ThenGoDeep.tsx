@@ -1,5 +1,5 @@
 import React, { useCallback, useRef } from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { Reveal } from "../components/Reveal";
 import { Sfx } from "../components/Sfx";
 import { typewriter } from "../components/helpers";
@@ -61,6 +61,8 @@ export const SceneC_ThenGoDeep: React.FC = () => {
       <Sfx cue="reveal" at={0.0} dur={0.7} volume={0.32} />
       <Sfx cue="pop" at={0.95} dur={0.4} volume={0.26} />
       <Sfx cue="plop" at={1.5} dur={0.4} volume={0.22} />
+      {/* Keyboard typing clatter under the chat-input typewriter (1.8–4.4s local). */}
+      <Audio src="/assets/sfx/keyboard-scenec.mp3" offset="1.8s" duration="2.6s" volume={0.28} />
 
       {/* Fade to dark for SceneD */}
       <div

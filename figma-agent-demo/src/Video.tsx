@@ -1,10 +1,13 @@
 import React from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { SceneA_FigmaWindow } from "./scenes/SceneA_FigmaWindow";
 import { SceneB_AgentPrompt } from "./scenes/SceneB_AgentPrompt";
 import { SceneBprime_OnboardingGeneration } from "./scenes/SceneBprime_OnboardingGeneration";
 import { SceneC_ThenGoDeep } from "./scenes/SceneC_ThenGoDeep";
 import { SceneD_LogoCard } from "./scenes/SceneD_LogoCard";
+
+const MUSIC = "/assets/music-bed.mp3";
+const TOTAL_MS = 30800;
 
 /**
  * Figma — Native Agent (v7 — cursor click responses + use-case payoff scene)
@@ -35,7 +38,7 @@ import { SceneD_LogoCard } from "./scenes/SceneD_LogoCard";
  * Repo layout:
  *   src/Video.tsx                the composition root (this file)
  *   src/scenes/*.tsx             one `<Timegroup mode="fixed">` per scene, its own
- *                                local clock, sequenced by the root `mode="sequence"`
+ *                                local clock, sequenced by the inner `mode="sequence"`
  *                                Timegroup below (no crossfade `overlap` — scenes
  *                                hard-cut via their own internal solid-color wash)
  *   src/components/Reveal.tsx    shared declarative fade+translate/scale entrance/exit
@@ -50,20 +53,30 @@ import { SceneD_LogoCard } from "./scenes/SceneD_LogoCard";
  * SceneB, the cursor-sweep + click-consequence choreography — see the doc
  * comment at the top of each scene file for why those specific bits are kept
  * as JS instead of CSS.
+ *
+ * The scene sequence is wrapped in an outer `mode="contain"` Timegroup so the
+ * music bed `<Audio>` can sit as a sibling spanning the whole composition,
+ * rather than being swept up as an extra "scene" inside the sequence.
  */
 export const Video = () => {
   return (
     <Timegroup
+      mode="contain"
       workbench
       className="w-[1920px] h-[1080px] relative overflow-hidden"
-      mode="sequence"
       style={{ background: "#1E1E1E" }}
     >
-      <SceneA_FigmaWindow />
-      <SceneB_AgentPrompt />
-      <SceneBprime_OnboardingGeneration />
-      <SceneC_ThenGoDeep />
-      <SceneD_LogoCard />
+      <Timegroup mode="sequence" className="absolute inset-0">
+        <SceneA_FigmaWindow />
+        <SceneB_AgentPrompt />
+        <SceneBprime_OnboardingGeneration />
+        <SceneC_ThenGoDeep />
+        <SceneD_LogoCard />
+      </Timegroup>
+
+      {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to
+          the composition's total runtime regardless of the source file's own length. */}
+      <Audio src={MUSIC} volume={1} duration={`${TOTAL_MS}ms`} />
     </Timegroup>
   );
 };
