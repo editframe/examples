@@ -1,11 +1,10 @@
-import React, { useCallback, useRef } from "react";
+import React from "react";
 import { Timegroup } from "@editframe/react";
-import { eases } from "animejs";
-import { clamp, lerp, track } from "../components/helpers";
 import { vc, fonts } from "../lib/colors";
+import { SCENES } from "../constants";
 
 /**
- * Scene 3 — CodeToConcept (6.5s)  ‖ Delba canon rebuild
+ * Scene 3 — CodeToConcept (5.0s local + 0.5s crossfade tail)  ‖ Delba canon rebuild
  *
  * Reference: Delba's "use client visually explained" + "Partial Prerendering
  * explained" — both videos use the move: a code block sits in the middle
@@ -16,18 +15,16 @@ import { vc, fonts } from "../lib/colors";
  * We use the PPR vocabulary: <ShoppingCart /> is dynamic (blue), the rest of
  * the page shell is static (purple). The bracket-label vocabulary is hers.
  *
- * Beats:
- *   0–500       Cross-dissolve in.
- *   500–2500    Code block fades in line-by-line (stagger ≈ 220ms/line).
+ * Beats (local ms, this scene's own clock):
+ *   0–2200      Code block fades in line-by-line (stagger 110ms/line).
  *               Geist Mono, syntax-tokenized very lightly (keyword gray400,
  *               strings + tags gray100).
- *   2500–3300   Right-edge "static" bracket draws over lines 1–8, purple.
- *               Label "static" slides in from x+24 → x+0.
- *   3300–4100   Right-edge "dynamic" bracket draws over lines 4–6
- *               (the <Suspense> with <ShoppingCart />), blue. Label
- *               "dynamic" slides in.
- *   4100–5500   Hold — viewer reads.
- *   5500–6500   Cross-dissolve out.
+ *   1800–2300   Right-edge "static" bracket draws over the whole block, purple.
+ *   2150–2500   Label "static" slides in from x+24 → x+0.
+ *   2500–3000   Right-edge "dynamic" bracket draws over the Suspense block, blue.
+ *   2850–3200   Label "dynamic" slides in.
+ *   3200–4500   Hold — viewer reads.
+ *   4500–5000   Crossfade out (--ef-transition-out-start).
  *
  * Brand checks:
  *   - Bg #0A0A0A ✓
@@ -44,10 +41,10 @@ type CodeLine = {
 };
 
 const COLOR = {
-  keyword: vc.gray400,    // export, function, return
-  fn: vc.gray100,         // Page, ShoppingCart
-  tag: vc.gray100,        // <main>, <Suspense>, <ShoppingCart />
-  string: vc.purpleSoft,  // fallback strings — soft purple ties into vocabulary
+  keyword: vc.gray400, // export, function, return
+  fn: vc.gray100, // Page, ShoppingCart
+  tag: vc.gray100, // <main>, <Suspense>, <ShoppingCart />
+  string: vc.purpleSoft, // fallback strings — soft purple ties into vocabulary
   plain: vc.textMuted,
   comment: vc.gray600,
 };
@@ -71,77 +68,34 @@ const CODE_TOP = 220;
 const LINE_HEIGHT = 56;
 const CODE_FONT_SIZE = 28;
 const CODE_RIGHT = 1180; // right edge of code text area; brackets live just past this
+const LINE_STAGGER = 110;
+const LINE_FADE_DUR = 260;
+
+// Static bracket spans the whole component (lines 0-9).
+const STATIC_DASH_TOTAL = 320;
+const STATIC_DRAW_START = 1800;
+const STATIC_DRAW_END = 2300;
+const STATIC_LABEL_START = 2150;
+const STATIC_LABEL_END = 2500;
+
+// Dynamic bracket spans lines 3-5 (the Suspense block), nested inside the static one.
+const DYNAMIC_DASH_TOTAL = 220;
+const DYNAMIC_DRAW_START = 2500;
+const DYNAMIC_DRAW_END = 3000;
+const DYNAMIC_LABEL_START = 2850;
+const DYNAMIC_LABEL_END = 3200;
 
 export const Scene3_CodeToConcept: React.FC = () => {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const lineRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const staticBracketRef = useRef<SVGPathElement>(null);
-  const staticLabelRef = useRef<HTMLDivElement>(null);
-  const dynamicBracketRef = useRef<SVGPathElement>(null);
-  const dynamicLabelRef = useRef<HTMLDivElement>(null);
-
-  const handleFrame = useCallback(({ ownCurrentTimeMs }: { ownCurrentTimeMs: number }) => {
-    const ms = ownCurrentTimeMs;
-
-    if (wrapperRef.current) {
-      // No scene-level fade — prevents black seam at the cut.
-      wrapperRef.current.style.opacity = "1";
-    }
-
-    // Code lines stagger in (first line starts immediately at scene cut so we
-    // don't show a black frame at the seam).
-    LINES.forEach((_, i) => {
-      const el = lineRefs.current[i];
-      if (!el) return;
-      const start = i * 110;
-      const p = track(ms, start, start + 260, eases.outCubic);
-      el.style.opacity = String(p);
-      el.style.transform = `translateY(${lerp(8, 0, p)}px)`;
-    });
-
-    // Static bracket (lines 0-3 inclusive + 6-9, but we draw single bracket
-    // covering the "shell" lines 0,1,2,3,6,7,8,9 — visually we cover the
-    // outer block, with the dynamic bracket clearly nested inside).
-    if (staticBracketRef.current) {
-      const total = 320;
-      const p = track(ms, 1800, 2300, eases.outCubic);
-      staticBracketRef.current.style.strokeDasharray = String(total);
-      staticBracketRef.current.style.strokeDashoffset = String(total * (1 - p));
-      staticBracketRef.current.style.opacity = String(clamp((ms - 1800) / 180));
-    }
-    if (staticLabelRef.current) {
-      const p = track(ms, 2150, 2500, eases.outCubic);
-      staticLabelRef.current.style.opacity = String(p);
-      staticLabelRef.current.style.transform = `translateX(${lerp(24, 0, p)}px)`;
-    }
-
-    // Dynamic bracket (lines 3-5 — the Suspense block)
-    if (dynamicBracketRef.current) {
-      const total = 220;
-      const p = track(ms, 2500, 3000, eases.outCubic);
-      dynamicBracketRef.current.style.strokeDasharray = String(total);
-      dynamicBracketRef.current.style.strokeDashoffset = String(total * (1 - p));
-      dynamicBracketRef.current.style.opacity = String(clamp((ms - 2500) / 180));
-    }
-    if (dynamicLabelRef.current) {
-      const p = track(ms, 2850, 3200, eases.outCubic);
-      dynamicLabelRef.current.style.opacity = String(p);
-      dynamicLabelRef.current.style.transform = `translateX(${lerp(24, 0, p)}px)`;
-    }
-  }, []);
-
-  // Bracket geometry — for SVGs we use one big SVG layer covering the right
-  // edge of the code column. Lines start at CODE_TOP, each line is LINE_HEIGHT.
+  // Bracket geometry — one big SVG layer covering the right edge of the code
+  // column. Lines start at CODE_TOP, each line is LINE_HEIGHT.
   const svgLeft = CODE_RIGHT;
   const svgTop = CODE_TOP - 10;
   const svgHeight = LINES.length * LINE_HEIGHT + 20;
 
-  // Static bracket spans lines 0-9 (the whole component)
   const staticY1 = 0 + 6;
   const staticY2 = LINES.length * LINE_HEIGHT - 4;
   const staticPath = `M 4 ${staticY1} L 16 ${staticY1} L 16 ${staticY2} L 4 ${staticY2}`;
 
-  // Dynamic bracket spans lines 3-5 (the Suspense block) — inset further right
   const dynY1 = 3 * LINE_HEIGHT + 6;
   const dynY2 = 6 * LINE_HEIGHT - 4;
   const dynPath = `M 38 ${dynY1} L 50 ${dynY1} L 50 ${dynY2} L 38 ${dynY2}`;
@@ -149,13 +103,18 @@ export const Scene3_CodeToConcept: React.FC = () => {
   return (
     <Timegroup
       mode="fixed"
-      duration="5s"
-      onFrame={handleFrame as any}
+      duration={`${SCENES.codeToConcept.duration}ms`}
       className="absolute inset-0 overflow-hidden"
     >
       <div style={{ position: "absolute", inset: 0, background: vc.bg }} />
 
-      <div ref={wrapperRef} style={{ position: "absolute", inset: 0, opacity: 0 }}>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          animation: "scene-fade-out var(--ef-transition-duration) var(--ef-transition-out-start) cubic-bezier(0.32,0,0.67,0) forwards",
+        }}
+      >
         {/* Tiny eyebrow above code block */}
         <div
           style={{
@@ -188,13 +147,10 @@ export const Scene3_CodeToConcept: React.FC = () => {
           {LINES.map((line, i) => (
             <div
               key={i}
-              ref={(el) => {
-                lineRefs.current[i] = el;
-              }}
               style={{
-                opacity: 0,
-                willChange: "transform, opacity",
                 height: LINE_HEIGHT,
+                animation: `reveal-in ${LINE_FADE_DUR}ms ${i * LINE_STAGGER}ms cubic-bezier(0.33,1,0.68,1) backwards`,
+                ["--reveal-y" as any]: "8px",
               }}
             >
               {line.tokens.map(([txt, kind], j) => (
@@ -218,24 +174,30 @@ export const Scene3_CodeToConcept: React.FC = () => {
           }}
         >
           <path
-            ref={staticBracketRef}
             d={staticPath}
             stroke={vc.purple}
             strokeWidth={2}
+            strokeDasharray={STATIC_DASH_TOTAL}
             fill="none"
             strokeLinecap="round"
             strokeLinejoin="round"
-            style={{ opacity: 0 }}
+            style={{
+              ["--dash-total" as any]: STATIC_DASH_TOTAL,
+              animation: `bracket-draw ${STATIC_DRAW_END - STATIC_DRAW_START}ms ${STATIC_DRAW_START}ms cubic-bezier(0.33,1,0.68,1) backwards`,
+            }}
           />
           <path
-            ref={dynamicBracketRef}
             d={dynPath}
             stroke={vc.blue}
             strokeWidth={2}
+            strokeDasharray={DYNAMIC_DASH_TOTAL}
             fill="none"
             strokeLinecap="round"
             strokeLinejoin="round"
-            style={{ opacity: 0 }}
+            style={{
+              ["--dash-total" as any]: DYNAMIC_DASH_TOTAL,
+              animation: `bracket-draw ${DYNAMIC_DRAW_END - DYNAMIC_DRAW_START}ms ${DYNAMIC_DRAW_START}ms cubic-bezier(0.33,1,0.68,1) backwards`,
+            }}
           />
         </svg>
 
@@ -243,7 +205,6 @@ export const Scene3_CodeToConcept: React.FC = () => {
             doesn't overlap with the inset dynamic label (which sits inside the
             same SVG column at the suspense block). */}
         <div
-          ref={staticLabelRef}
           style={{
             position: "absolute",
             left: svgLeft + 36,
@@ -253,8 +214,8 @@ export const Scene3_CodeToConcept: React.FC = () => {
             fontWeight: 500,
             color: vc.purple,
             letterSpacing: "-0.02em",
-            opacity: 0,
-            willChange: "transform, opacity",
+            ["--slide-x" as any]: "24px",
+            animation: `slide-x-in ${STATIC_LABEL_END - STATIC_LABEL_START}ms ${STATIC_LABEL_START}ms cubic-bezier(0.33,1,0.68,1) backwards`,
           }}
         >
           static
@@ -275,7 +236,6 @@ export const Scene3_CodeToConcept: React.FC = () => {
             indented further right so the eye reads "this small piece, inside
             the big static block, is dynamic." */}
         <div
-          ref={dynamicLabelRef}
           style={{
             position: "absolute",
             left: svgLeft + 78,
@@ -285,8 +245,8 @@ export const Scene3_CodeToConcept: React.FC = () => {
             fontWeight: 500,
             color: vc.blue,
             letterSpacing: "-0.02em",
-            opacity: 0,
-            willChange: "transform, opacity",
+            ["--slide-x" as any]: "24px",
+            animation: `slide-x-in ${DYNAMIC_LABEL_END - DYNAMIC_LABEL_START}ms ${DYNAMIC_LABEL_START}ms cubic-bezier(0.33,1,0.68,1) backwards`,
           }}
         >
           dynamic

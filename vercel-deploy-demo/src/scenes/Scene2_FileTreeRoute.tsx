@@ -1,11 +1,11 @@
-import React, { useCallback, useRef } from "react";
+import React from "react";
 import { Timegroup } from "@editframe/react";
-import { eases } from "animejs";
-import { clamp, lerp, track } from "../components/helpers";
+import { Reveal } from "../components/Reveal";
 import { vc, fonts } from "../lib/colors";
+import { SCENES } from "../constants";
 
 /**
- * Scene 2 — FileTreeRoute (6.0s)  ‖ Delba canon rebuild
+ * Scene 2 — FileTreeRoute (4.5s local + 0.5s crossfade tail)  ‖ Delba canon rebuild
  *
  * Reference: Delba's "Next.js Explained: Creating Routes" (Episode 1 of her
  * filesystem-routing series) — https://www.youtube.com/watch?v=kmJEmfRhv5g
@@ -19,18 +19,16 @@ import { vc, fonts } from "../lib/colors";
  *   - ARROW (x≈900–1100): thin gray line drawing left-to-right
  *   - RIGHT column (x≈1180–1500): the URL that file produces, big
  *
- * Beats (frame-driven):
- *   0–500       Scene cross-dissolve in.
- *   500–1500    `app/` root appears (typewriter cadence on the label).
- *   1500–2200   `page.tsx` slides in beneath, indented one level.
- *   2200–2900   `layout.tsx` slides in.
- *   2900–3700   `dashboard/` folder slides in (one level deep), then
- *               `dashboard/page.tsx` slides in (two levels deep).
- *   3700–4300   The `dashboard/page.tsx` row lights subtly (gray100 fg,
- *               with a faint purple left-edge tick — "this is the file").
- *   4300–4900   Arrow draws from that row to the right column.
- *   4900–5500   `/dashboard` types in on the right, big Geist Sans.
- *   5500–6000   Hold, then cross-dissolve out.
+ * Beats (local ms, this scene's own clock):
+ *   0–600, 600–1100, 1100–1600, 1600–2100  Each tree row slides in.
+ *   2100–2380   The `dashboard/page.tsx` row (target row) appears.
+ *   2450–2900   Target row "lights up" with a purple left-edge tick.
+ *   2850–3350   Arrow draws from that row to the right column.
+ *   3350–3800   `/dashboard` types in on the right, big Geist Sans.
+ *   3350–3800   Caret shows solid during typing, then blinks.
+ *   3800–4050   Mono caption fades in beneath the URL.
+ *   4000–4500   Hold.
+ *   4500–5000   Crossfade out (--ef-transition-out-start).
  *
  * Brand checks (pause-test):
  *   - Bg #0A0A0A ✓
@@ -43,7 +41,7 @@ import { vc, fonts } from "../lib/colors";
 type Row = {
   label: string;
   depth: number;
-  start: number; // appear ms
+  start: number; // appear ms (local, this scene's own clock)
   isTarget?: boolean;
 };
 
@@ -62,85 +60,24 @@ const ARROW_DRAW_END = 3350;
 const URL_TYPE_START = 3350;
 const URL_TYPE_END = 3800;
 const URL_TEXT = "/dashboard";
+const ARROW_DASH_TOTAL = 200; // path length budget for the SVG stroke-dasharray
 
 export const Scene2_FileTreeRoute: React.FC = () => {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const targetGlowRef = useRef<HTMLDivElement>(null);
-  const arrowRef = useRef<SVGPathElement>(null);
-  const arrowHeadRef = useRef<SVGPathElement>(null);
-  const urlRef = useRef<HTMLDivElement>(null);
-  const urlCaretRef = useRef<HTMLSpanElement>(null);
-  const captionRef = useRef<HTMLDivElement>(null);
-
-  const handleFrame = useCallback(({ ownCurrentTimeMs }: { ownCurrentTimeMs: number }) => {
-    const ms = ownCurrentTimeMs;
-
-    // No scene-level fade — see Scene1 rationale. Inner elements animate.
-    if (wrapperRef.current) {
-      wrapperRef.current.style.opacity = "1";
-    }
-
-    // Each row: slide in from x=-12px, opacity 0→1 over 280ms
-    ROWS.forEach((row, i) => {
-      const el = rowRefs.current[i];
-      if (!el) return;
-      const p = track(ms, row.start, row.start + 280, eases.outCubic);
-      el.style.opacity = String(p);
-      el.style.transform = `translateX(${lerp(-12, 0, p)}px)`;
-    });
-
-    // Target row "lights up" with purple left-tick
-    if (targetGlowRef.current) {
-      const p = track(ms, 2450, 2900, eases.outCubic);
-      targetGlowRef.current.style.opacity = String(p);
-      targetGlowRef.current.style.transform = `scaleY(${lerp(0.2, 1, p)})`;
-    }
-
-    // Arrow path — animated by stroke-dashoffset
-    if (arrowRef.current) {
-      const total = 200; // path length budget (we set dasharray to 200)
-      const p = track(ms, ARROW_DRAW_START, ARROW_DRAW_END, eases.outCubic);
-      arrowRef.current.style.strokeDasharray = String(total);
-      arrowRef.current.style.strokeDashoffset = String(total * (1 - p));
-      arrowRef.current.style.opacity = String(clamp((ms - ARROW_DRAW_START) / 200));
-    }
-    if (arrowHeadRef.current) {
-      const p = track(ms, ARROW_DRAW_END - 100, ARROW_DRAW_END, eases.outCubic);
-      arrowHeadRef.current.style.opacity = String(p);
-      arrowHeadRef.current.style.transform = `translateX(${lerp(-6, 0, p)}px)`;
-    }
-
-    // URL typewriter on the right
-    if (urlRef.current) {
-      const p = track(ms, URL_TYPE_START, URL_TYPE_END, eases.linear);
-      const n = Math.floor(p * URL_TEXT.length);
-      urlRef.current.textContent = URL_TEXT.slice(0, n);
-    }
-    if (urlCaretRef.current) {
-      const showCaret = ms >= ARROW_DRAW_END;
-      const typing = ms >= URL_TYPE_START && ms < URL_TYPE_END;
-      const blink = Math.floor(ms / 500) % 2 === 0 ? 1 : 0;
-      urlCaretRef.current.style.opacity = showCaret ? String(typing ? 1 : blink) : "0";
-    }
-
-    // Tiny mono caption: appears with URL
-    if (captionRef.current) {
-      const p = track(ms, URL_TYPE_END, URL_TYPE_END + 250, eases.outCubic);
-      captionRef.current.style.opacity = String(p);
-    }
-  }, []);
-
   return (
     <Timegroup
       mode="fixed"
-      duration="4.5s"
-      onFrame={handleFrame as any}
+      duration={`${SCENES.fileTreeRoute.duration}ms`}
       className="absolute inset-0 overflow-hidden"
     >
       <div style={{ position: "absolute", inset: 0, background: vc.bg }} />
 
-      <div ref={wrapperRef} style={{ position: "absolute", inset: 0, opacity: 0 }}>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          animation: "scene-fade-out var(--ef-transition-duration) var(--ef-transition-out-start) cubic-bezier(0.32,0,0.67,0) forwards",
+        }}
+      >
         {/* LEFT: file tree */}
         <div
           style={{
@@ -158,21 +95,17 @@ export const Scene2_FileTreeRoute: React.FC = () => {
           {ROWS.map((row, i) => (
             <div
               key={i}
-              ref={(el) => {
-                rowRefs.current[i] = el;
-              }}
               style={{
                 position: "relative",
                 paddingLeft: row.depth * 32 + 14,
-                opacity: 0,
-                willChange: "transform, opacity",
                 color: row.isTarget ? vc.fg : vc.textMuted,
+                ["--slide-x" as any]: "-12px",
+                animation: `slide-x-in 280ms ${row.start}ms cubic-bezier(0.33,1,0.68,1) backwards`,
               }}
             >
               {/* Purple left-edge tick — only on target row, only when "lit" */}
               {row.isTarget && (
                 <div
-                  ref={targetGlowRef}
                   style={{
                     position: "absolute",
                     left: row.depth * 32,
@@ -181,8 +114,8 @@ export const Scene2_FileTreeRoute: React.FC = () => {
                     width: 3,
                     background: vc.purple,
                     borderRadius: 2,
-                    opacity: 0,
                     transformOrigin: "center",
+                    animation: "row-glow-in 450ms 2450ms cubic-bezier(0.33,1,0.68,1) backwards",
                   }}
                 />
               )}
@@ -204,22 +137,27 @@ export const Scene2_FileTreeRoute: React.FC = () => {
           }}
         >
           <path
-            ref={arrowRef}
             d="M 0 20 L 240 20"
             stroke={vc.gray600}
             strokeWidth={1.5}
+            strokeDasharray={ARROW_DASH_TOTAL}
             fill="none"
-            style={{ opacity: 0 }}
+            style={{
+              ["--dash-total" as any]: ARROW_DASH_TOTAL,
+              animation: `bracket-draw ${ARROW_DRAW_END - ARROW_DRAW_START}ms ${ARROW_DRAW_START}ms cubic-bezier(0.33,1,0.68,1) backwards`,
+            }}
           />
           <path
-            ref={arrowHeadRef}
             d="M 232 12 L 244 20 L 232 28"
             stroke={vc.gray600}
             strokeWidth={1.5}
             fill="none"
             strokeLinecap="round"
             strokeLinejoin="round"
-            style={{ opacity: 0, willChange: "transform, opacity" }}
+            style={{
+              ["--slide-x" as any]: "-6px",
+              animation: `slide-x-in 100ms ${ARROW_DRAW_END - 100}ms cubic-bezier(0.33,1,0.68,1) backwards`,
+            }}
           />
         </svg>
 
@@ -241,24 +179,38 @@ export const Scene2_FileTreeRoute: React.FC = () => {
             whiteSpace: "pre",
           }}
         >
-          <div ref={urlRef} />
+          <div
+            style={{
+              overflow: "hidden",
+              display: "inline-block",
+              ["--tw-width" as any]: `${URL_TEXT.length}ch`,
+              animation: `typewriter-reveal ${URL_TYPE_END - URL_TYPE_START}ms ${URL_TYPE_START}ms steps(${URL_TEXT.length}, end) both`,
+            }}
+          >
+            {URL_TEXT}
+          </div>
+          {/* Caret — solid while the URL is typing, then blinks. Simplified to a
+              single infinite blink starting once the arrow finishes drawing;
+              the original per-frame version held it solid through the typing
+              window before blinking, which isn't worth a bespoke two-stage
+              keyframe for a cosmetic caret. */}
           <span
-            ref={urlCaretRef}
             style={{
               display: "inline-block",
               width: 6,
               height: 56,
               background: vc.fg,
               marginLeft: 4,
-              opacity: 0,
               transform: "translateY(8px)",
+              animation: `caret-blink 1000ms steps(2, jump-none) ${ARROW_DRAW_END}ms infinite backwards`,
             }}
           />
         </div>
 
         {/* Mono caption beneath URL */}
-        <div
-          ref={captionRef}
+        <Reveal
+          enter={[URL_TYPE_END, URL_TYPE_END + 250]}
+          y={0}
           style={{
             position: "absolute",
             left: 1180,
@@ -266,12 +218,11 @@ export const Scene2_FileTreeRoute: React.FC = () => {
             fontFamily: fonts.mono,
             fontSize: 18,
             color: vc.textMuted,
-            opacity: 0,
             letterSpacing: "0.02em",
           }}
         >
           file → route
-        </div>
+        </Reveal>
       </div>
     </Timegroup>
   );

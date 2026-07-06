@@ -6,6 +6,7 @@ import { Scene3_CodeToConcept } from "./scenes/Scene3_CodeToConcept";
 import { Scene4_BuildLog } from "./scenes/Scene4_BuildLog";
 import { Scene5_OutputCard } from "./scenes/Scene5_OutputCard";
 import { Scene9_LogoCard } from "./scenes/Scene9_LogoCard";
+import { OVERLAP_MS } from "./constants";
 
 /**
  * Vercel — Delba-canon rebuild v4 (jeremy-vercel-1)
@@ -44,6 +45,13 @@ import { Scene9_LogoCard } from "./scenes/Scene9_LogoCard";
  *   Scene 9: LogoCard (Vercel mark)            2.5s  (20.0 – 22.5)
  *   ─────────────────────────────────────────────── 22.5s
  *
+ * v8 — sequenced with a real 500ms crossfade (`OVERLAP_MS` in constants.ts) instead
+ * of hard cuts. Each scene's own `<Timegroup duration>` is bumped by `OVERLAP_MS`
+ * (except the opener) so its "solo" screen time above is unchanged; the extra time
+ * is spent fading out during `--ef-transition-out-start` while the next scene's own
+ * elements play in. See `constants.ts` (`SCENES`) for the exact per-scene durations
+ * and the arithmetic that keeps the total at 22.5s.
+ *
  * Removed from v3:
  *   ✗ Scene2_BuildPipeline      — deploy-log streaming was the wrong subject
  *   ✗ Scene3_GlobeZoom (URL)    — URL reveal is a marketing-clip move,
@@ -61,16 +69,18 @@ export const Video = () => {
   return (
     <Timegroup
       workbench
+      mode="contain"
       className="w-[1920px] h-[1080px] relative overflow-hidden"
-      mode="sequence"
       style={{ background: "#0A0A0A" }}
     >
-      <Scene1_TerminalPush />
-      <Scene2_FileTreeRoute />
-      <Scene3_CodeToConcept />
-      <Scene4_BuildLog />
-      <Scene5_OutputCard />
-      <Scene9_LogoCard />
+      <Timegroup mode="sequence" overlap={`${OVERLAP_MS}ms`} className="absolute inset-0">
+        <Scene1_TerminalPush />
+        <Scene2_FileTreeRoute />
+        <Scene3_CodeToConcept />
+        <Scene4_BuildLog />
+        <Scene5_OutputCard />
+        <Scene9_LogoCard />
+      </Timegroup>
     </Timegroup>
   );
 };

@@ -45,3 +45,68 @@
     box-sizing: border-box;
   }
 }
+
+/* === Shared across scenes (see src/components/Reveal.tsx) === */
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(var(--reveal-y, 20px)); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes reveal-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(var(--reveal-exit-y, 0px)); }
+}
+
+/* Whole-scene crossfade-out during the shared sequence `overlap` window — applied
+   to each scene's content wrapper (see src/Video.tsx / constants.ts SCENES). */
+@keyframes scene-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Horizontal slide-in, shared by Scene2 rows/arrowhead and Scene3 labels —
+   distance is set per-element via the `--slide-x` custom property. */
+@keyframes slide-x-in {
+  from { opacity: 0; transform: translateX(var(--slide-x, 24px)); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Monospace "typing" reveal via width + steps() — replaces per-frame textContent
+   slicing. Target width is set per-element via the `--tw-width` custom property. */
+@keyframes typewriter-reveal {
+  from { width: 0; }
+  to { width: var(--tw-width); }
+}
+
+/* SVG stroke "draw-on" — replaces per-frame strokeDashoffset writes. Total dash
+   length is set per-element via the `--dash-total` custom property. */
+@keyframes bracket-draw {
+  0% { opacity: 0; stroke-dashoffset: var(--dash-total); }
+  36% { opacity: 1; }
+  100% { opacity: 1; stroke-dashoffset: 0; }
+}
+
+/* === Scene1 (src/scenes/Scene1_TerminalPush.tsx) === */
+@keyframes rule-draw-in {
+  from { opacity: 0; transform: scaleX(0); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+
+/* === Scene2 (src/scenes/Scene2_FileTreeRoute.tsx) === */
+@keyframes row-glow-in {
+  from { opacity: 0; transform: scaleY(0.2); }
+  to { opacity: 1; transform: scaleY(1); }
+}
+@keyframes caret-blink {
+  0%, 49% { opacity: 0; }
+  50%, 100% { opacity: 1; }
+}
+
+/* === Scene4 (src/scenes/Scene4_BuildLog.tsx) — one-shot "Ready" pulse === */
+@keyframes ready-pulse-text {
+  0%, 100% { transform: scale(1); text-shadow: 0 0 0 rgba(255, 255, 255, 0.55); }
+  50% { transform: scale(1.04); text-shadow: 0 0 12px rgba(255, 255, 255, 0.55); }
+}
+@keyframes ready-pulse-check {
+  0%, 100% { text-shadow: 0 0 0 rgba(255, 255, 255, 0.7); }
+  50% { text-shadow: 0 0 12px rgba(255, 255, 255, 0.7); }
+}
