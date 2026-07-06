@@ -832,7 +832,7 @@ export function Scene5_AIChatPanel() {
       {/* Ask-AI prompt typewriter keystrokes (PHASE 2 typing starts at 1500ms local) */}
       <Audio src="/assets/sfx/keyboard.wav" offset="1500ms" duration="1.5s" volume={0.7} />
       {/* Thumbs-up click (TU_CLICK = 13060ms local, see onFrame above) */}
-      <Audio src="/assets/sfx/click.mp3" offset="13060ms" sourceIn="0.6s" duration="0.3s" volume={2.2} />
+      <Audio src="/assets/sfx/click.mp3" offset="13060ms" sourceIn="0.6s" duration="0.3s" volume={1} />
     </Timegroup>
   );
 }

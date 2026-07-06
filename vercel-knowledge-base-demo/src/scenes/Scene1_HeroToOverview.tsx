@@ -996,9 +996,9 @@ export function Scene1_HeroToOverview() {
       </div>
 
       {/* Filter button click — opens the dropdown */}
-      <Audio src="/assets/sfx/click.mp3" offset={`${CLICK_BTN_TIME}ms`} sourceIn="0.6s" duration="0.3s" volume={2.2} />
+      <Audio src="/assets/sfx/click.mp3" offset={`${CLICK_BTN_TIME}ms`} sourceIn="0.6s" duration="0.3s" volume={1} />
       {/* Sandbox row click — closes the dropdown, applies the filter */}
-      <Audio src="/assets/sfx/click.mp3" offset={`${SANDBOX_CLICK}ms`} sourceIn="0.6s" duration="0.3s" volume={2.2} />
+      <Audio src="/assets/sfx/click.mp3" offset={`${SANDBOX_CLICK}ms`} sourceIn="0.6s" duration="0.3s" volume={1} />
     </Timegroup>
   );
 }
