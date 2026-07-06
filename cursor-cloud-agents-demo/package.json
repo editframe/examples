@@ -9,7 +9,7 @@
   "type": "module",
   "scripts": {
     "start": "editframe preview",
-    "render": "editframe render -o output/demo-silent.mp4"
+    "render": "editframe render -o output/demo.mp4"
   },
   "dependencies": {
     "@editframe/cli": "0.54.0",

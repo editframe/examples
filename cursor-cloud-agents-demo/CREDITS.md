@@ -12,40 +12,35 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `audio/audio-bed.mp3`
+### `src/assets/music.mp3`
 
 | | |
 |---|---|
-| **Title** | Tech Solution |
-| **Artist** | joyinsound |
-| **Source** | [Pixabay — track 403394](https://pixabay.com/music/beats-tech-solution-403394/) |
-| **License** | [Pixabay Content License](https://pixabay.com/service/license-summary/) |
-| **Commercial use** | ✅ Allowed |
-| **Attribution required** | ❌ No (credit appreciated) |
-| **Redistribution** | ✅ Permitted as part of derivative work |
+| **Title** | LowTide (66s-in segment) |
+| **Artist** | Not embedded in the source file — unverified, carried forward from this template's original audio pass |
+| **License** | Commercial use cleared per this template's original sourcing |
+| **Treatment** | Segment 66s–86.1s trimmed, normalized to -26 LUFS, fade in 0.4s / fade out 1.8s baked in — see the `<Audio>` usage in `src/Video.tsx` |
 
-A driving, modern tech-bed that mirrors the Cursor product feel — clean rhythm, no vocal interference. Replace freely with anything from Pixabay, [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/) — keep the filename `audio-bed.mp3` or update `add-sfx-v16.sh` accordingly.
+Same source track as `clerk-cli-demo` (which uses the intro segment instead) — see that project's `CREDITS.md` for the shared-asset precedent.
 
 ---
 
 ## SFX
 
-### `audio/click-hd-loud.mp3`
+### `src/assets/sfx/click.mp3`
 
 | | |
 |---|---|
-| **Type** | UI click (HD, high-headroom) |
-| **Source** | "Click Sound Effect (HD)" — separately sourced free SFX |
+| **Type** | UI click |
+| **Source** | Free UI SFX collection |
 | **License** | Royalty-free, commercial use cleared |
-| **Used for** | "Suggest a reply…" chip cursor-click at master 21.5s |
+| **Used for** | "Start Agent" button click in `Scene4_CreateEnv` (offset 1500ms, global ~8000ms) |
 
 ---
 
 ## Want to swap audio?
 
-1. Drop your replacement file in `audio/` (match filename or update `add-sfx-v16.sh`).
-2. Update the corresponding row above with source + license info.
-3. Re-run `bash add-sfx-v16.sh`.
+Keep the replacement in `src/assets/` (or `src/assets/sfx/`), update the corresponding `<Audio src="...">` reference in `src/Video.tsx` / `src/scenes/Scene4_CreateEnv.tsx`, and update the table above with the real source + license.
 
 For 100% safe royalty-free sources:
 

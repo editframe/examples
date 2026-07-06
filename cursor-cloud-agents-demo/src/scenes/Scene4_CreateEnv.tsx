@@ -33,7 +33,7 @@
  *   BTN_CENTER_X = right side: 520+880-36 = 1364, btn width ~190, center = 1364-95 = 1269
  */
 import React from "react";
-import { Timegroup, Image } from "@editframe/react";
+import { Timegroup, Image, Audio } from "@editframe/react";
 import { TraceLayer } from "../components/TraceLayer";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 
@@ -303,6 +303,9 @@ export function Scene4_CreateEnv() {
       </div>
 
       <TraceLayer sceneStartMs={START_MASTER} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
+
+      {/* "Start Agent" button click — global 8000ms (this scene starts at 6500ms master) */}
+      <Audio src="/assets/sfx/click.mp3" offset="1500ms" sourceIn="0.6s" duration="0.3s" volume={2.2} />
     </Timegroup>
   );
 }
