@@ -10,10 +10,9 @@ A 22.5-second product demo capturing the full Vercel deploy flow, from code push
 
 ```bash
 npm install
-npm run render
-bash add-sfx-v13.sh        # mux music + SFX
+npm run render        # -> output/demo.mp4 (native, single pass)
 ```
 
-The rendered video is saved to `output/`.
-
-Audio files live in `audio/` and are fully cleared for commercial use — see [CREDITS.md](CREDITS.md) for license details.
+The music bed plays as a single `<Audio>` element spanning the whole composition
+(`src/Video.tsx`) — no post-render mux step. The audio file lives in `src/assets/` and is
+fully cleared for commercial use — see [CREDITS.md](CREDITS.md) for license details.

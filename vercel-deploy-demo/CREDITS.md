@@ -12,7 +12,7 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `audio/music-bed.mp3`
+### `src/assets/music-bed.mp3`
 
 | | |
 |---|---|
@@ -24,30 +24,18 @@ document so downstream forkers can verify provenance.
 | **Attribution required** | ❌ No (credit appreciated) |
 | **Redistribution** | ✅ Permitted as part of derivative work |
 
-Driving electronic bed that fits the Vercel deploy-payoff curve. Replace freely with anything from Pixabay, [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/) — keep the filename `music-bed.mp3` or update `add-sfx-v13.sh` accordingly.
+Driving electronic bed that fits the Vercel deploy-payoff curve. Replace freely with anything from Pixabay, [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/) — keep the filename `music-bed.mp3` or update the `<Audio src="/assets/music-bed.mp3">` path in `src/Video.tsx`.
 
-The mux applies a 1.5s fade-in, a 2.0s fade-out starting at 20.5s, and master volume 0.16.
+The bundled file is pre-baked with a 1.5s fade-in, a 2.0s fade-out starting at 20.5s, and master volume 0.16 — played back at `volume={1}` on the `<Audio>` element since the fades/level are already committed to the asset.
 
----
-
-## SFX
-
-### `audio/click-hd-loud.mp3`
-
-| | |
-|---|---|
-| **Type** | UI click (HD, high-headroom) |
-| **Source** | "Click Sound Effect (HD)" — separately sourced free SFX |
-| **License** | Royalty-free, commercial use cleared |
-| **Used for** | Not used in this video's mux; included for fork consistency with sibling templates |
+There are **no sound effects** in this video — it is music only.
 
 ---
 
 ## Want to swap audio?
 
-1. Drop your replacement file in `audio/` (match filename or update `add-sfx-v13.sh`).
-2. Update the corresponding row above with source + license info.
-3. Re-run `bash add-sfx-v13.sh`.
+1. Drop your replacement file in `src/assets/` (match filename or update the `src` path in `src/Video.tsx`).
+2. Update the row above with source + license info.
 
 For 100% safe royalty-free sources:
 

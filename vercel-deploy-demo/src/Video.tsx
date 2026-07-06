@@ -1,12 +1,14 @@
 import React from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { Scene1_TerminalPush } from "./scenes/Scene1_TerminalPush";
 import { Scene2_FileTreeRoute } from "./scenes/Scene2_FileTreeRoute";
 import { Scene3_CodeToConcept } from "./scenes/Scene3_CodeToConcept";
 import { Scene4_BuildLog } from "./scenes/Scene4_BuildLog";
 import { Scene5_OutputCard } from "./scenes/Scene5_OutputCard";
 import { Scene9_LogoCard } from "./scenes/Scene9_LogoCard";
-import { OVERLAP_MS } from "./constants";
+import { OVERLAP_MS, DURATION_MS } from "./constants";
+
+const MUSIC = "/assets/music-bed.mp3";
 
 /**
  * Vercel — Delba-canon rebuild v4 (jeremy-vercel-1)
@@ -81,6 +83,10 @@ export const Video = () => {
         <Scene5_OutputCard />
         <Scene9_LogoCard />
       </Timegroup>
+
+      {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the
+          composition's total runtime regardless of the source file's own length. */}
+      <Audio src={MUSIC} volume={1} duration={`${DURATION_MS}ms`} />
     </Timegroup>
   );
 };

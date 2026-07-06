@@ -20,6 +20,7 @@
  * exactly 22500ms (22.5s) — the original v7 total.
  */
 export const OVERLAP_MS = 500;
+export const DURATION_MS = 22500;   // 22.5s total — sum(SCENES.*.duration) - 5*OVERLAP_MS
 
 export const SCENES = {
   terminalPush: { duration: 3000, label: "Opener / title card" },
