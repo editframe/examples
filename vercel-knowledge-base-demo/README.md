@@ -11,9 +11,8 @@ A 28.1-second product demo of the Vercel Knowledge Base.
 ```bash
 npm install
 npm run render
-bash add-sfx-v13.sh        # mux music + SFX
 ```
 
-The rendered video is saved to `output/`.
+The rendered video is saved to `output/demo.mp4`.
 
-Audio files live in `audio/` and are fully cleared for commercial use — see [CREDITS.md](CREDITS.md) for license details.
+Audio (keyboard SFX on the typed Ask-AI prompt + click SFX on the 3 real clicks — no music, per spec) is baked directly into the composition via native `<Audio>` elements in `src/scenes/`, no post-render mux step. Every audio file bundled in this template is cleared for commercial use — see [CREDITS.md](CREDITS.md) for license details.
