@@ -34,7 +34,7 @@ FADE_IN="${FADE_IN:-1.5}"          # smooth music fade-in
 dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$BASE")
 
 # rounded-rect masks sized to the wells.json rects + the rects themselves
-coords=$(python _finalize_helper.py ".")
+coords=$(python3 _finalize_helper.py ".")
 read AX AY AW AH BX BY BW BH <<< "$coords"
 echo "WELL_A=${AX},${AY},${AW}x${AH}   WELL_B=${BX},${BY},${BW}x${BH}"
 
