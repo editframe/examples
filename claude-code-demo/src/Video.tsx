@@ -13,11 +13,19 @@ import Scene6_LogoCard from "./scenes/Scene6_LogoCard";
  *
  *   Scene 1: Demo + 3D agent spawn        8.5s
  *   Scene 2: Scatter + mascot reveal      3.5s
- *   Scene 3: Arm-pull (one-by-one)        8.0s
- *   Scene 4: Compiled list + 2nd prompt   6.5s
+ *   Scene 3: Arm-pull (one-by-one)        6.5s
+ *   Scene 4: Compiled list + 2nd prompt   7.0s
  *   Scene 5: Jump-out + black curtain     7.0s
  *   Scene 6: Claude Code + EDITFRAME      3.5s
- *   ────────────────────────────────── 37.0s
+ *   ────────────────────────────────── 36.0s
+ *
+ * Each scene is its own `<Timegroup mode="fixed">` (see src/scenes/), sequenced by this
+ * root `<Timegroup mode="sequence">` with no `overlap` — cuts between scenes are
+ * deliberate hard cuts (scatter, jump-out, curtain), not crossfades, matching the
+ * original edit. Every scene animates against its own local clock via plain CSS
+ * `@keyframes` / <Reveal>; the only remaining `onFrame` usage is scoped per-scene for
+ * text-content mutation (typewriters, counters) or a genuinely coupled rig (the arm-pull
+ * and curtain-pull scenes — see the comments at the top of each for why).
  */
 
 export const Video: React.FC = () => (

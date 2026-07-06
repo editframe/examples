@@ -196,3 +196,180 @@ html, body, #root {
   vertical-align: text-bottom;
   margin-left: 2px;
 }
+
+/* ── Shared keyframes (used across scenes via <Reveal> / PaperBackground) ── */
+
+/* Generic one-shot fade + float reveal, backing <Reveal>. */
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(var(--reveal-y, 20px)); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes reveal-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(var(--reveal-exit-y, 0px)); }
+}
+
+/* Linear background parallax drift, backing <PaperBackground>. Each scene supplies
+   its own --drift-from/--drift-to (continuing the same overall range across cuts). */
+@keyframes paper-drift {
+  from { transform: translateX(var(--drift-from)); }
+  to   { transform: translateX(var(--drift-to)); }
+}
+
+/* ── Scene 1 — Demo ── */
+
+/* Hero terminal spring-in. Bundles the opacity ramp (originally a separate, shorter
+   0-250ms linear fade) into the same 500ms out-back timing as the translateY spring —
+   opacity briefly overshoots past 1 with this timing function, which the browser clamps
+   silently, so the visible result matches the original two-speed fade closely enough. */
+@keyframes hero-term-in {
+  from { opacity: 0; transform: translateY(700px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Sub-terminal "tossed paper card" entrance — flat 2D slide-in from a per-instance
+   (--dx, --dy) offset, no rotation (this project's mascot brand rules are flat-only). */
+@keyframes sub-term-in {
+  from { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.92); }
+  to   { opacity: 1; transform: translate(0, 0) scale(1); }
+}
+
+/* Sub-terminal content line reveal — slide in from the left, used instead of
+   <Reveal> (which is translateY-only) since these lines slide horizontally. */
+@keyframes subline-in {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Scene 2 — Reveal ── */
+
+/* Hero terminal + sub-terminals scatter away (hard exit, no crossfade). */
+@keyframes hero-scatter-out {
+  from { opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+  to   { opacity: 0; transform: translate(-50%, calc(-50% + 900px)) rotate(-6deg) scale(0.3); }
+}
+@keyframes sub-term-implode {
+  from { opacity: 1; transform: scale(0.85); }
+  to   { opacity: 0; transform: scale(0); }
+}
+
+/* Mascot drop-in with a bounce + a brief squash-on-landing (multi-stop, sampled from
+   the original outBack spring + linear squash so the shape matches exactly). */
+@keyframes mascot-drop-in {
+  0%     { opacity: 0; transform: translateY(-1200px) scaleY(1); }
+  33%    { opacity: 1; transform: translateY(0px) scaleY(1); }
+  50%    { opacity: 1; transform: translateY(96px) scaleY(1); }
+  66.7%  { opacity: 1; transform: translateY(48px) scaleY(0.8); }
+  83.3%  { opacity: 1; transform: translateY(0px) scaleY(0.9); }
+  100%   { opacity: 1; transform: translateY(0px) scaleY(1); }
+}
+
+/* Dust puff on landing — no `backwards` needed: the element's own base opacity:0
+   already matches the desired pre-delay appearance, and the animation itself starts
+   with the same abrupt 0→0.7 jump the original per-frame math had. */
+@keyframes dust-puff {
+  0%   { opacity: 0.7;  transform: translate(-50%, 0) scale(0.4); }
+  20%  { opacity: 0.36; transform: translate(-50%, 0) scale(1.38); }
+  40%  { opacity: 0.15; transform: translate(-50%, 0) scale(1.97); }
+  60%  { opacity: 0.05; transform: translate(-50%, 0) scale(2.27); }
+  80%  { opacity: 0.01; transform: translate(-50%, 0) scale(2.38); }
+  100% { opacity: 0;    transform: translate(-50%, 0) scale(2.4); }
+}
+
+/* Hat tip — lift + tilt then return, sampled from the original 3-phase outCubic. */
+@keyframes hat-tip {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  20%  { transform: translate(0, -13.3px) rotate(-11.6deg); }
+  40%  { transform: translate(0, -16px) rotate(-14deg); }
+  60%  { transform: translate(0, -16px) rotate(-14deg); }
+  80%  { transform: translate(0, -3px) rotate(-2.6deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+/* ── Scene 3 — Arm Pull ── */
+
+/* Hat lift-off + shrink into "pocket", sampled from the original 3-phase easing. */
+@keyframes hat-remove {
+  0%   { opacity: 1;    transform: translate(0, 0px) scale(1); }
+  20%  { opacity: 1;    transform: translate(0, -35px) scale(1); }
+  40%  { opacity: 1;    transform: translate(0, -40px) scale(1); }
+  50%  { opacity: 1;    transform: translate(0, -34.8px) scale(0.867); }
+  60%  { opacity: 1;    transform: translate(0, 1.5px) scale(0.733); }
+  70%  { opacity: 1;    transform: translate(0, 100px) scale(0.6); }
+  80%  { opacity: 0.67; transform: translate(0, 100px) scale(0.585); }
+  90%  { opacity: 0.33; transform: translate(0, 100px) scale(0.481); }
+  100% { opacity: 0;    transform: translate(0, 100px) scale(0.2); }
+}
+
+/* Mascot fade-out as the next scene takes over. */
+@keyframes mascot-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* ── Scene 4 — Second Prompt ── */
+
+/* Hero terminal entrance (scale-up variant — Scene 1's hero-term-in is a translateY drop). */
+@keyframes hero-term-in-scale {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Task-list row reveal — <Reveal> is translateY-only; rows slide in from the left. */
+@keyframes row-in {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Whole-scene camera zoom-in: hold, then two eased zoom+pan phases, then hold.
+   A fixed function of local time (no coupling to any other element), so it converts
+   directly to CSS — the per-stop `animation-timing-function` reproduces the original's
+   two `eases.inOutCubic` windows exactly, no sampling needed. */
+@keyframes camera-zoom {
+  0%      { transform: translateY(0px) scale(1); }
+  35.71%  { transform: translateY(0px) scale(1); animation-timing-function: cubic-bezier(0.65,0,0.35,1); }
+  57.14%  { transform: translateY(-180px) scale(1.6); animation-timing-function: cubic-bezier(0.65,0,0.35,1); }
+  78.57%  { transform: translateY(-100px) scale(2.1); }
+  100%    { transform: translateY(-100px) scale(2.1); }
+}
+
+/* ── Scene 5 — Curtain ── */
+
+/* Hat reappearing from "pocket" once the curtain is down — independent of the
+   jump/curtain/arm rig (a pure function of local time), so it converts directly. */
+@keyframes hat-reappear {
+  from { opacity: 0; transform: translate(0, -30px) scale(0.3); }
+  to   { opacity: 1; transform: translate(0, 0) scale(1); }
+}
+
+/* Hero terminal slides off the bottom as the curtain comes down — independent of the
+   curtain/mascot rig itself (only reads local time), so it converts directly too.
+   Sampled from the original's two overlapping windows (inCubic slide + outCubic fade). */
+@keyframes hero-slide-off {
+  0%   { opacity: 1;    transform: translate(-50%, calc(-50% + 0px)); }
+  40%  { opacity: 1;    transform: translate(-50%, calc(-50% + 51px)); }
+  50%  { opacity: 0.58; transform: translate(-50%, calc(-50% + 100px)); }
+  60%  { opacity: 0.3;  transform: translate(-50%, calc(-50% + 173px)); }
+  70%  { opacity: 0.13; transform: translate(-50%, calc(-50% + 274px)); }
+  80%  { opacity: 0.04; transform: translate(-50%, calc(-50% + 410px)); }
+  100% { opacity: 0;    transform: translate(-50%, calc(-50% + 800px)); }
+}
+
+/* ── Scene 6 — Logo Card ── */
+
+@keyframes burst-in {
+  from { opacity: 0; transform: scale(0.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes burst-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes wordmark-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes wordmark-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}

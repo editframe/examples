@@ -5,10 +5,21 @@ import React from "react";
  * Two layers of curved horizontal stripes at different frequencies + opacity
  * create the hand-drawn topographic feel from the Anthropic reference.
  * The container is 1.2× wider than the viewport so a subtle parallax drift
- * (-30px to +30px range) reveals new strokes without ever showing the edge.
+ * reveals new strokes without ever showing the edge.
+ *
+ * The drift is a single linear CSS `paper-drift` keyframe (see styles.css) driven
+ * by `--drift-from`/`--drift-to`, not a per-frame `onFrame` ref mutation — each scene
+ * passes its own `driftFrom`/`driftTo`/`durationMs` (continuing the same overall
+ * drift range across the cut to the next scene) instead of reading a shared ref.
  */
 
-const PaperBackground = React.forwardRef<HTMLDivElement>((_, ref) => {
+interface Props {
+  driftFrom: number;
+  driftTo: number;
+  durationMs: number;
+}
+
+const PaperBackground: React.FC<Props> = ({ driftFrom, driftTo, durationMs }) => {
   // Pre-generate two sets of wave paths at different phase offsets
   const waves: { y: number; amp: number; freq: number; opacity: number; stroke: string }[] = [];
   for (let i = 0; i < 28; i++) {
@@ -40,15 +51,18 @@ const PaperBackground = React.forwardRef<HTMLDivElement>((_, ref) => {
       }}
     >
       <div
-        ref={ref}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: -180,
-          width: 2280,
-          height: 1080,
-          willChange: "transform",
-        }}
+        style={
+          {
+            position: "absolute",
+            top: 0,
+            left: -180,
+            width: 2280,
+            height: 1080,
+            "--drift-from": `${driftFrom}px`,
+            "--drift-to": `${driftTo}px`,
+            animation: `paper-drift ${durationMs}ms linear both`,
+          } as React.CSSProperties
+        }
       >
         <svg
           width="2400"
@@ -80,7 +94,6 @@ const PaperBackground = React.forwardRef<HTMLDivElement>((_, ref) => {
       />
     </div>
   );
-});
+};
 
-PaperBackground.displayName = "PaperBackground";
 export default PaperBackground;

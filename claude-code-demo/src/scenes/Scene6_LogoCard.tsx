@@ -1,48 +1,23 @@
-import React, { useCallback, useRef } from "react";
+import React from "react";
 import { Timegroup } from "@editframe/react";
-import { eases } from "animejs";
 import AnthropicBurst from "../components/AnthropicBurst";
-import { clamp, lerp, track } from "../components/helpers";
 
 /**
  * Scene 6 — Final logo card (3.5s)
  *
  *   0–600     Anthropic burst + "Claude Code" wordmark fade in centered
- *   600–1400  Hold
- *   1400–3000 Continued hold (EDITFRAME credit intentionally removed)
+ *   600–3000  Hold (EDITFRAME credit intentionally removed)
  *   3000–3500 Gentle fade out
+ *
+ * Both fade-in and fade-out are fixed functions of local time — plain CSS keyframes,
+ * no `onFrame` needed at all for this scene.
  */
 
 export const Scene6_LogoCard: React.FC = () => {
-  const burstRef = useRef<HTMLDivElement>(null);
-  const wordmarkRef = useRef<HTMLDivElement>(null);
-
-  const handleFrame = useCallback(
-    ({ ownCurrentTimeMs }: { ownCurrentTimeMs: number }) => {
-      const ms = ownCurrentTimeMs;
-
-      const inP = track(ms, 0, 600, eases.outCubic);
-      const outP = track(ms, 3000, 3500, eases.outCubic);
-      const overall = inP * (1 - outP);
-
-      if (burstRef.current) {
-        const sc = lerp(0.7, 1, inP);
-        burstRef.current.style.opacity = String(overall);
-        burstRef.current.style.transform = `scale(${sc})`;
-      }
-      if (wordmarkRef.current) {
-        wordmarkRef.current.style.opacity = String(overall);
-        wordmarkRef.current.style.transform = `translateY(${lerp(12, 0, inP)}px)`;
-      }
-    },
-    []
-  );
-
   return (
     <Timegroup
       mode="fixed"
       duration="3.5s"
-      onFrame={handleFrame as any}
       className="absolute inset-0"
     >
       {/* Warm-dark Claude ink background (#141413 per brand canon, not pure black) */}
@@ -66,20 +41,18 @@ export const Scene6_LogoCard: React.FC = () => {
           gap: 32,
         }}
       >
-        <div ref={burstRef} style={{ opacity: 0, willChange: "transform, opacity" }}>
+        <div style={{ animation: "burst-in 600ms cubic-bezier(0.33,1,0.68,1) both, burst-out 500ms 3000ms cubic-bezier(0.33,1,0.68,1) forwards" }}>
           <AnthropicBurst size={140} color="var(--claude)" />
         </div>
         <div
-          ref={wordmarkRef}
           style={{
-            opacity: 0,
             color: "#FAF9F5",
             fontFamily: "'Source Serif 4 Display', 'Tiempos Headline', Newsreader, 'EB Garamond', Georgia, serif",
             fontSize: 140,
             fontWeight: 500,
             letterSpacing: "-0.02em",
             lineHeight: 1,
-            willChange: "transform, opacity",
+            animation: "wordmark-in 600ms cubic-bezier(0.33,1,0.68,1) both, wordmark-out 500ms 3000ms cubic-bezier(0.33,1,0.68,1) forwards",
           }}
         >
           Claude Code

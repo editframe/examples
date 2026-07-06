@@ -4,6 +4,7 @@ import { eases } from "animejs";
 import PaperBackground from "../components/PaperBackground";
 import Terminal from "../components/Terminal";
 import Mascot from "../components/Mascot";
+import { Reveal } from "../components/Reveal";
 import { clamp, lerp, track, typewriter } from "../components/helpers";
 
 /**
@@ -21,47 +22,41 @@ import { clamp, lerp, track, typewriter } from "../components/helpers";
  *   4200–5800  Serif headline types in below mascot:
  *              "Agent view, now available in research preview"
  *   5800–7000  Hold
+ *
+ * The mascot jump/stretch + curtain descent + reaching arms are kept as one scoped
+ * `onFrame` — the arm's hand position tracks the curtain's own descending edge
+ * (`handY = curtainBottomY` mid-pull, then a damped spring retract), and the arm's
+ * shoulder anchor tracks the mascot's own in-flight jump/recenter position. This is a
+ * single physically-coupled rig, not independent one-shot effects, so it stays JS by
+ * design (see REFACTOR-PATTERNS.md 2b, priority 5). The hat reappearing and the hero
+ * terminal sliding off are both independent of this rig (pure functions of local time)
+ * and are plain CSS; the headline's fade is <Reveal>, its typed text is still JS.
  */
 
 const HEADLINE_LINE1 = "Agent view, now available";
 const HEADLINE_LINE2 = "in research preview";
 
-export const Scene5_Curtain: React.FC = () => {
-  const paperRef = useRef<HTMLDivElement>(null);
-  const heroTerminalRef = useRef<HTMLDivElement>(null);
+const MASCOT_HOME_X = 960;
+const MASCOT_HOME_Y = 460; // sits on top of terminal (above center)
 
+export const Scene5_Curtain: React.FC = () => {
   const mascotWrapRef = useRef<HTMLDivElement>(null);
-  const hatRef = useRef<SVGGElement>(null);
   const leftEyeRef = useRef<SVGRectElement>(null);
   const rightEyeRef = useRef<SVGRectElement>(null);
-  const leftArmRef = useRef<SVGGElement>(null);
-  const rightArmRef = useRef<SVGGElement>(null);
 
-  // Two arm extension paths reaching up
   const leftArmPathRef = useRef<SVGPathElement>(null);
   const rightArmPathRef = useRef<SVGPathElement>(null);
-  const leftHandRef = useRef<SVGRectElement>(null);
-  const rightHandRef = useRef<SVGRectElement>(null);
 
   const blackCurtainRef = useRef<HTMLDivElement>(null);
 
   const h1Ref = useRef<HTMLDivElement>(null);
   const h2Ref = useRef<HTMLDivElement>(null);
 
-  const MASCOT_HOME_X = 960;
-  const MASCOT_HOME_Y = 460; // sits on top of terminal (above center)
-
   const handleFrame = useCallback(
     ({ ownCurrentTimeMs }: { ownCurrentTimeMs: number }) => {
       const ms = ownCurrentTimeMs;
 
-      // Paper drift
-      if (paperRef.current) {
-        const p = clamp(ms / 7000);
-        paperRef.current.style.transform = `translateX(${lerp(60, 75, p)}px)`;
-      }
-
-      // BLACK CURTAIN progress (computed early; used for body stretch + eye scan)
+      // BLACK CURTAIN progress (computed early; used for body stretch + hand tracking)
       const curtainP = track(ms, 1900, 3300, eases.inOutCubic);
       const curtainBottomY = 1080 * curtainP;
 
@@ -71,28 +66,28 @@ export const Scene5_Curtain: React.FC = () => {
       const stretchY = 1 + 0.22 * bodyStretchIn * (1 - bodyStretchOut);
 
       // Mascot jump out (0-700) + recenter (3000-4000) + body stretch
-      if (mascotWrapRef.current) {
+      let mascotTopLeftX = MASCOT_HOME_X - 105;
+      let mascotTopLeftY = MASCOT_HOME_Y - 112;
+      if (ms < 3000) {
         const jumpP = clamp(ms / 700);
         const x = lerp(-510, 0, jumpP);
         const baseY = lerp(-270, 0, jumpP);
         const arcY = -120 * Math.sin(jumpP * Math.PI);
         const scaleP = lerp(0.36, 1.0, eases.outCubic(jumpP));
-
-        if (ms < 3000) {
-          mascotWrapRef.current.style.transform =
-            `translate(${x}px, ${baseY + arcY}px) scale(${scaleP}, ${scaleP * stretchY})`;
-        } else {
-          const recenterP = track(ms, 3000, 4000, eases.inOutCubic);
-          mascotWrapRef.current.style.transform =
-            `translate(0, ${lerp(0, 60, recenterP)}px) scale(1, ${stretchY})`;
+        mascotTopLeftX = MASCOT_HOME_X - 105 + x;
+        mascotTopLeftY = MASCOT_HOME_Y - 112 + baseY + arcY;
+        if (mascotWrapRef.current) {
+          mascotWrapRef.current.style.transform = `translate(-50%, calc(-50% + ${baseY + arcY}px)) scale(${scaleP}, ${scaleP * stretchY})`;
+        }
+      } else {
+        const recenterP = track(ms, 3000, 4000, eases.inOutCubic);
+        mascotTopLeftY = MASCOT_HOME_Y - 112 + lerp(0, 60, recenterP);
+        if (mascotWrapRef.current) {
+          mascotWrapRef.current.style.transform = `translate(-50%, calc(-50% + ${lerp(0, 60, recenterP)}px)) scale(1, ${stretchY})`;
         }
       }
 
       // EYES scan from UP → DOWN as curtain descends
-      //   Before pull (ms<1200): neutral (y=0)
-      //   Arm reach 1200-1900: look UP (y=-2)
-      //   Curtain descent 1900-3300: scan DOWN from -2 to +2
-      //   After (3300+): neutral (y=0)
       let eyeY = 0;
       if (ms >= 1200 && ms < 1900) {
         eyeY = -2;
@@ -103,29 +98,8 @@ export const Scene5_Curtain: React.FC = () => {
         const fadeP = track(ms, 3300, 3700, eases.outCubic);
         eyeY = Math.round(lerp(2, 0, fadeP));
       }
-      if (leftEyeRef.current) {
-        leftEyeRef.current.style.transform = `translate(0, ${eyeY}px)`;
-        leftEyeRef.current.setAttribute("fill", "#000000");
-        leftEyeRef.current.style.filter = "";
-      }
-      if (rightEyeRef.current) {
-        rightEyeRef.current.style.transform = `translate(0, ${eyeY}px)`;
-        rightEyeRef.current.setAttribute("fill", "#000000");
-        rightEyeRef.current.style.filter = "";
-      }
-
-      // Hat: hidden until curtain comes down, then reappears on mascot
-      if (hatRef.current) {
-        const hatBackP = ms >= 3000 && ms < 3600 ? track(ms, 3000, 3600, eases.outCubic) : (ms >= 3600 ? 1 : 0);
-        if (ms < 3000) {
-          hatRef.current.style.opacity = "0";
-        } else {
-          hatRef.current.style.opacity = String(hatBackP);
-          const sc = lerp(0.3, 1, hatBackP);
-          const ty = lerp(-30, 0, hatBackP);
-          hatRef.current.style.transform = `translate(0, ${ty}px) scale(${sc})`;
-        }
-      }
+      if (leftEyeRef.current) leftEyeRef.current.style.transform = `translate(0, ${eyeY}px)`;
+      if (rightEyeRef.current) rightEyeRef.current.style.transform = `translate(0, ${eyeY}px)`;
 
       // BLACK CURTAIN slides down
       if (blackCurtainRef.current) {
@@ -133,38 +107,18 @@ export const Scene5_Curtain: React.FC = () => {
       }
 
       // ARMS — L-shaped: from shoulder UP to curtain edge, then OUTWARD to hand.
-      // Hands stay AT the curtain edge as it descends, then retract slinky-style.
       const armAppearP = track(ms, 1200, 1900, eases.outCubic);
       const armRetractP = track(ms, 3300, 4100, eases.outCubic);
       const armVis = armAppearP * (1 - armRetractP);
 
-      // Mascot's current screen position (for shoulder anchors)
-      let mascotTopLeftX = 960 - 105;
-      let mascotTopLeftY = 460 - 112;
-      if (ms < 3000) {
-        const jumpP = clamp(ms / 700);
-        const x = lerp(-510, 0, jumpP);
-        const baseY = lerp(-270, 0, jumpP);
-        const arcY = -120 * Math.sin(jumpP * Math.PI);
-        mascotTopLeftX = 960 - 105 + x;
-        mascotTopLeftY = 460 - 112 + baseY + arcY;
-      } else {
-        const recenterP = track(ms, 3000, 4000, eases.inOutCubic);
-        mascotTopLeftY = 460 - 112 + lerp(0, 60, recenterP);
-      }
-      // Left shoulder = outer edge of left arm stub (col 0)
       const leftShoulderX = mascotTopLeftX + 0;
       const leftShoulderY = mascotTopLeftY + 10.5 * 14;
-      // Right shoulder = outer edge of right arm stub (col 15)
       const rightShoulderX = mascotTopLeftX + 15 * 14;
       const rightShoulderY = mascotTopLeftY + 10.5 * 14;
 
-      // Hand position over time. Hands ALWAYS track the curtain bottom edge,
-      // even when it descends past the mascot — like pulling a garage door
-      // all the way down without letting go.
-      //  Phase 1 (1200-1900): hand rises from shoulder to top of frame
-      //  Phase 2 (1900-3300): hand follows curtain bottom edge ALL the way down to 1080
-      //  Phase 3 (3300-4100): SLINKY retract back to shoulder (damped spring)
+      // Hand position: rises to top of frame (1200-1900), tracks the curtain's own
+      // descending bottom edge ALL the way down (1900-3300), then a damped-spring
+      // "slinky" retract back to the shoulder (3300-4100).
       let handY: number;
       if (ms < 1200) {
         handY = leftShoulderY;
@@ -172,79 +126,43 @@ export const Scene5_Curtain: React.FC = () => {
         const p = (ms - 1200) / 700;
         handY = lerp(leftShoulderY, -20, eases.outCubic(p));
       } else if (ms < 3300) {
-        // Track curtain bottom edge ALL THE WAY DOWN (no clamp at shoulder)
         handY = curtainBottomY;
       } else {
-        // SLINKY RETRACT — damped oscillating spring from 1080 back to shoulder
         const t = clamp((ms - 3300) / 800);
         const springT = 1 - Math.exp(-3 * t) * Math.cos(t * Math.PI * 3);
         handY = lerp(1080, leftShoulderY, clamp(springT));
       }
 
-      // The vertical leg of each arm extends straight up from the OUTER END
-      // of the body's existing arm nub. The body's 2-cell arm stub already
-      // forms the horizontal part — so the long extension is a single
-      // vertical line aligned with the nub's outer edge.
-      const leftHandX = leftShoulderX;
-      const rightHandX = rightShoulderX;
-
       if (leftArmPathRef.current) {
-        const d = `M${leftShoulderX},${leftShoulderY} L${leftShoulderX},${handY}`;
-        leftArmPathRef.current.setAttribute("d", d);
+        leftArmPathRef.current.setAttribute("d", `M${leftShoulderX},${leftShoulderY} L${leftShoulderX},${handY}`);
         leftArmPathRef.current.style.opacity = String(armVis);
       }
       if (rightArmPathRef.current) {
-        const d = `M${rightShoulderX},${rightShoulderY} L${rightShoulderX},${handY}`;
-        rightArmPathRef.current.setAttribute("d", d);
+        rightArmPathRef.current.setAttribute("d", `M${rightShoulderX},${rightShoulderY} L${rightShoulderX},${handY}`);
         rightArmPathRef.current.style.opacity = String(armVis);
       }
-      // Hands no longer rendered separately — the path's square line-cap at
-      // the end of the vertical leg IS the hand. This keeps them visually
-      // connected to the arm with no seam or detached look.
-      if (leftHandRef.current) leftHandRef.current.style.opacity = "0";
-      if (rightHandRef.current) rightHandRef.current.style.opacity = "0";
 
-      // Hero terminal slides off the bottom as curtain comes down (2000-3000)
-      if (heroTerminalRef.current) {
-        const slideP = track(ms, 2000, 3000, eases.inCubic);
-        heroTerminalRef.current.style.transform = `translate(-50%, calc(-50% + ${lerp(0, 800, slideP)}px))`;
-        heroTerminalRef.current.style.opacity = String(1 - track(ms, 2400, 3000, eases.outCubic));
-      }
-
-      // Headline (4200-5800)
-      if (h1Ref.current) {
-        h1Ref.current.textContent = typewriter(ms, 4200, 600, HEADLINE_LINE1);
-        h1Ref.current.style.opacity = String(track(ms, 4200, 4500, eases.outCubic));
-      }
-      if (h2Ref.current) {
-        h2Ref.current.textContent = typewriter(ms, 4900, 500, HEADLINE_LINE2);
-        h2Ref.current.style.opacity = String(track(ms, 4900, 5200, eases.outCubic));
-      }
+      // Headline (typed text — the fade is <Reveal>).
+      if (h1Ref.current) h1Ref.current.textContent = typewriter(ms, 4200, 600, HEADLINE_LINE1);
+      if (h2Ref.current) h2Ref.current.textContent = typewriter(ms, 4900, 500, HEADLINE_LINE2);
     },
     []
   );
 
   return (
-    <Timegroup
-      mode="fixed"
-      duration="7s"
-      onFrame={handleFrame as any}
-      className="absolute inset-0"
-    >
-      <PaperBackground ref={paperRef} />
+    <Timegroup mode="fixed" duration="7s" onFrame={handleFrame as any} className="absolute inset-0">
+      <PaperBackground driftFrom={60} driftTo={75} durationMs={7000} />
 
-      {/* Hero terminal continues from Scene 4 — slides off bottom */}
+      {/* Hero terminal continues from Scene 4 — slides off bottom (CSS, decoupled from the rig) */}
       <div
-        ref={heroTerminalRef}
         style={{
           position: "absolute",
           left: "50%",
           top: "50%",
-          transform: "translate(-50%, -50%)",
           width: 1100,
           height: 680,
           zIndex: 2,
-          willChange: "transform, opacity",
+          animation: "hero-slide-off 1000ms 2000ms linear both",
         }}
       >
         <Terminal width={1100} height={680} title="acme — claude — 92×28">
@@ -261,7 +179,6 @@ export const Scene5_Curtain: React.FC = () => {
           background: "#141413",
           transform: "translateY(-100%)",
           zIndex: 5,
-          willChange: "transform",
         }}
       />
 
@@ -275,15 +192,15 @@ export const Scene5_Curtain: React.FC = () => {
           zIndex: 8,
         }}
       >
-        <div ref={mascotWrapRef} style={{ willChange: "transform" }}>
+        <div ref={mascotWrapRef}>
           <Mascot
             variant="cowboy"
             pixel={14}
-            hatRef={hatRef}
             leftEyeRef={leftEyeRef}
             rightEyeRef={rightEyeRef}
-            leftArmRef={leftArmRef}
-            rightArmRef={rightArmRef}
+            hatRef={(el) => {
+              if (el) el.style.animation = "hat-reappear 600ms 3000ms cubic-bezier(0.33,1,0.68,1) backwards";
+            }}
           />
         </div>
       </div>
@@ -295,31 +212,11 @@ export const Scene5_Curtain: React.FC = () => {
         viewBox="0 0 1920 1080"
         style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 9 }}
       >
-        <path
-          ref={leftArmPathRef}
-          d=""
-          stroke="var(--claude)"
-          strokeWidth={22}
-          strokeLinecap="square"
-          fill="none"
-          opacity={0}
-        />
-        <path
-          ref={rightArmPathRef}
-          d=""
-          stroke="var(--claude)"
-          strokeWidth={22}
-          strokeLinecap="square"
-          fill="none"
-          opacity={0}
-        />
-        <rect ref={leftHandRef} x={0} y={0} width={30} height={30} fill="var(--claude)" opacity={0} />
-        <rect ref={rightHandRef} x={0} y={0} width={30} height={30} fill="var(--claude)" opacity={0} />
+        <path ref={leftArmPathRef} d="" stroke="var(--claude)" strokeWidth={22} strokeLinecap="square" fill="none" opacity={0} />
+        <path ref={rightArmPathRef} d="" stroke="var(--claude)" strokeWidth={22} strokeLinecap="square" fill="none" opacity={0} />
       </svg>
 
-      {/* Serif headline — appears below mascot on the now-black background.
-            Warm off-white on warm-dark (NOT pure white on pure black), canonical
-            Tiempos-substitute stack, no shadow per brand rules. */}
+      {/* Serif headline — appears below mascot on the now-black background. */}
       <div
         style={{
           position: "absolute",
@@ -338,8 +235,12 @@ export const Scene5_Curtain: React.FC = () => {
           zIndex: 10,
         }}
       >
-        <div ref={h1Ref} style={{ opacity: 0, minHeight: 84 }}></div>
-        <div ref={h2Ref} style={{ opacity: 0, minHeight: 84 }}></div>
+        <Reveal enter={[4200, 4500]} y={0} style={{ minHeight: 84 }}>
+          <div ref={h1Ref} />
+        </Reveal>
+        <Reveal enter={[4900, 5200]} y={0} style={{ minHeight: 84 }}>
+          <div ref={h2Ref} />
+        </Reveal>
       </div>
     </Timegroup>
   );

@@ -1,10 +1,10 @@
 import React, { useCallback, useRef } from "react";
 import { Timegroup } from "@editframe/react";
-import { eases } from "animejs";
 import PaperBackground from "../components/PaperBackground";
 import Terminal from "../components/Terminal";
 import Mascot from "../components/Mascot";
-import { clamp, lerp, track, typewriter, outBack } from "../components/helpers";
+import { Reveal } from "../components/Reveal";
+import { typewriter } from "../components/helpers";
 
 /**
  * Scene 2 — Scatter + Mascot reveal (3.5s, faster than v2)
@@ -16,155 +16,50 @@ import { clamp, lerp, track, typewriter, outBack } from "../components/helpers";
  *  1300–1700 Hat TIPS (lift+tilt then return)
  *  1700–2700 Serif headline types in CENTERED on frame (above the mascot is below)
  *  2700–3500 Hold; mascot eyes glow to set up the tentacle scene
+ *
+ * Every beat here is a fixed function of this scene's own local clock — plain CSS
+ * `@keyframes`, no `onFrame`. Only the headline typewriter needs JS (text-content
+ * mutation has no CSS equivalent); its fade is still handled by <Reveal>.
  */
 
 const HEADLINE_LINE1 = "Introducing agent view";
 const HEADLINE_LINE2 = "in Claude Code";
 
 export const Scene2_Reveal: React.FC = () => {
-  const paperRef = useRef<HTMLDivElement>(null);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const sub1Ref = useRef<HTMLDivElement>(null);
-  const sub2Ref = useRef<HTMLDivElement>(null);
-  const sub3Ref = useRef<HTMLDivElement>(null);
-  const sub4Ref = useRef<HTMLDivElement>(null);
-
-  const mascotWrapRef = useRef<HTMLDivElement>(null);
-  const hatRef = useRef<SVGGElement>(null);
-  const leftEyeRef = useRef<SVGRectElement>(null);
-  const rightEyeRef = useRef<SVGRectElement>(null);
-  const dustRef = useRef<HTMLDivElement>(null);
-
   const h1Ref = useRef<HTMLDivElement>(null);
   const h2Ref = useRef<HTMLDivElement>(null);
 
   const handleFrame = useCallback(
     ({ ownCurrentTimeMs }: { ownCurrentTimeMs: number }) => {
       const ms = ownCurrentTimeMs;
-
-      if (paperRef.current) {
-        const p = clamp(ms / 3500);
-        paperRef.current.style.transform = `translateX(${lerp(15, 30, p)}px)`;
-      }
-
-      // SCATTER — all terminals fly off rotating
-      // Hero: shrink down + drop + fade (out of frame)
-      if (heroRef.current) {
-        const p = track(ms, 0, 500, eases.inCubic);
-        const scale = lerp(1, 0.3, p);
-        const ty = lerp(0, 900, p);
-        const rot = lerp(0, -6, p);
-        heroRef.current.style.transform = `translate(-50%, calc(-50% + ${ty}px)) rotate(${rot}deg) scale(${scale})`;
-        heroRef.current.style.opacity = String(1 - p);
-      }
-
-      // SUB-TERMINALS IMPLODE — pure 2D scale-to-zero + fade. No 3D rotation
-      // (per Claude brand flat-only mandate). They're flat paper cards
-      // collapsing in on themselves.
-      const subs = [sub1Ref, sub2Ref, sub3Ref, sub4Ref];
-      for (const ref of subs) {
-        if (!ref.current) continue;
-        const p = track(ms, 0, 500, eases.inCubic);
-        ref.current.style.transformOrigin = "center center";
-        ref.current.style.transform = `scale(${lerp(0.85, 0, p)})`;
-        ref.current.style.opacity = String(1 - p);
-      }
-
-      // MASCOT drop (800-1300)
-      if (mascotWrapRef.current) {
-        const p = outBack(clamp((ms - 800) / 500), 1.5);
-        const ty = lerp(-1200, 0, p);
-        let squash = 1;
-        if (ms >= 1200 && ms < 1400) {
-          const sp = (ms - 1200) / 200;
-          squash = lerp(0.8, 1.0, sp);
-        }
-        mascotWrapRef.current.style.transform = `translate(-50%, calc(-50% + ${ty}px)) scaleY(${squash})`;
-        mascotWrapRef.current.style.opacity = String(clamp((ms - 800) / 200));
-      }
-
-      // Dust puff
-      if (dustRef.current) {
-        const p = track(ms, 1200, 1700, eases.outCubic);
-        const scale = lerp(0.4, 2.4, p);
-        const op = p > 0 ? lerp(0.7, 0, p) : 0;
-        dustRef.current.style.transform = `translate(-50%, 0) scale(${scale})`;
-        dustRef.current.style.opacity = String(op);
-      }
-
-      // HAT TIP (1300-1700)
-      if (hatRef.current) {
-        const p = clamp((ms - 1300) / 400);
-        let liftY = 0;
-        let rotZ = 0;
-        if (p < 0.45) {
-          const pp = p / 0.45;
-          liftY = lerp(0, -16, eases.outCubic(pp));
-          rotZ = lerp(0, -14, eases.outCubic(pp));
-        } else if (p < 0.65) {
-          liftY = -16;
-          rotZ = -14;
-        } else {
-          const pp = (p - 0.65) / 0.35;
-          liftY = lerp(-16, 0, eases.outCubic(pp));
-          rotZ = lerp(-14, 0, eases.outCubic(pp));
-        }
-        hatRef.current.style.transform = `translate(0, ${liftY}px) rotate(${rotZ}deg)`;
-      }
-
-      // HEADLINE typewriter — CENTERED on frame vertically
-      // Position: vertical center, mascot moves to make room
-      if (h1Ref.current) {
-        h1Ref.current.textContent = typewriter(ms, 1700, 420, HEADLINE_LINE1);
-        h1Ref.current.style.opacity = String(track(ms, 1700, 2000, eases.outCubic));
-      }
-      if (h2Ref.current) {
-        h2Ref.current.textContent = typewriter(ms, 2150, 330, HEADLINE_LINE2);
-        h2Ref.current.style.opacity = String(track(ms, 2150, 2450, eases.outCubic));
-      }
-
-      // Eyes stay PURE BLACK — no glow (the user wants no white/colored eyes ever)
-      if (leftEyeRef.current) {
-        leftEyeRef.current.setAttribute("fill", "#000000");
-        leftEyeRef.current.style.filter = "";
-      }
-      if (rightEyeRef.current) {
-        rightEyeRef.current.setAttribute("fill", "#000000");
-        rightEyeRef.current.style.filter = "";
-      }
+      if (h1Ref.current) h1Ref.current.textContent = typewriter(ms, 1700, 420, HEADLINE_LINE1);
+      if (h2Ref.current) h2Ref.current.textContent = typewriter(ms, 2150, 330, HEADLINE_LINE2);
     },
     []
   );
 
   return (
-    <Timegroup
-      mode="fixed"
-      duration="3.5s"
-      onFrame={handleFrame as any}
-      className="absolute inset-0"
-    >
-      <PaperBackground ref={paperRef} />
+    <Timegroup mode="fixed" duration="3.5s" onFrame={handleFrame as any} className="absolute inset-0">
+      <PaperBackground driftFrom={15} driftTo={30} durationMs={3500} />
 
       <div className="scene-3d" style={{ position: "absolute", inset: 0 }}>
         {/* Sub-terms re-instantiated to scatter (matching end of Scene 1) */}
-        <SubTermShell innerRef={sub1Ref} style={{ top: 40, left: 40 }} title="agent-1" />
-        <SubTermShell innerRef={sub2Ref} style={{ top: 40, right: 40 }} title="agent-2" />
-        <SubTermShell innerRef={sub3Ref} style={{ bottom: 40, left: 40 }} title="agent-3" />
-        <SubTermShell innerRef={sub4Ref} style={{ bottom: 40, right: 40 }} title="agent-4" />
+        <SubTermShell style={{ top: 40, left: 40 }} title="agent-1" />
+        <SubTermShell style={{ top: 40, right: 40 }} title="agent-2" />
+        <SubTermShell style={{ bottom: 40, left: 40 }} title="agent-3" />
+        <SubTermShell style={{ bottom: 40, right: 40 }} title="agent-4" />
 
         {/* Hero terminal — same size + position as Scene 1, animated away */}
         <div
-          ref={heroRef}
           style={{
             position: "absolute",
             left: "50%",
             top: "50%",
-            transform: "translate(-50%, -50%)",
             width: 1480,
             height: 860,
             transformOrigin: "center center",
             zIndex: 2,
-            willChange: "transform, opacity",
+            animation: "hero-scatter-out 500ms cubic-bezier(0.32,0,0.67,0) both",
           }}
         >
           <Terminal width={1480} height={860} title="acme — claude — 92×28">
@@ -174,7 +69,6 @@ export const Scene2_Reveal: React.FC = () => {
 
         {/* Dust puff */}
         <div
-          ref={dustRef}
           style={{
             position: "absolute",
             left: "50%",
@@ -184,32 +78,31 @@ export const Scene2_Reveal: React.FC = () => {
             borderRadius: "50%",
             background: "radial-gradient(ellipse, rgba(176,201,182,0.65) 0%, rgba(176,201,182,0) 70%)",
             opacity: 0,
-            willChange: "transform, opacity",
             pointerEvents: "none",
             zIndex: 3,
+            animation: "dust-puff 500ms 1200ms cubic-bezier(0.33,1,0.68,1) forwards",
           }}
         />
 
         {/* MASCOT — positioned above center so headline sits at center */}
         <div
-          ref={mascotWrapRef}
           style={{
             position: "absolute",
             left: "50%",
             top: "calc(50% - 260px)",
-            transform: "translate(-50%, -1200px)",
-            opacity: 0,
+            transform: "translate(-50%, -50%)",
             zIndex: 5,
-            willChange: "transform, opacity",
           }}
         >
-          <Mascot
-            variant="cowboy"
-            pixel={22}
-            hatRef={hatRef}
-            leftEyeRef={leftEyeRef}
-            rightEyeRef={rightEyeRef}
-          />
+          <div style={{ animation: "mascot-drop-in 600ms 800ms linear both" }}>
+            <Mascot
+              variant="cowboy"
+              pixel={22}
+              hatRef={(el) => {
+                if (el) el.style.animation = "hat-tip 400ms 1300ms cubic-bezier(0.33,1,0.68,1) both";
+              }}
+            />
+          </div>
         </div>
 
         {/* HEADLINE — at vertical center of frame
@@ -233,27 +126,26 @@ export const Scene2_Reveal: React.FC = () => {
             zIndex: 4,
           }}
         >
-          <div ref={h1Ref} style={{ opacity: 0, minHeight: 96 }}></div>
-          <div ref={h2Ref} style={{ opacity: 0, minHeight: 96 }}></div>
+          <Reveal enter={[1700, 2000]} y={0} style={{ minHeight: 96 }}>
+            <div ref={h1Ref} />
+          </Reveal>
+          <Reveal enter={[2150, 2450]} y={0} style={{ minHeight: 96 }}>
+            <div ref={h2Ref} />
+          </Reveal>
         </div>
       </div>
     </Timegroup>
   );
 };
 
-const SubTermShell: React.FC<{
-  innerRef: React.RefObject<HTMLDivElement | null>;
-  style: React.CSSProperties;
-  title: string;
-}> = ({ innerRef, style, title }) => (
+const SubTermShell: React.FC<{ style: React.CSSProperties; title: string }> = ({ style, title }) => (
   <div
-    ref={innerRef}
     style={{
       position: "absolute",
       width: 700,
       height: 460,
       transformOrigin: "center center",
-      willChange: "transform, opacity",
+      animation: "sub-term-implode 500ms cubic-bezier(0.32,0,0.67,0) both",
       ...style,
     }}
   >
