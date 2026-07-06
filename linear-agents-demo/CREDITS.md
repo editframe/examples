@@ -2,12 +2,13 @@
 
 # Audio Credits
 
-**The music bundled in `audio/` is a production track for this demo; brand & media assets are demo-only.**
+**The music bundled in `src/assets/` is a production track for this demo; brand & media assets are demo-only.**
 Sources documented below. If you replace any file, update this document so
 downstream forkers can verify provenance.
 
-The shipped [`output/demo.mp4`](output/demo.mp4) already has this music baked in;
-[`add-audio.sh`](add-audio.sh) reproduces it from `output/demo-silent.mp4`.
+The shipped [`output/demo.mp4`](output/demo.mp4) already has this music baked in — it plays as
+a native `<Audio>` element on the composition timeline (`src/Video.tsx`), with the fade-in,
+fade-out, and loudnorm normalization pre-baked directly into `src/assets/music-bed.mp3`.
 
 </div>
 
@@ -15,7 +16,7 @@ The shipped [`output/demo.mp4`](output/demo.mp4) already has this music baked in
 
 ## Music
 
-### `audio/music-bed.mp3`
+### `src/assets/music-bed.mp3`
 
 | | |
 |---|---|
@@ -27,7 +28,8 @@ The shipped [`output/demo.mp4`](output/demo.mp4) already has this music baked in
 This cut is **music only** — there are no sound effects in the 32s timeline.
 Replace freely with any royalty-free track ([Pixabay Music](https://pixabay.com/music/),
 [Free Music Archive](https://freemusicarchive.org/), [Incompetech](https://incompetech.com/music/royalty-free/)) —
-keep the filename `music-bed.mp3` or update [`add-audio.sh`](add-audio.sh).
+keep the filename `music-bed.mp3` (already fade/loudnorm-baked) or re-run your own ffmpeg
+pass and update `src/assets/music-bed.mp3` directly.
 
 ---
 

@@ -28,11 +28,12 @@ The final shipped render (with audio) lives at [`output/demo.mp4`](output/demo.m
 
 ```bash
 npm install
-NO_COLOR=1 FORCE_COLOR=0 npm run render    # → output/demo-silent.mp4
-bash add-audio.sh                          # → output/demo.mp4  (music bed muxed)
+NO_COLOR=1 FORCE_COLOR=0 npm run render    # → output/demo.mp4 (native, single pass)
 ```
 
-> **Windows quirk:** the Editframe CLI's Vite spawn parses ANSI-colored stdout. The `NO_COLOR=1 FORCE_COLOR=0` prefix is required or render init times out. The committed `output/demo.mp4` already has audio baked in — the render → mux steps above just reproduce it.
+> **Windows quirk:** the Editframe CLI's Vite spawn parses ANSI-colored stdout. The `NO_COLOR=1 FORCE_COLOR=0` prefix is required or render init times out. The committed `output/demo.mp4` already has audio baked in — the render above just reproduces it.
+
+The music bed plays as a single `<Audio>` element spanning the whole composition (`src/Video.tsx`). Audio sits on the composition timeline alongside everything else — no post-render mux step.
 
 ---
 
@@ -53,14 +54,15 @@ bash add-audio.sh                          # → output/demo.mp4  (music bed mux
 
 ## Audio
 
-A single **music bed** runs under the full 32s — loudnorm-normalized (−16 LUFS) with a
-0.6s fade-in and a 1.5s fade-out under the logo hold. This cut is **music only**; there
-are no sound effects. The mux is reproduced by [`add-audio.sh`](add-audio.sh). See
+A single **music bed** runs under the full 32s as a native `<Audio>` element on the
+composition timeline (`src/Video.tsx`) — loudnorm-normalized (−16 LUFS) with a 0.6s
+fade-in and a 1.5s fade-out under the logo hold, pre-baked directly into the committed
+asset. This cut is **music only**; there are no sound effects. See
 [`CREDITS.md`](CREDITS.md) for provenance.
 
-| Cue | Master ms | Source file |
-|---|---|---|
-| Music bed | 0 – 32000 | `audio/music-bed.mp3` (loudnorm −16, fade-in 0.6s, fade-out 30.5–32.0s) |
+| Cue | Time (ms) | File | Volume |
+|---|---|---|---|
+| Music bed | 0 – 32000 | `src/assets/music-bed.mp3` (loudnorm −16, fade-in 0.6s, fade-out 30.5–32.0s) | 1.0 |
 
 ---
 
@@ -92,23 +94,20 @@ Linear runs a dark, flat UI — a warm near-black ground, two greys of type, and
 ├── README.md                  ← you are here
 ├── LICENSE                    ← MIT
 ├── CREDITS.md                 ← audio provenance
-├── BRIEF.md                   ← creative brief + 8-beat scene plan
-├── brand-rules-linear.md      ← brand spec (canonical: src/constants.ts)
-├── add-audio.sh               ← muxes music bed → output/demo.mp4
 ├── .env.example               ← env vars (none required to render)
 ├── index.html
 ├── package.json
 ├── package-lock.json
 ├── vite.config.ts
 ├── tsconfig.json
-├── audio/                     ← music bed (commercial-cleared)  (+ audio/README.md)
 ├── output/
 │   └── demo.mp4               ← final shipped render (with audio)
 └── src/
-    ├── Video.tsx              ← composition root: one `<Timegroup mode="sequence">` of 8 scenes
+    ├── Video.tsx              ← composition root: contain -> sequence of 8 scenes + Audio
     ├── main.tsx               ← TimelineRoot mount
     ├── constants.ts           ← scene durations (SCENES) + palette tokens
     ├── styles.css             ← document reset + every scene's `@keyframes`
+    ├── assets/                ← music-bed.mp3 (fade/loudnorm pre-baked)
     ├── scenes/                ← one file per scene, each its own `<Timegroup mode="fixed">`
     │   ├── TitleIntro.tsx
     │   ├── Backlog.tsx
@@ -134,13 +133,12 @@ git clone https://github.com/editframe/linear-agents-demo.git
 cd linear-agents-demo
 npm install
 NO_COLOR=1 FORCE_COLOR=0 npm run render
-bash add-audio.sh
 ```
 
-1. **Swap the story** — each beat is its own file under `src/scenes/`, sequenced by the root `<Timegroup mode="sequence">` in `src/Video.tsx`. Edit a scene's own local timing constants directly in that file; scene durations live in `src/constants.ts` (`SCENES`).
+1. **Swap the story** — each beat is its own file under `src/scenes/`, sequenced by the inner `<Timegroup mode="sequence">` in `src/Video.tsx`. Edit a scene's own local timing constants directly in that file; scene durations live in `src/constants.ts` (`SCENES`).
 2. **Rebrand** — replace the palette tokens at the top of `src/constants.ts` (and `FONT` / `MONO`, also in `src/constants.ts`). Never use pure `#000` or drop shadows on text.
-3. **Swap the music** — drop a replacement `music-bed.mp3` into `audio/` (or update the `MUSIC=` variable in `add-audio.sh`); log it in [`CREDITS.md`](CREDITS.md).
-4. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render`, then `bash add-audio.sh`.
+3. **Swap the music** — replace `src/assets/music-bed.mp3` (bake any new fade/loudnorm treatment into the file itself with a local ffmpeg pass — no runtime fade logic) and adjust the `<Audio>` `volume` in `src/Video.tsx`; log it in [`CREDITS.md`](CREDITS.md).
+4. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render`.
 
 ---
 

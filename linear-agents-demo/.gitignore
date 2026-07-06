@@ -8,19 +8,15 @@ dist/
 .vite-cache/
 .turbo/
 
+# Editframe local asset cache (transcoded media under src/assets)
+src/assets/.cache/
+
 # Render artifacts — the repo commits ONLY output/demo.mp4 (final, with audio)
 output/*
 !output/demo.mp4
 output.mp4
-demo-silent.mp4
-demo-final.mp4
-demo-test.mp4
-demo-raw.mp4
 frames/
-myframes/
 _refframes/
-cur_*.png
-*_f[0-9]*.jpg
 
 # Internal build / QA artifacts — not part of the published template
 .claude/
@@ -44,6 +40,7 @@ _ROUND*.md
 _USER_COMMENTS.txt
 chk*.jpg
 chk*.png
+cur_*.png
 
 # Editor / OS
 .DS_Store
