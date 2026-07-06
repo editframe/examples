@@ -1,96 +1,89 @@
 /**
- * Linear for Agents — master timing constants (0–32s).
- * Source: _linear_run/03-BUILD-BRIEF.md (frame-verified).
- * All times in MASTER milliseconds. Single 32000ms Timegroup clock.
+ * rhode — "summer '26" eCommerce product ad · master constants.
+ * 1080x1920 @ 30fps, ~20s total. Seven sequenced beats, each its own
+ * `<Timegroup mode="fixed">` (see src/scenes/), sequenced with a shared `overlap`
+ * (see SCENES below) — no single master-ms clock — plus one cross-fade bridge
+ * (`DewyBridge`) that sits outside the sequence. Brand world: warm-neutral,
+ * glossy, editorial. Oat-cream ground, espresso type, dusty rose + cocoa accents.
+ * No pure white, no pure black.
  */
+export const W = 1080;
+export const H = 1920;
+export const LEFT_COL = 96;
 
-export const DURATION_MS = 32000;
-export const FPS = 30;
+// ── PALETTE (brand-accurate warm neutrals) ──
+export const OAT = "#EDE6DA";
+export const WARM_WHITE = "#F5F1EA";
+export const CARD_CREAM = "#E9E1D3";
+export const ESPRESSO = "#2A2320";
+export const BROWN = "#5C4434";
+export const DUSTY_ROSE = "#E8D4D0";
+export const SOFT_PINK = "#E0C7C2";
+export const COCOA = "#4A3528";
+export const ESPRESSO_BG = "#33291F";
+export const ESPRESSO_BG_LO = "#2A2320";
 
-/** Overlay reference frames for pixel-alignment debugging */
-export const TRACE_MODE = false;
-export const TRACE_OPACITY = 0.35;
+// ── TYPE ──
+export const SANS = "Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif";
+export const SERIF = "'Source Serif 4', Georgia, 'Times New Roman', serif";
 
-// ── PALETTE ──
-export const BG = "#111115";
-export const TEXT_PRIMARY = "#E4E4E6";
-export const TEXT_SECONDARY = "#8A8F98";
-export const LINEAR_PURPLE = "#5E6AD2";
-export const CODEGEN_PURPLE = "#8A5CF5";
-export const STATUS_YELLOW = "#D9A40E";
-export const STATUS_GREEN = "#3D9962";
-export const CHECKBOX_BLUE = "#4A82F6";
-export const DEVIN_BLUE = "#3886E1";
-export const CODE_BG = "#1A1A1E";
+// ── VIDEO WELL 1 (Application beat) — exact, non-negotiable ──
+// inner rect x=220, y=560, width=640, height=1040, corner radius 40. Flat cream
+// #EDE6DA placeholder — real footage is composited in afterward, outside this
+// composition (see README "Quick start" / add-audio.sh's sibling render step);
+// the well rect itself never transforms once the frame is on screen.
+export const WELL_X = 220;
+export const WELL_Y = 560;
+export const WELL_W = 640;
+export const WELL_H = 1040;
+export const WELL_R = 40;
+export const FRAME_PAD = 22; // premium off-white frame padding OUTSIDE the well rect
 
-// ── BEAT 0: Title card intro ──
-export const TITLE_INTRO_IN_START = 0;
-export const TITLE_INTRO_IN_END = 400;
-export const TITLE_INTRO_OUT_START = 1433;
-export const TITLE_INTRO_OUT_END = 1767;
+// ── VIDEO WELL 2 (Result beat) — founder/model clip, exact spec ──
+// inner rect x=120, y=1180, w=440, h=680, radius 32. Same flat-cream-placeholder
+// convention as WELL 1.
+export const W2_X = 120;
+export const W2_Y = 1180;
+export const W2_W = 440;
+export const W2_H = 680;
+export const W2_R = 32;
+export const W2_PAD = 18; // off-white frame padding OUTSIDE well 2
 
-// ── BEAT 1: Backlog scene ──
-export const BACKLOG_IN = 1767;          // hard cut
-export const SCROLL_START = 1933;        // motion blur scroll begins
-export const SCROLL_END = 2500;          // scroll settles
-export const CHECKBOXES_IN = 2833;       // issues get selected
-export const MODAL_IN = 3000;            // "Assign to..." modal appears
-export const MODAL_OUT = 4533;           // modal closes
-export const CODEGEN_ICONS_IN = 4667;    // Codegen diamond icons appear on rows
-export const CURSOR_HOVER_ROW = 7133;    // cursor hovers LIN-1293
-export const BACKLOG_TRANSITION = 7367;  // zoom+blur transition starts
+export const GRAIN =
+  `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E")`;
 
-// ── BEAT 2: ENG-1293 Codegen Issue ──
-export const ISSUE1_IN = 7967;           // zoom transition ends, scene in
-export const ACTIVITY1_LINE1 = 8133;     // "Adrien Griveau created..."
-export const ACTIVITY1_LINE2 = 8567;     // "Adrien Griveau assigned..."
-export const ACTIVITY1_LINE3 = 8967;     // "Codegen moved to In Progress"
-export const CODEGEN_MSG1_IN = 9167;     // "Hey! I'm on it."
-export const CODEGEN_LINK_IN = 9533;     // "View my work" link
-export const CODEGEN_MSG2_IN = 10033;    // second Codegen message
-export const REPLY_INPUT_IN = 11767;     // "Leave a reply..."
-export const PR_ACTIVITY_IN = 12133;     // PR added activity line
-export const STATUS_IN_REVIEW = 12567;   // moved to In Review
-export const PR_CARD_IN = 12800;         // PR card appears
-export const ISSUE1_FADE_OUT = 15000;    // cross-fade to integrations
-export const ISSUE1_FADE_END = 15233;
+/**
+ * ── SCENES ──
+ * Each beat is its own `<Timegroup mode="fixed">`, sequenced by the root
+ * `<Timegroup mode="sequence" overlap={OVERLAP_MS}>` in `Video.tsx`. There is no
+ * master clock read anywhere — every scene animates against its OWN local time
+ * (`--ef-progress` / plain CSS keyframe delays).
+ *
+ * `OVERLAP_MS` of shared time exists at every scene boundary — during it, the
+ * outgoing scene is playing the tail of its own duration (see
+ * `--ef-transition-out-start` in `references/css-variables.md`) while the
+ * incoming scene plays the head of its own. `duration` below already accounts for
+ * that: every scene after the first is `nominal + OVERLAP_MS` so its own "solo"
+ * screen time still matches the original cut. Net result: the 7 sequenced
+ * durations minus 6 overlaps sum to exactly 20000ms (the original total runtime).
+ *
+ * The original single `onFrame` cut also had an eighth beat, "Dewy Texture"
+ * (~9.0–10.5s), that isn't in this list — it's a short cross-fade bridge that
+ * visually overlaps BOTH the tail of Application and the head of Result at once
+ * (by up to 1.2s), which a uniform per-pair `overlap` can't represent. It's kept
+ * as `<DewyBridge>`, a sibling of the scene sequence (see `Video.tsx`), animating
+ * on the whole composition's own local clock — see that component's doc comment.
+ */
+export const OVERLAP_MS = 200;
 
-// ── BEAT 3: Integrations Settings ──
-export const INTEGRATIONS_IN = 15233;
-export const CURSOR_DEVIN = 16233;       // cursor over Devin Enable
-export const CURSOR_CLICK_DEVIN = 16433; // click
-export const INTEGRATIONS_OUT = 17400;   // hard cut
+export const SCENES = {
+  hook: { duration: 1950, label: "wordmark draw-in, limited edition / summer '26" },
+  hero: { duration: 2600, label: "dusty-rose block wipe, Highlight Milk push-in, the dewy look, $28" },
+  application: { duration: 5150, label: "video-in-frame well 1, how it's applied / the dewy look" },
+  result: { duration: 3680, label: "skin macro Ken-Burns + well 2 + lip-swatch grid, glassy lit-from-within" },
+  range: { duration: 2870, label: "kinetic montage — sip, macadamia, the summer kit + prices" },
+  offer: { duration: 2200, label: "the summer kit, $100, limited edition" },
+  cta: { duration: 2750, label: "stylized site-scroll resolving to shop rhode + rhodeskin.com" },
+} as const;
 
-// ── BEAT 4: ENG-237 Devin @-mention ──
-export const ISSUE2_IN = 17400;
-export const ACTIVITY2_LINE1 = 17800;    // "Andreas Eldh created..."
-export const COMMENT_BOX_IN = 18133;     // Andreas comment box
-export const AT_TYPED = 18533;           // "@" typed
-export const DROPDOWN_IN = 18633;        // @mention dropdown
-export const DROPDOWN_OUT = 19233;       // dropdown closes
-export const COMMENT_FINAL = 19467;      // "@devin can you take a look?" finalized
-export const DEVIN_MSG_IN = 19700;       // Devin bubble appears
-export const DEVIN_REVEAL_START = 19867; // content reveals top-to-bottom
-export const DEVIN_REVEAL_END = 22567;   // full response visible
-export const CODE_BLOCK_IN = 21800;      // code block appears
-export const TOOLTIP_IN = 23067;         // "Expand (8 lines)" tooltip
-export const ISSUE2_FADE_OUT = 23533;    // fade to black
-export const ISSUE2_FADE_END = 24033;
-
-// ── BEAT 5: Outro title ticker ──
-export const TICKER_IN = 24033;
-export const WORD_CODING_IN = 24033;
-export const WORD_CODING_OUT = 24600;    // blur transition starts
-export const WORD_TRIAGE_IN = 24767;     // "Triage" settles
-export const WORD_TRIAGE_OUT = 25300;
-export const WORD_PLANNING_IN = 25500;   // "Planning" settles
-export const TICKER_OUT = 26000;         // fade out
-export const TITLE_OUTRO_IN = 26200;     // "Linear for Agents" full card
-export const TITLE_OUTRO_OUT = 27000;
-export const TITLE_OUTRO_END = 27167;
-
-// ── BEAT 6: Linear logo outro ──
-export const LOGO_IN_START = 28267;
-export const LOGO_IN_END = 28900;
-export const LOGO_OUT_START = 30867;
-export const LOGO_OUT_END = 31533;
+export type SceneName = keyof typeof SCENES;

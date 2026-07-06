@@ -113,15 +113,25 @@ the source of truth for the tokens; full spec in [`brand-rules-rhode.md`](brand-
 ├── output/
 │   └── demo.mp4               ← final shipped render (1080×1920, with audio)
 └── src/
-    ├── Video.tsx              ← composition root (20s, single Timegroup, frame-driven onFrame)
+    ├── Video.tsx              ← composition root: one root Timegroup (mode="contain")
+    │                             wrapping a sequenced Timegroup of scenes + DewyBridge
     ├── main.tsx               ← TimelineRoot mount
-    ├── styles.css
-    ├── constants.ts
-    ├── assets.d.ts            ← image module typings
-    ├── assets/                ← product PNGs + campaign lifestyle/macro stills
+    ├── styles.css             ← all @keyframes (shared Reveal/wipe/bob + per-scene ones)
+    ├── constants.ts           ← palette, well specs, SCENES (durations + overlap math)
+    ├── assets/                ← product PNGs + campaign lifestyle/macro stills (real
+    │                             files — no base64 in source)
+    ├── scenes/                ← one file per beat, each its own `<Timegroup mode="fixed">`
+    │   ├── Hook.tsx
+    │   ├── Hero.tsx
+    │   ├── Application.tsx
+    │   ├── Result.tsx
+    │   ├── Range.tsx
+    │   ├── Offer.tsx
+    │   └── Cta.tsx
     └── components/
-        ├── assets.ts          ← base64-baked product assets (Vite inlines for the render)
-        └── helpers.ts         ← track, lerp, clamp, easings (easeOutCubic, outBack…)
+        ├── Reveal.tsx         ← shared fade + float-up/down reveal (CSS-driven)
+        ├── ProductCard.tsx    ← shared studio-card shell (Hero, Offer)
+        └── DewyBridge.tsx     ← cross-fade bridge sibling of the scene sequence
 ```
 
 ---
@@ -136,14 +146,16 @@ NO_COLOR=1 FORCE_COLOR=0 npm run render
 bash add-audio.sh
 ```
 
-1. **Swap the story** — the demo is one frame-driven `onFrame` timeline in
-   [`src/Video.tsx`](src/Video.tsx) on a single `mode="sequence"` `<Timegroup>`. Retune
-   the per-beat `track(ms, start, end, ease)` windows to re-cut a beat.
-2. **Rebrand** — replace the palette tokens at the top of `src/Video.tsx` (and the spec
+1. **Swap the story** — each beat is its own `<Timegroup mode="fixed">` under
+   [`src/scenes/`](src/scenes), sequenced by the root `<Timegroup mode="sequence">` in
+   [`src/Video.tsx`](src/Video.tsx). Retune a scene's own CSS `animation` delays (all
+   local to that scene's own clock — see `src/constants.ts`'s `SCENES` doc comment for
+   the duration/overlap math) to re-cut a beat.
+2. **Rebrand** — replace the palette tokens in `src/constants.ts` (and the spec
    in [`brand-rules-rhode.md`](brand-rules-rhode.md)). Never read pure `#000` or drop
    shadows on text.
-3. **Re-skin assets** — drop new product/lifestyle imagery into `src/assets/` (and update
-   the base64 in `src/components/assets.ts` if you re-bake).
+3. **Re-skin assets** — drop new product/lifestyle imagery into `src/assets/` and point
+   the relevant scene's `<Image src="/assets/...">` at the new file.
 4. **Swap the music** — drop a replacement `music-bed.mp3` into `audio/` (or update the
    `MUSIC=` variable in [`add-audio.sh`](add-audio.sh)); log it in [`CREDITS.md`](CREDITS.md).
 5. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render`, then `bash add-audio.sh`.

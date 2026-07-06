@@ -4,3 +4,151 @@
 @source "../index.html";
 
 html, body, #root { height: 100%; margin: 0; padding: 0; }
+
+/* === shared Reveal (see src/components/Reveal.tsx) === */
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(var(--reveal-y, 20px)); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes reveal-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(var(--reveal-exit-y, 0px)); }
+}
+
+/* === shared whole-scene clip-path wipes (Hero/Result/Range/Offer backdrops) === */
+@keyframes wipe-y-in { from { clip-path: inset(0% 0% 100% 0%); } to { clip-path: inset(0% 0% 0% 0%); } }
+@keyframes wipe-y-out { from { clip-path: inset(0% 0% 0% 0%); } to { clip-path: inset(100% 0% 0% 0%); } }
+@keyframes wipe-x-in { from { clip-path: inset(0% 100% 0% 0%); } to { clip-path: inset(0% 0% 0% 0%); } }
+@keyframes wipe-x-out { from { clip-path: inset(0% 0% 0% 0%); } to { clip-path: inset(0% 0% 0% 100%); } }
+@keyframes wipe-rise-in { from { clip-path: inset(100% 0% 0% 0%); } to { clip-path: inset(0% 0% 0% 0%); } }
+@keyframes wipe-rise-out { from { clip-path: inset(0% 0% 0% 0%); } to { clip-path: inset(0% 0% 100% 0%); } }
+
+/* === shared product-card motion (Hero/Offer, via components/ProductCard.tsx) === */
+@keyframes card-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes product-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+@keyframes gloss-sweep {
+  0% { transform: translate(-130%, -110%); opacity: 0; }
+  50% { opacity: 0.95; }
+  100% { transform: translate(130%, 110%); opacity: 0; }
+}
+
+/* === Hook scene (src/scenes/Hook.tsx) === */
+@keyframes hook-mark-in {
+  from { opacity: 0.55; transform: translateY(calc(-50% + 20px)) scale(1.015); letter-spacing: 22px; }
+  to { opacity: 1; transform: translateY(-50%) scale(1); letter-spacing: 12px; }
+}
+@keyframes hook-mark-out {
+  from { opacity: 1; transform: translateY(-50%) scale(1); }
+  to { opacity: 0; transform: translateY(calc(-50% - 30px)) scale(1); }
+}
+@keyframes hook-rule-in {
+  from { opacity: 0; transform: translateX(-50%) scaleX(0); }
+  to { opacity: 1; transform: translateX(-50%) scaleX(1); }
+}
+@keyframes hook-rule-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes dot-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dot-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+
+/* === Hero scene (src/scenes/Hero.tsx) === */
+@keyframes hero-card-in {
+  0% { opacity: 0; transform: translate(-50%, -50%) perspective(1500px) rotateX(0deg) rotateY(13deg) scale(0.9); }
+  30% { opacity: 1; transform: translate(-50%, -50%) perspective(1500px) rotateX(-2deg) rotateY(10deg) scale(1.0); }
+  100% { transform: translate(-50%, -50%) perspective(1500px) rotateX(-4deg) rotateY(7deg) scale(1.14); }
+}
+@keyframes hero-focus-pull {
+  from { filter: sepia(0.12) saturate(1.06) hue-rotate(-8deg) brightness(1.02) contrast(1.0) blur(2px); }
+  to { filter: sepia(0.12) saturate(1.16) hue-rotate(-8deg) brightness(1.05) contrast(1.12) blur(0); }
+}
+@keyframes cap-glint-sweep {
+  0% { opacity: 0; transform: translateX(-160px) rotate(18deg); }
+  50% { opacity: 0.85; }
+  100% { opacity: 0; transform: translateX(160px) rotate(18deg); }
+}
+
+/* === Application scene (src/scenes/Application.tsx) === */
+@keyframes app-bg-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes app-shade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes app-veil-in {
+  from { opacity: 1; transform: translateY(-60px); }
+  to { opacity: 0; transform: translateY(0); }
+}
+@keyframes app-veil-out {
+  from { opacity: 0; transform: translateY(0); }
+  to { opacity: 1; transform: translateY(40px); }
+}
+@keyframes tick-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tick-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
+/* === DewyBridge (src/components/DewyBridge.tsx) — sibling of the sequence, absolute-ms cues === */
+@keyframes dewy-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dewy-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes dewy-lift-out { from { transform: translateY(0); } to { transform: translateY(-200px); } }
+@keyframes dewy-img-push {
+  from { transform: translate(1.5%, 0) scale(1.12); }
+  to { transform: translate(-2%, 0) scale(1.26); }
+}
+
+/* === Result scene (src/scenes/Result.tsx) === */
+@keyframes result-skin-kenburns {
+  from { transform: translate(-3%, -2%) scale(1.1); }
+  to { transform: translate(4%, 3%) scale(1.22); }
+}
+@keyframes result-swatch-kenburns {
+  from { transform: scale(1.04); }
+  to { transform: scale(1.1); }
+}
+@keyframes well2-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes well2-shade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes well2-swatch-in {
+  from { opacity: 0; transform: translateY(64px) scale(0.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* === Range scene (src/scenes/Range.tsx) === */
+@keyframes range-tile-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* === Offer scene (src/scenes/Offer.tsx) === */
+@keyframes offer-card-in {
+  0% { opacity: 0; transform: translate(-50%, -50%) perspective(1700px) rotate(4.5deg) scale(0.92); }
+  25% { opacity: 1; transform: translate(-50%, -50%) perspective(1700px) rotate(1deg) scale(1.0); }
+  100% { transform: translate(-50%, -50%) perspective(1700px) rotate(1deg) scale(1.06); }
+}
+
+/* === Cta scene (src/scenes/Cta.tsx) — final beat, nothing plays after it === */
+@keyframes cta-scene-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cta-scroll { from { transform: translateY(0); } to { transform: translateY(-980px); } }
+@keyframes cta-plate-in { from { transform: translateY(100%); } to { transform: translateY(0%); } }
+@keyframes cta-plate-word-in {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 120px)); }
+  to { opacity: 0.9; transform: translate(-50%, -50%); }
+}
+@keyframes cta-plate-word-out { from { opacity: 0.9; } to { opacity: 0; } }
+@keyframes cta-overlay-in { from { transform: translateY(100%); } to { transform: translateY(0%); } }
+@keyframes cta-shop-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cta-shop-press { from { transform: scale(0.92); } to { transform: scale(1.0); } }
+@keyframes cta-shop-bloom {
+  from { box-shadow: 0 14px 28px rgba(42,35,32,0.16); }
+  to { box-shadow: 0 36px 70px rgba(42,35,32,0.32); }
+}
+@keyframes cta-word-in {
+  from { opacity: 0; letter-spacing: 24px; }
+  to { opacity: 1; letter-spacing: 12px; }
+}
+@keyframes cta-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cta-final-resolve { from { opacity: 0; } to { opacity: 0.1; } }
