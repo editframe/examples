@@ -1,8 +1,11 @@
 import React from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { TicketScatter } from "./scenes/TicketScatter";
 import { CursorJiraScene } from "./scenes/CursorJiraScene";
 import { LogoCard } from "./scenes/LogoCard";
+
+const MUSIC = "/assets/audio-bed.mp3";
+const DURATION_MS = 28500; // 3500 (TicketScatter) + 21500 (CursorJiraScene) + 3500 (LogoCard)
 
 /**
  * Cursor With Jira — v5 (Jeremy scrap-and-rebuild, 2026-05-23)
@@ -57,6 +60,9 @@ export const Video = () => {
       <TicketScatter />
       <CursorJiraScene />
       <LogoCard />
+      {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to
+          the composition's total runtime regardless of the source file's own length. */}
+      <Audio src={MUSIC} volume={1} duration={`${DURATION_MS}ms`} />
     </Timegroup>
   );
 };

@@ -8,24 +8,20 @@ import { Audio } from "@editframe/react";
  *   `dur`    play duration (defaults to 1.2s).
  *   `volume` 0–1.
  *
- * SFX files live in `public/sfx/`. Editframe's audio pipeline pulls them
- * via the dev server's static file route — this is more reliable than
- * inlined base64, which doesn't round-trip through the AudioContext encoder.
+ * SFX files live in `src/assets/sfx/` and are bundled by the singlefile
+ * build like any other local asset (see `<Video>`/`<Audio>` local-asset
+ * resolution in the `vite-plugin` skill).
  */
 
 const SFX_PATHS: Record<string, string> = {
-  pop: "/sfx/pop.mp3",
-  plop: "/sfx/plop.mp3",
-  notify: "/sfx/notify.mp3",
-  success: "/sfx/success.mp3",
-  twinkle: "/sfx/twinkle.mp3",
-  reveal: "/sfx/reveal.mp3",
-  glitch: "/sfx/glitch.mp3",
-  "glitch-short": "/sfx/glitch-short.mp3",
-  ping: "/sfx/ping.mp3",
-  confirm: "/sfx/confirm.mp3",
-  "glass-pop": "/sfx/glass-pop.mp3",
-  disappear: "/sfx/disappear.mp3",
+  pop: "/assets/sfx/pop.mp3",
+  notify: "/assets/sfx/notify.mp3",
+  twinkle: "/assets/sfx/twinkle.mp3",
+  reveal: "/assets/sfx/reveal.mp3",
+  "glitch-short": "/assets/sfx/glitch-short.mp3",
+  ping: "/assets/sfx/ping.mp3",
+  confirm: "/assets/sfx/confirm.mp3",
+  "glass-pop": "/assets/sfx/glass-pop.mp3",
 };
 
 export const Sfx: React.FC<{

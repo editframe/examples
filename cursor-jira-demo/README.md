@@ -10,10 +10,11 @@ A 28.5-second product demo showing the Cursor + Jira integration: Cursor replies
 
 ```bash
 npm install
-npm run render
-bash add-sfx-v16.sh        # mux music + SFX
+npm run render         # -> output/demo.mp4 (native, single pass)
 ```
 
 The rendered video is saved to `output/`.
 
-Audio files live in `audio/` and are fully cleared for commercial use — see [CREDITS.md](CREDITS.md) for license details.
+Audio (music bed + SFX) plays as native `<Audio>` elements on the composition
+timeline — no post-render mux step. Files live in `src/assets/` and are fully
+cleared for commercial use — see [CREDITS.md](CREDITS.md) for license details.

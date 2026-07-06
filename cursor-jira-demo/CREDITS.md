@@ -12,7 +12,7 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `audio/audio-bed.mp3`
+### `src/assets/audio-bed.mp3`
 
 | | |
 |---|---|
@@ -24,13 +24,13 @@ document so downstream forkers can verify provenance.
 | **Attribution required** | ❌ No (credit appreciated) |
 | **Redistribution** | ✅ Permitted as part of derivative work |
 
-A driving, modern tech-bed that mirrors the Cursor product feel — clean rhythm, no vocal interference. Replace freely with anything from Pixabay, [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/) — keep the filename `audio-bed.mp3` or update `add-sfx-v16.sh` accordingly.
+A driving, modern tech-bed that mirrors the Cursor product feel — clean rhythm, no vocal interference. Replace freely with anything from Pixabay, [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/) — keep the filename `audio-bed.mp3`, or update the `<Audio src="...">` path in `src/Video.tsx` accordingly.
 
 ---
 
 ## SFX
 
-### `audio/click-hd-loud.mp3`
+### `src/assets/sfx/click-hd-loud.mp3`
 
 | | |
 |---|---|
@@ -43,9 +43,9 @@ A driving, modern tech-bed that mirrors the Cursor product feel — clean rhythm
 
 ## Want to swap audio?
 
-1. Drop your replacement file in `audio/` (match filename or update `add-sfx-v16.sh`).
+1. Drop your replacement file in `src/assets/` (or `src/assets/sfx/` for SFX), matching the existing filename, or update the corresponding `src="..."` path in `src/Video.tsx` / `src/components/Sfx.tsx`.
 2. Update the corresponding row above with source + license info.
-3. Re-run `bash add-sfx-v16.sh`.
+3. Re-render (`npm run render`).
 
 For 100% safe royalty-free sources:
 

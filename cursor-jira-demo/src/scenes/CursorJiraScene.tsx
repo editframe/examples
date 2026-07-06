@@ -1,5 +1,5 @@
 import React, { useCallback, useRef } from "react";
-import { Timegroup } from "@editframe/react";
+import { Timegroup, Audio } from "@editframe/react";
 import { eases } from "animejs";
 import { JiraHeader, JiraSidebar } from "../components/JiraChrome";
 import {
@@ -342,6 +342,9 @@ export const CursorJiraScene: React.FC = () => {
       <Sfx cue="glass-pop" at={18.0} dur={0.5} volume={0.45} />
       <Sfx cue="confirm" at={20.3} dur={1.0} volume={0.5} />
       <Sfx cue="notify" at={20.7} dur={0.9} volume={0.32} />
+      {/* "Suggest a reply..." chip cursor-click (mux script v16, master 21500ms
+          = local 18000ms — this scene starts at master 3500ms, no overlap). */}
+      <Audio src="/assets/sfx/click-hd-loud.mp3" offset="18s" duration="1.5s" volume={0.5} />
 
       {/* White surface */}
       <div style={{ position: "absolute", inset: 0, background: "#FFFFFF" }} />
