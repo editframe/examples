@@ -217,6 +217,119 @@ couple of minutes.
 
 ---
 
+## Part 3 — the audio pipeline (native `<Audio>`, no ffmpeg mux) + scaffold parity
+
+Part 1 described this smell as something to look for when re-syncing from an upstream
+author. It also exists **independently of any upstream sync** — most projects in this repo
+have it natively, self-authored, no external repo involved. Don't gate this fix on "is there
+evidence of an upstream author" (that was the wrong scoping the first time around); gate it
+on "does `package.json`'s `render` script write to `demo-silent.mp4` and is there a shell
+script that muxes audio afterward."
+
+### 3a. The ffmpeg mux smell, precisely
+
+**Smell markers** (any combination):
+- `package.json` → `"render": "editframe render -o output/demo-silent.mp4"`.
+- A root-level `add-audio.sh` / `add-sfx-vNN.sh` / `add-music.sh` / `composite-well.sh` —
+  naming is inconsistent and not a reliable signal of what the script actually does (an
+  `add-sfx-*.sh` file may only mux music, no SFX at all) — **read every script fully**
+  before assuming its scope from its name.
+- A root-level `audio/` folder (raw stems: `music-bed.mp3`, `click-hd-loud.mp3`, etc.),
+  referenced only by the shell script, never imported into the composition.
+- `public/sfx/*.{mp3,wav}` — served from Vite's static root, so `vite-plugin-singlefile`
+  can't inline it into the portable single-HTML bundle. Same smell as base64-in-source (2a),
+  different flavor: an asset that exists outside the composition's own dependency graph.
+- Sometimes a half-finished native attempt already exists and is dead code — e.g. a
+  `src/components/Sfx.tsx` wrapping `<Audio>` with a comment like *"draft cues only, final
+  layer applied post-render via bash mix script"*, never actually imported into any scene.
+  If you find one, it's your reference for the target shape — finish wiring it in, don't
+  rebuild from scratch, and delete the caveat comment once it's the real source of truth.
+
+### 3b. The fix
+
+**Music bed** (spans the whole composition):
+1. Read the mux script's ffmpeg filter chain in full — volume, `afade in/out` timings,
+   `loudnorm`, `alimiter`. These exist because a flat, unfaded track sounds bad, not because
+   ffmpeg is required at render time.
+2. Run that *same* filter chain **once, locally, audio-only** (drop `-map 0:v`/any `-i` on
+   the video) to bake the fades/normalization directly into the committed asset — e.g.:
+   ```
+   ffmpeg -i audio/music-bed.mp3 -af "afade=t=in:st=0:d=1.5,afade=t=out:st=18.5:d=1.5,alimiter=limit=0.97" \
+     -b:a 192k src/assets/music-bed.mp3
+   ```
+   The output is a normal, final-sounding mp3 — no runtime fade logic needed, matching how
+   base64 images became real files in 2a (asset is pre-finished, not computed at
+   render/build time).
+3. Move it to `src/assets/`, reference with one root-level
+   `<Audio src="/assets/music-bed.mp3" volume={1} duration={`${TOTAL_MS}ms`} />` — exactly
+   the allbirds pattern (`src/Video.tsx`). `<Audio>` has no `mode="fit"`; the explicit
+   `duration` pins it to the composition's resolved length instead.
+
+**SFX cues** (one-shot, tied to a specific moment):
+1. The mux script's `-ss`/`adelay`/explicit timestamp arguments give you the absolute-ms
+   cue points — same "absolute-ms → local" translation as 2b, just for audio instead of
+   `onFrame` callbacks.
+2. Move each raw file into `src/assets/` (or `src/assets/sfx/` if there are many).
+3. Every temporal element — `<Audio>` included — supports an `offset` prop
+   (`EFTemporal`, confirmed in `elements/packages/elements/src/elements/EFTemporal.ts`):
+   the element's start time relative to its **parent `Timegroup`**. Place the cue as a plain
+   `<Audio src="..." offset="Xs" duration="Ys" volume={v} />` sibling inside whichever scene
+   `Timegroup` contains that moment — no extra nested `Timegroup` needed just for timing.
+   `sourceIn`/`sourceOut`/`trimStart`/`trimEnd` trim the source file itself if needed.
+4. Delete the mux script(s) and the top-level `audio/` folder once every file referenced
+   from it has been moved into `src/` (or confirmed dead and dropped — see 3c).
+5. `package.json` → `"render": "editframe render -o output/demo.mp4"` — one pass, no
+   shell-script chaining, no `-silent` naming. Fix any broken chained scripts you find while
+   here (e.g. `node scripts/inline-assets.mjs && editframe render ...` where the script
+   doesn't exist — dead reference, drop it).
+6. `.gitignore` — drop `demo-silent.mp4`/`demo-composite.mp4`/versioned-output
+   special-casing; match allbirds' shape (`output/*` ignored, `!output/demo.mp4` tracked).
+
+**No source audio content exists at all** (a project ships a fully silent
+`output/demo.mp4`): reuse an already-licensed track from a tonally-similar sibling project
+in this repo (there's already precedent for this — several projects share byte-identical
+`music-bed.mp3`/`click-hd-loud.mp3` files) rather than inventing new sourcing infrastructure.
+Copy the file, add a matching `CREDITS.md` entry mirroring the source project's real
+attribution (same file → same Pixabay/license citation), wire it in per 3b.
+
+### 3c. `public/` triage
+
+Before moving or deleting anything in `public/`, check what's actually referenced:
+```
+find <project>/public -type f | while read f; do
+  rel="${f#<project>/public/}"; grep -rq "$rel" <project>/src || echo "DEAD: $rel"
+done
+```
+In practice almost everything under `public/extracted/`, `public/*reference*`,
+`public/*_calibrate*`, versioned comparison frames (`ref_NNs.jpg`, `v2_NNs.jpg`,
+`frame_NNNN.jpg`) is **authoring/QA debris from the original build process, never imported
+by the composition** — delete it outright, don't migrate it. Anything that *is* referenced
+(rare — check for real, e.g. a UI-mockup tile grid) moves into `src/assets/` like any other
+image (2a) so it's covered by the singlefile bundle. Delete `public/` entirely once empty.
+
+### 3d. Other scaffold drift to reconcile against `allbirds-tree-runner-demo` (the gold standard)
+
+- `SHOT-LIST.md` (authoring planning doc) — delete, not part of the shipped template.
+- `poster.jpg` (real README-referenced thumbnail) — keep.
+- `extras/` (standalone bonus drop-in components, e.g. `LowerThird.tsx`, `BarChart.tsx`,
+  documented in their own `extras/README.md`) — keep, it's legitimate showcase material for
+  goal #2 (demonstrating more Editframe patterns to prospective customers). Do fix real bugs
+  in them, but **don't** force the Part 2b CSS-cascade rewrite onto them — they're
+  deliberately standalone/portable (may be dropped in without a `Timegroup` ancestor
+  providing `--ef-progress`), so a `startFrame`/`endFrame`-prop-driven, JS-computed-style
+  implementation is the *correct* shape for this specific component category, not a smell.
+- Missing `CREDITS.md` — every project that ships any third-party asset (music, SFX, stock
+  imagery) needs one, matching a sibling's format.
+
+**Where else this applies:** every project except `allbirds-tree-runner-demo` had some
+combination of these. As of this writing, one documented exception remains open:
+`gymshark-geo-seamless-demo` bakes its audio mux into the same ffmpeg pass that composites
+real brand footage into masked "well" placeholders (`_finalize_helper.py` + `wells.json` +
+`add-audio.sh`) — the two are inseparable in the current script, and the well-compositing
+half is a separate, larger native-CSS-masking task. Left untouched pending that task.
+
+---
+
 ## Suggested order of operations per project
 
 1. Confirm scope with whoever's asking — full re-sync from an upstream author's repo is a
