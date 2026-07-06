@@ -102,3 +102,97 @@
   opacity: var(--sweep-opacity, 0);
   will-change: transform, left, opacity;
 }
+
+/* === Shared one-shot fade-out (used at the tail of Scene5_TerminalRun) === */
+@keyframes reveal-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* === Shared blinking-cursor phases, used by every typewriter scene ===
+ * `cursor-blink` alone (with `backwards` fill and an `animation-delay` equal to the
+ * moment typing finishes) reproduces "solid while waiting/typing, then blinks" in one
+ * declaration: the `backwards` fill holds the 0% keyframe (opacity 1) for the whole
+ * delay window, then the infinite blink takes over exactly when the delay elapses.
+ * `cursor-appear` / `cursor-vanish` are one-shot instant toggles (steps(1,end), ~1ms)
+ * for cursors that should stay invisible until typing starts, or disappear for good
+ * once later content appears — stack them after `cursor-blink` in the animation list
+ * so they win over it for the property they touch during their own active window.
+ */
+@keyframes cursor-blink {
+  0%, 49.9% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes cursor-appear {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes cursor-vanish {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* === Monospace character-reveal typewriter (Scene1_2_Terminal, Scene5_TerminalRun) ===
+ * Safe because both scenes use a real monospace font (JetBrains Mono): `1ch` is exactly
+ * one glyph's width for every character, so animating `width` from 0 to `Nch` in
+ * `steps(N, end)` reveals exactly one character per step with no mid-glyph clipping.
+ * (Proportional-font scenes — Scene3/6/7, Inter — do NOT use this trick; see their own
+ * comments for why a JS textContent reveal is kept there instead.)
+ */
+@keyframes typewriter-reveal {
+  from { width: 0; }
+}
+
+/* === Scene1_2_Terminal — stack-up reflow, computed once from OUTPUT_LINES/spawnAt ===
+ * Every subsequent output line "pushes" the ones above it up by one row the instant it
+ * spawns. Each line's resting position only ever changes at another line's fixed spawnAt,
+ * so the whole sequence is a deterministic step function — expressed here as duplicate-
+ * percentage keyframe stops (a zero-length segment = an instant snap, no easing needed
+ * since the held values on either side of a *non*-duplicate stop are identical).
+ */
+@keyframes term-prompt-shift {
+  0%      { transform: translateY(0px); }
+  30.909% { transform: translateY(0px); }
+  30.909% { transform: translateY(-87px); }
+  43.636% { transform: translateY(-87px); }
+  43.636% { transform: translateY(-174px); }
+  56.364% { transform: translateY(-174px); }
+  56.364% { transform: translateY(-261px); }
+  69.091% { transform: translateY(-261px); }
+  69.091% { transform: translateY(-348px); }
+  100%    { transform: translateY(-348px); }
+}
+@keyframes term-line0-stack {
+  0%      { transform: translateY(0px); }
+  18.421% { transform: translateY(0px); }
+  18.421% { transform: translateY(-87px); }
+  36.842% { transform: translateY(-87px); }
+  36.842% { transform: translateY(-174px); }
+  55.263% { transform: translateY(-174px); }
+  55.263% { transform: translateY(-261px); }
+  100%    { transform: translateY(-261px); }
+}
+@keyframes term-line1-stack {
+  0%      { transform: translateY(0px); }
+  22.581% { transform: translateY(0px); }
+  22.581% { transform: translateY(-87px); }
+  45.161% { transform: translateY(-87px); }
+  45.161% { transform: translateY(-174px); }
+  100%    { transform: translateY(-174px); }
+}
+@keyframes term-line2-stack {
+  0%      { transform: translateY(0px); }
+  29.167% { transform: translateY(0px); }
+  29.167% { transform: translateY(-87px); }
+  100%    { transform: translateY(-87px); }
+}
+@keyframes term-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* === Scene8_LogoOutro — entrance only, holds forever (no exit) === */
+@keyframes logo-outro-in {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}

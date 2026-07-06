@@ -16,13 +16,26 @@
  *   - Color scheme preserved
  *   - MCP service box with border preserved
  *   - Scene 4→5 transition intact (this scene's start = immediately after Scene 4)
+ *
+ * CSS conversion: every line's character reveal is a `ch`-unit `steps()` clip (JetBrains
+ * Mono is monospace, so this is exact — see the shared `typewriter-reveal` keyframe's own
+ * comment in styles.css). The MCP box's instant appear and the end-of-scene fade-out are
+ * both one-shot CSS keyframes.
+ *
+ * What's KEPT as a scoped `addFrameTask`: the camera-follow scroll. Its target position is
+ * an exponentially-smoothed chase (`lerp` toward a target that jumps every time a new line's
+ * cumulative content height crosses the viewport) — a continuous decay curve toward a
+ * data-dependent, discretely-changing target. Reproducing that exact smoothing feel with
+ * static keyframes would need ~29 razor-thin snap-then-ease segments (one per content line)
+ * and still wouldn't have the same "catching up" inertia. This is the one genuinely
+ * irreducible piece of procedural math in this scene — it only touches the wrapper's
+ * `transform`, never `textContent`.
  */
 
 import React, { useRef, useCallback } from "react";
 import { Timegroup } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
-import { clamp, lerp } from "../components/helpers";
 
 const SCENE_START = 17500; // updated: scene 4 is now 10000ms → 7500+10000=17500
 const SCENE_DUR = 7500; // extended to hold on final frame (MCP box + full Wrote line + $)
@@ -126,26 +139,19 @@ function getContentHeightAtMs(ms: number): number {
   return h;
 }
 
+// Fade out at very end (last 400ms) — CSS keyframe, delay computed once here.
+const FADE_OUT_START = SCENE_DUR - 400;
+
 export function Scene5_TerminalRun() {
-  const wrapperRef   = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const lineTextRefs = useRef<(HTMLSpanElement | null)[]>(
-    new Array(CONTENT_LINES.length).fill(null) // auto-sized to CONTENT_LINES array length
-  );
-  const setLineTextRef = (i: number) => (el: HTMLSpanElement | null) => {
-    lineTextRefs.current[i] = el;
-  };
-  const mcpBoxRef = useRef<HTMLDivElement>(null);
-
-  // Smooth scroll state
+  // Smooth scroll state — see file header comment for why this stays a frame task.
   const smoothScrollRef = useRef<number>(0);
 
   const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
     if (!wrapperRef.current) return;
 
     // ── Viewport-aware scroll ──────────────────────────────────────────────────
-    // Usable viewport: VIEWPORT_H - VIEWPORT_TOP_PAD (wrapper starts at top_pad px from top)
     const usableViewport = VIEWPORT_H - VIEWPORT_TOP_PAD;
     const contentHeight = getContentHeightAtMs(ms);
 
@@ -160,45 +166,6 @@ export function Scene5_TerminalRun() {
 
     // Apply: move content UP by smoothScrollY so new lines remain visible
     wrapperRef.current.style.transform = `translateY(${-smoothScrollRef.current}px)`;
-
-    // ── Fade out at very end (last 400ms) — holds fully visible until near-end ─
-    if (containerRef.current) {
-      if (ms > SCENE_DUR - 400) {
-        const fadeP = clamp((ms - (SCENE_DUR - 400)) / 400);
-        containerRef.current.style.opacity = String(1 - fadeP);
-      } else {
-        containerRef.current.style.opacity = "1";
-      }
-    }
-
-    // ── Typewriter per line ───────────────────────────────────────────────────
-    CONTENT_LINES.forEach((line, i) => {
-      const timing = LINE_TIMINGS[i];
-
-      if (line.type === "mcp") {
-        if (mcpBoxRef.current) {
-          mcpBoxRef.current.style.opacity = ms >= timing.startMs ? "1" : "0";
-        }
-        return;
-      }
-
-      if (line.type === "blank") return;
-
-      const el = lineTextRefs.current[i];
-      if (!el) return;
-
-      if (ms < timing.startMs) {
-        el.textContent = "";
-        return;
-      }
-
-      const text = line.text ?? "";
-      if (text.length === 0) return;
-
-      const elapsed = ms - timing.startMs;
-      const charCount = Math.min(text.length, Math.floor(elapsed / MS_PER_CHAR));
-      el.textContent = text.slice(0, charCount);
-    });
   }, []);
 
   return (
@@ -218,12 +185,12 @@ export function Scene5_TerminalRun() {
       <TraceLayer sceneStartMs={SCENE_START} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
 
       <div
-        ref={containerRef}
         style={{
           position: "absolute",
           inset: 0,
           overflow: "hidden",
           zIndex: 1,
+          animation: `reveal-out 400ms ${FADE_OUT_START}ms linear forwards`,
         }}
       >
         <div
@@ -241,11 +208,12 @@ export function Scene5_TerminalRun() {
           }}
         >
           {CONTENT_LINES.map((line, i) => {
+            const timing = LINE_TIMINGS[i];
+
             if (line.type === "mcp") {
               return (
                 <div
                   key={i}
-                  ref={mcpBoxRef}
                   style={{
                     display: "inline-flex",
                     flexDirection: "column",
@@ -255,7 +223,7 @@ export function Scene5_TerminalRun() {
                     marginBottom: 4,
                     padding: "12px 20px",
                     minWidth: 380,
-                    opacity: 0,
+                    animation: `term-fade-in 1ms ${timing.startMs}ms steps(1, end) both`,
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
@@ -284,10 +252,23 @@ export function Scene5_TerminalRun() {
               return <div key={i} style={{ minHeight: LINE_HEIGHT / 2 }} />;
             }
 
+            const text = line.text ?? "";
+            const revealDuration = Math.max(text.length * MS_PER_CHAR, 1);
+            const revealStyle: React.CSSProperties = {
+              display: "inline-block",
+              overflow: "hidden",
+              verticalAlign: "bottom",
+              whiteSpace: "nowrap",
+              width: `${text.length}ch`,
+              animation: `typewriter-reveal ${revealDuration}ms steps(${Math.max(text.length, 1)}, end) ${timing.startMs}ms both`,
+            };
+
             if (line.type === "tool") {
               return (
                 <div key={i} style={{ minHeight: LINE_HEIGHT }}>
-                  <span ref={setLineTextRef(i)} style={{ color: C_TOOL }} />
+                  <span style={revealStyle}>
+                    <span style={{ color: C_TOOL }}>{text}</span>
+                  </span>
                 </div>
               );
             }
@@ -307,7 +288,9 @@ export function Scene5_TerminalRun() {
                   fontStyle: line.type === "dim" ? "italic" : "normal",
                 }}
               >
-                <span ref={setLineTextRef(i)} style={{ color }} />
+                <span style={revealStyle}>
+                  <span style={{ color }}>{text}</span>
+                </span>
               </div>
             );
           })}

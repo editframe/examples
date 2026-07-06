@@ -10,13 +10,18 @@
  *     with a blinking block cursor that persists at end
  *   - Centered both horizontally and vertically
  *   - The bg transitions from dark (coming from Scene 5's fade-out) to white instantly at start
+ *
+ * The cursor is now the shared CSS `cursor-blink` keyframe (see styles.css): a
+ * `backwards`-filled infinite blink whose delay covers the "solid while typing" window
+ * for free (see that keyframe's own comment). The character reveal itself stays a scoped
+ * `addFrameTask` — Inter is a proportional font, so a `ch`-unit CSS clip (safe for the
+ * monospace terminal scenes) would risk clipping mid-glyph here.
  */
 
 import React, { useRef, useCallback } from "react";
 import { Timegroup } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
-import { clamp } from "../components/helpers";
 
 const SCENE_START = 18500; // FIX 1: shifted -1500ms
 const SCENE_DUR = 2000;
@@ -31,29 +36,12 @@ const FONT_SIZE = 100;
 
 export function Scene6_TitleCard() {
   const textRef = useRef<HTMLSpanElement>(null);
-  const cursorRef = useRef<HTMLSpanElement>(null);
 
   const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    // Typewriter
     if (textRef.current) {
       const elapsed = ms - TYPE_START;
-      const charCount = elapsed < 0 ? 0 : Math.min(
-        FULL_TEXT.length,
-        Math.floor(elapsed / CHAR_DELAY)
-      );
+      const charCount = elapsed < 0 ? 0 : Math.min(FULL_TEXT.length, Math.floor(elapsed / CHAR_DELAY));
       textRef.current.textContent = FULL_TEXT.slice(0, charCount);
-    }
-
-    // Blinking cursor
-    if (cursorRef.current) {
-      const isTyping = ms < TYPE_END + 100;
-      if (isTyping) {
-        cursorRef.current.style.opacity = "1";
-      } else {
-        // Blink at ~1Hz
-        const blinkCycle = Math.floor((ms - TYPE_END) / 500) % 2;
-        cursorRef.current.style.opacity = blinkCycle === 0 ? "1" : "0";
-      }
     }
   }, []);
 
@@ -97,9 +85,8 @@ export function Scene6_TitleCard() {
           }}
         >
           <span ref={textRef} />
-          {/* Block cursor */}
+          {/* Block cursor — solid during the delay (backwards fill), blinks after */}
           <span
-            ref={cursorRef}
             style={{
               display: "inline-block",
               width: 8,
@@ -107,7 +94,7 @@ export function Scene6_TitleCard() {
               background: "#111111",
               marginLeft: 4,
               verticalAlign: "text-bottom",
-              opacity: 0,
+              animation: `cursor-blink 1000ms step-end infinite ${TYPE_END}ms backwards`,
             }}
           />
         </div>

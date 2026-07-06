@@ -1,6 +1,18 @@
 /**
  * Cursor SDK Product Demo (v6, round-5 user feedback)
- * 1920×1080 @ 30fps · ~23.7s total
+ * 1920×1080 @ 30fps
+ *
+ * Eight scenes (see src/scenes/), each its own `<Timegroup mode="fixed">`, played by one
+ * root `<Timegroup mode="sequence">` — hard cuts between scenes are deliberate here (each
+ * scene's own comments call out its background flipping "instantly"), so unlike some other
+ * example projects in this repo the sequence has no `overlap`.
+ *
+ * Nearly every scene animates against its own local clock via plain CSS `@keyframes` /
+ * `steps()` typewriter clips / the shared `cursor-blink` cursor — no master-ms clock, no
+ * imperative ref-driven style mutation. Two scenes keep a small, explicitly-justified
+ * `addFrameTask` for math that has no reasonable static-CSS equivalent: Scene4_CodeBlock's
+ * accelerating camera chase + per-token text reveal, and Scene5_TerminalRun's
+ * viewport-follow scroll smoothing (see each file's own comment for why).
  */
 import React from "react";
 import { Timegroup } from "@editframe/react";

@@ -9,6 +9,10 @@
  *   - Animation: typed out character-by-character (~45ms per char),
  *     blinking cursor at end
  *   - Centered horizontally and vertically
+ *
+ * Same cursor/text split as Scene6_TitleCard — see that file's comment for why the
+ * cursor is CSS (`cursor-blink`) but the character reveal stays a scoped `addFrameTask`
+ * (proportional Inter font).
  */
 
 import React, { useRef, useCallback } from "react";
@@ -29,26 +33,12 @@ const FONT_SIZE = 72;
 
 export function Scene7_NowAvailable() {
   const textRef = useRef<HTMLSpanElement>(null);
-  const cursorRef = useRef<HTMLSpanElement>(null);
 
   const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
     if (textRef.current) {
       const elapsed = ms - TYPE_START;
-      const charCount = elapsed < 0 ? 0 : Math.min(
-        FULL_TEXT.length,
-        Math.floor(elapsed / CHAR_DELAY)
-      );
+      const charCount = elapsed < 0 ? 0 : Math.min(FULL_TEXT.length, Math.floor(elapsed / CHAR_DELAY));
       textRef.current.textContent = FULL_TEXT.slice(0, charCount);
-    }
-
-    if (cursorRef.current) {
-      const isTyping = ms < TYPE_END + 100;
-      if (isTyping) {
-        cursorRef.current.style.opacity = "1";
-      } else {
-        const blinkCycle = Math.floor((ms - TYPE_END) / 500) % 2;
-        cursorRef.current.style.opacity = blinkCycle === 0 ? "1" : "0";
-      }
     }
   }, []);
 
@@ -92,7 +82,6 @@ export function Scene7_NowAvailable() {
         >
           <span ref={textRef} />
           <span
-            ref={cursorRef}
             style={{
               display: "inline-block",
               width: 6,
@@ -100,7 +89,7 @@ export function Scene7_NowAvailable() {
               background: "#111111",
               marginLeft: 3,
               verticalAlign: "text-bottom",
-              opacity: 0,
+              animation: `cursor-blink 1000ms step-end infinite ${TYPE_END}ms backwards`,
             }}
           />
         </div>

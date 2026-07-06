@@ -6,17 +6,15 @@
  *   - Cube SLIGHTLY SMALLER: ~250px (was 310px)
  *   - Smooth entrance: opacity 0→1 + scale 0.85→1.0 over 600ms, easeOutCubic (preserved)
  *   - Centered both axes on white background
+ *
+ * One-shot fade + scale entrance, nothing exits — a plain `logo-outro-in` CSS keyframe
+ * (see styles.css) replaces the old per-frame `track()`/ref-mutation entirely.
  */
 
-import React, { useRef, useCallback } from "react";
-import { Timegroup } from "@editframe/react";
+import React from "react";
+import { Timegroup, Image } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
-import { track } from "../components/helpers";
-import { eases } from "animejs";
-// ROUND-7 FIX (comment #2): use the REAL downloaded Cursor logo PNG instead of
-// a hand-built SVG cube. Sized smaller so it matches the box (not too big).
-import { cursorLogoPng } from "../assets/cursorLogo";
 
 const SCENE_START = 22500;
 const SCENE_DUR = 1263;
@@ -28,24 +26,10 @@ const ENTRANCE_DURATION = 600;
 const LOGO_SIZE = 168;
 
 export function Scene8_LogoOutro() {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
-  const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    if (!wrapperRef.current) return;
-
-    const p = track(ms, 0, ENTRANCE_DURATION, eases.outCubic);
-    const opacity = p;
-    const scale = 0.85 + 0.15 * p;
-
-    wrapperRef.current.style.opacity = String(opacity);
-    wrapperRef.current.style.transform = `scale(${scale})`;
-  }, []);
-
   return (
     <Timegroup
       mode="fixed"
       duration={`${SCENE_DUR}ms`}
-      onFrame={onFrame as any}
       style={{
         position: "absolute",
         inset: 0,
@@ -68,19 +52,11 @@ export function Scene8_LogoOutro() {
           zIndex: 1,
         }}
       >
-        <div
-          ref={wrapperRef}
-          style={{
-            opacity: 0,
-            transform: "scale(0.85)",
-          }}
-        >
-          <img
-            src={cursorLogoPng}
+        <div style={{ animation: `logo-outro-in ${ENTRANCE_DURATION}ms cubic-bezier(0.33,1,0.68,1) both` }}>
+          <Image
+            src="/assets/cursor-logo.png"
             alt="Cursor"
-            width={LOGO_SIZE}
-            height={LOGO_SIZE}
-            style={{ display: "block", objectFit: "contain" }}
+            style={{ width: LOGO_SIZE, height: LOGO_SIZE, display: "block", objectFit: "contain" }}
           />
         </div>
       </div>

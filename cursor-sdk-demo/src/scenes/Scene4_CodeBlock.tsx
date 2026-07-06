@@ -20,14 +20,25 @@
  *   - No panel chrome — code directly on bg
  *   - JetBrains Mono, 48px
  *   - Syntax colors: blue keywords, green classes, orange methods, pink strings, dim line nums
+ *
+ * DELIBERATELY KEPT AS A SCOPED `addFrameTask` (not converted to CSS):
+ * This scene compounds two irreducible things at once — (1) per-token, multi-line
+ * `textContent` reveal across 40+ syntax-colored spans (CSS cannot mutate DOM text, and
+ * unlike the monospace terminal scenes this isn't a single flat string so the `ch`-unit
+ * clip trick doesn't apply per-line either), and (2) a camera chase whose speed itself
+ * *ramps* over time — both `frameFraction` (0.72→0.56) and `lerpSpeed` (0.34→0.72) vary
+ * continuously with `phase3T`, on top of exponential smoothing toward a target that
+ * depends on which token was most recently typed. There is no reasonable static-keyframe
+ * equivalent for an accelerating, content-dependent camera chase layered on token-level
+ * text mutation — this is the "genuinely irreducible" case referred to in
+ * REFACTOR-PATTERNS.md 2b, kept scoped to this one scene only.
  */
 
 import React, { useRef, useCallback } from "react";
 import { Timegroup } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
-import { clamp, lerp, track } from "../components/helpers";
-import { eases } from "animejs";
+import { clamp, lerp } from "../components/helpers";
 
 const SCENE_START = 7500;
 // ROUND-8d: the code+camera-chase fully settles by ~scene-local 5900ms, but the

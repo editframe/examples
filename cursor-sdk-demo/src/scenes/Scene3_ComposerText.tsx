@@ -7,13 +7,22 @@
  *
  * Typewriter: Line 1 types out first, then Line 2 starts immediately after
  * Line 1 finishes (no gap). Blinking cursor on the active typing line.
+ *
+ * The blinking-cursor opacity is now the shared CSS `cursor-blink`/`cursor-appear`/
+ * `cursor-vanish` keyframes (see styles.css) instead of a per-frame ref mutation.
+ *
+ * The character reveal itself is kept as a small scoped `addFrameTask` (textContent
+ * slicing), NOT converted to the `ch`-unit CSS clip trick used in the monospace scenes:
+ * Inter is a proportional font, so each character has a different width. A CSS
+ * `width: 0 → Nch` clip would not align to glyph boundaries and risks clipping
+ * mid-character — a real visual-regression risk, not just JS-aversion. Setting
+ * textContent is also something CSS categorically cannot do.
  */
 
 import React, { useRef, useCallback } from "react";
 import { Timegroup } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
-import { clamp } from "../components/helpers";
 
 const SCENE_START = 5500; // FIX 1: shifted -1500ms
 const SCENE_DUR = 2000; // FIX 2: same 2000ms, but faster typing so "2.5" fits
@@ -41,10 +50,8 @@ const LEFT = 120;
 const TOP = 430;
 
 export function Scene3_ComposerText() {
-  const text1Ref  = useRef<HTMLSpanElement>(null);
-  const text2Ref  = useRef<HTMLSpanElement>(null);
-  const cursor1Ref = useRef<HTMLSpanElement>(null);
-  const cursor2Ref = useRef<HTMLSpanElement>(null);
+  const text1Ref = useRef<HTMLSpanElement>(null);
+  const text2Ref = useRef<HTMLSpanElement>(null);
 
   const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
     // ── Line 1 typewriter ──
@@ -54,29 +61,11 @@ export function Scene3_ComposerText() {
       text1Ref.current.textContent = LINE1_TEXT.slice(0, count);
     }
 
-    // ── Line 1 cursor: visible while typing line 1, hidden once line 2 starts ──
-    if (cursor1Ref.current) {
-      const typingLine1 = ms >= TYPE_START && ms < LINE1_TYPE_END;
-      cursor1Ref.current.style.opacity = typingLine1 ? "1" : "0";
-    }
-
     // ── Line 2 typewriter ──
     if (text2Ref.current) {
       const elapsed = ms - LINE2_TYPE_START;
       const count = elapsed < 0 ? 0 : Math.min(LINE2_TEXT.length, Math.floor(elapsed / MS_PER_CHAR));
       text2Ref.current.textContent = LINE2_TEXT.slice(0, count);
-    }
-
-    // ── Line 2 cursor: visible while typing line 2, blinks after done ──
-    if (cursor2Ref.current) {
-      if (ms < LINE2_TYPE_START) {
-        cursor2Ref.current.style.opacity = "0";
-      } else if (ms < LINE2_TYPE_END + 100) {
-        cursor2Ref.current.style.opacity = "1";
-      } else {
-        const blinkCycle = Math.floor((ms - LINE2_TYPE_END) / 500) % 2;
-        cursor2Ref.current.style.opacity = blinkCycle === 0 ? "1" : "0";
-      }
     }
   }, []);
 
@@ -87,7 +76,6 @@ export function Scene3_ComposerText() {
     background: "#EEEADA",
     marginLeft: 4,
     verticalAlign: "text-bottom",
-    opacity: 0,
   };
 
   return (
@@ -106,7 +94,7 @@ export function Scene3_ComposerText() {
     >
       <TraceLayer sceneStartMs={SCENE_START} enabled={TRACE_MODE} opacity={TRACE_OPACITY} />
 
-      {/* Line 1 */}
+      {/* Line 1 — cursor visible only while typing line 1, then vanishes for good */}
       <div
         style={{
           position: "absolute",
@@ -125,10 +113,18 @@ export function Scene3_ComposerText() {
         }}
       >
         <span ref={text1Ref} />
-        <span ref={cursor1Ref} style={cursorStyle} />
+        <span
+          style={{
+            ...cursorStyle,
+            animation: [
+              `cursor-appear 1ms ${TYPE_START}ms steps(1, end) both`,
+              `cursor-vanish 1ms ${LINE1_TYPE_END}ms steps(1, end) forwards`,
+            ].join(", "),
+          }}
+        />
       </div>
 
-      {/* Line 2 */}
+      {/* Line 2 — cursor appears when line 2 starts, blinks once typing settles */}
       <div
         style={{
           position: "absolute",
@@ -147,7 +143,15 @@ export function Scene3_ComposerText() {
         }}
       >
         <span ref={text2Ref} />
-        <span ref={cursor2Ref} style={cursorStyle} />
+        <span
+          style={{
+            ...cursorStyle,
+            animation: [
+              `cursor-appear 1ms ${LINE2_TYPE_START}ms steps(1, end) both`,
+              `cursor-blink 1000ms step-end infinite ${LINE2_TYPE_END + 100}ms`,
+            ].join(", "),
+          }}
+        />
       </div>
     </Timegroup>
   );

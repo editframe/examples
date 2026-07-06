@@ -9,10 +9,19 @@
  *     line aligns to a common X coordinate. Right edges vary by line length.
  *     This matches the reference video layout.
  *
- * STACK-UP ANIMATION (preserved):
+ * STACK-UP ANIMATION (preserved, now CSS):
  *   Each new output line spawns at ANCHOR_Y and existing lines push upward.
  *   The block container is centered horizontally (left:50% + transform translateX(-50%))
  *   but internal flex direction is column with align-items: flex-start.
+ *
+ *   Every line's resting Y only ever changes at another line's fixed `spawnAt`, so the
+ *   whole stack-up is a deterministic step function — precomputed once (see the
+ *   `term-prompt-shift` / `term-lineN-stack` keyframes in styles.css, derived from
+ *   OUTPUT_LINES + LINE_HEIGHT) instead of read from a ref every frame.
+ *
+ * TYPEWRITER (now CSS): JetBrains Mono is a real monospace font, so the "$ uv add
+ * cursor-sdk" command reveals via a `width: 0 → 18ch` clip in `steps(18, end)` — exact,
+ * no per-character textContent mutation needed.
  *
  * LINES:
  *   1. $ uv add cursor-sdk (white)
@@ -22,12 +31,10 @@
  *   5.   + cursor-sdk==0.5.0         (orange #D87757)
  */
 
-import React, { useRef, useCallback } from "react";
+import React from "react";
 import { Timegroup } from "@editframe/react";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { TraceLayer } from "../components/TraceLayer";
-import { track, clamp } from "../components/helpers";
-import { eases } from "animejs";
 
 // ─── Timing ───────────────────────────────────────────────────────
 const SCENE_START = 0;
@@ -38,12 +45,14 @@ const COMMAND_FULL = "uv add cursor-sdk";
 const MS_PER_CHAR = 70;
 const TYPE_END = TYPE_START + COMMAND_FULL.length * MS_PER_CHAR; // ~1530ms
 
-// Output lines — spawn sequentially, push prior lines up
+// Output lines — spawn sequentially, push prior lines up. `stackKeyframe` is the
+// precomputed CSS keyframe (see styles.css) for this line's own step-function Y offset;
+// the last line never gets pushed, so it has none (stays at translateY(0)).
 const OUTPUT_LINES = [
-  { text: "Resolved 9 packages in 0.3s", color: "#888888", spawnAt: 1700 },
-  { text: "Prepared 7 packages in 1.8s",  color: "#888888", spawnAt: 2400 },
-  { text: "Installed 8 packages in 0.1s", color: "#AAAAAA", spawnAt: 3100 },
-  { text: " + cursor-sdk==0.5.0",         color: "#D87757", spawnAt: 3800 },
+  { text: "Resolved 9 packages in 0.3s", color: "#888888", spawnAt: 1700, stackKeyframe: "term-line0-stack" },
+  { text: "Prepared 7 packages in 1.8s",  color: "#888888", spawnAt: 2400, stackKeyframe: "term-line1-stack" },
+  { text: "Installed 8 packages in 0.1s", color: "#AAAAAA", spawnAt: 3100, stackKeyframe: "term-line2-stack" },
+  { text: " + cursor-sdk==0.5.0",         color: "#D87757", spawnAt: 3800, stackKeyframe: null },
 ] as const;
 
 const FONT_FAMILY = '"JetBrains Mono", "SF Mono", "Menlo", "Consolas", monospace';
@@ -58,71 +67,11 @@ const ANCHOR_Y = 490;
 // Give it 1100px to be safe; block will be centered in 1920px frame
 const BLOCK_WIDTH = 1100;
 
+// Cursor: solid while typing, blinks after, disappears for good once real output starts.
+const CURSOR_BLINK_START = TYPE_END + 200;
+const CURSOR_VANISH_AT = OUTPUT_LINES[0].spawnAt + 300;
+
 export function Scene1_2_Terminal() {
-  // Ref for the prompt-line inner div (gets Y translate)
-  const promptInnerRef = useRef<HTMLDivElement>(null);
-  // Refs for each output line inner div (gets Y translate + opacity)
-  const lineInnerRefs = [
-    useRef<HTMLDivElement>(null),
-    useRef<HTMLDivElement>(null),
-    useRef<HTMLDivElement>(null),
-    useRef<HTMLDivElement>(null),
-  ];
-  // Ref for the typed command text
-  const commandRef = useRef<HTMLSpanElement>(null);
-  // Ref for the block cursor
-  const cursorRef = useRef<HTMLSpanElement>(null);
-
-  const onFrame = useCallback(({ ownCurrentTimeMs: ms }: { ownCurrentTimeMs: number }) => {
-    // ── Typing animation ──
-    if (commandRef.current) {
-      const elapsed = ms - TYPE_START;
-      const charCount = elapsed < 0 ? 0 : Math.min(COMMAND_FULL.length, Math.floor(elapsed / MS_PER_CHAR));
-      commandRef.current.textContent = COMMAND_FULL.slice(0, charCount);
-    }
-
-    // ── Cursor blink ──
-    if (cursorRef.current) {
-      const afterOutput = ms > OUTPUT_LINES[0].spawnAt + 300;
-      const isTyping = ms >= TYPE_START && ms < TYPE_END + 200;
-      if (afterOutput) {
-        cursorRef.current.style.opacity = "0";
-      } else if (isTyping) {
-        cursorRef.current.style.opacity = "1";
-      } else {
-        const blinkCycle = Math.floor((ms - TYPE_END) / 500) % 2;
-        cursorRef.current.style.opacity = blinkCycle === 0 ? "1" : "0";
-      }
-    }
-
-    // ── Stack-up logic ──
-    const spawnedCount = OUTPUT_LINES.filter(l => ms >= l.spawnAt).length;
-
-    // Command row shifts up by spawnedCount * LINE_HEIGHT
-    if (promptInnerRef.current) {
-      promptInnerRef.current.style.transform = `translateY(${-spawnedCount * LINE_HEIGHT}px)`;
-    }
-
-    OUTPUT_LINES.forEach((line, i) => {
-      const el = lineInnerRefs[i].current;
-      if (!el) return;
-
-      if (ms < line.spawnAt) {
-        el.style.opacity = "0";
-        el.style.transform = "translateY(20px)";
-        return;
-      }
-
-      // depth = how far above the "anchor" (newest = 0, oldest pushed highest)
-      const depth = spawnedCount - 1 - i;
-      const targetY = -depth * LINE_HEIGHT;
-
-      const fadeP = track(ms, line.spawnAt, line.spawnAt + 250, eases.outCubic);
-      el.style.opacity = String(fadeP);
-      el.style.transform = `translateY(${targetY}px)`;
-    });
-  }, []);
-
   // ─── Styles ───────────────────────────────────────────────────────
   // Outer container: full-frame absolute, used to center the block horizontally
   const outerStyle: React.CSSProperties = {
@@ -159,7 +108,6 @@ export function Scene1_2_Terminal() {
     <Timegroup
       mode="fixed"
       duration={`${SCENE_DUR}ms`}
-      onFrame={onFrame as any}
       style={{
         position: "absolute",
         inset: 0,
@@ -177,18 +125,28 @@ export function Scene1_2_Terminal() {
         {/* Command row */}
         <div style={rowWrapStyle}>
           <div
-            ref={promptInnerRef}
             style={{
               ...textBaseStyle,
               display: "flex",
               alignItems: "baseline",
               zIndex: 2,
+              animation: `term-prompt-shift ${SCENE_DUR}ms linear both`,
             }}
           >
             <span style={{ color: "#888888", marginRight: 14 }}>$</span>
-            <span ref={commandRef} style={{ color: "#F0F0F0", fontWeight: 400 }} />
             <span
-              ref={cursorRef}
+              style={{
+                display: "inline-block",
+                overflow: "hidden",
+                verticalAlign: "bottom",
+                whiteSpace: "nowrap",
+                width: `${COMMAND_FULL.length}ch`,
+                animation: `typewriter-reveal ${COMMAND_FULL.length * MS_PER_CHAR}ms steps(${COMMAND_FULL.length}, end) ${TYPE_START}ms both`,
+              }}
+            >
+              <span style={{ color: "#F0F0F0", fontWeight: 400 }}>{COMMAND_FULL}</span>
+            </span>
+            <span
               style={{
                 display: "inline-block",
                 width: Math.round(FONT_SIZE * 0.55),
@@ -196,7 +154,10 @@ export function Scene1_2_Terminal() {
                 background: "#F0F0F0",
                 marginLeft: 3,
                 verticalAlign: "text-bottom",
-                opacity: 0,
+                animation: [
+                  `cursor-blink 1000ms step-end infinite ${CURSOR_BLINK_START}ms backwards`,
+                  `cursor-vanish 1ms ${CURSOR_VANISH_AT}ms steps(1, end) forwards`,
+                ].join(", "),
               }}
             />
           </div>
@@ -206,14 +167,15 @@ export function Scene1_2_Terminal() {
         {OUTPUT_LINES.map((line, i) => (
           <div key={i} style={rowWrapStyle}>
             <div
-              ref={lineInnerRefs[i]}
               style={{
                 ...textBaseStyle,
                 color: line.color,
                 fontWeight: line.color === "#D87757" ? 500 : 400,
-                opacity: 0,
-                transform: "translateY(20px)",
                 zIndex: 1,
+                animation: [
+                  `term-fade-in 250ms ${line.spawnAt}ms cubic-bezier(0.33,1,0.68,1) both`,
+                  ...(line.stackKeyframe ? [`${line.stackKeyframe} ${SCENE_DUR - line.spawnAt}ms ${line.spawnAt}ms linear both`] : []),
+                ].join(", "),
               }}
             >
               {line.text}
