@@ -1,13 +1,13 @@
 import React from "react";
 import { Timegroup, Image } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { Fin } from "../components/Fin";
 import { camoBg, facetedCamo } from "../components/camo";
 import { SCENES, OVERLAP_MS, W, H, NEAR_BLACK, WHITE, OFF_WHITE, DISPLAY, HEAVY } from "../constants";
 
-const GYMSHARK_LOGO = "/assets/gymshark-logo.png";
-const POSTER_FABRIC = "/assets/poster-fabric.jpg";
-const MODEL_0030 = "/assets/model-0030.jpg";
+const GYMSHARK_LOGO = "/gymshark-geo-seamless-demo/src/assets/gymshark-logo.png";
+const POSTER_FABRIC = "/gymshark-geo-seamless-demo/src/assets/poster-fabric.jpg";
+const MODEL_0030 = "/gymshark-geo-seamless-demo/src/assets/model-0030.jpg";
 
 // 8-tile grid mirroring the colorway selector's layout, used only by the T6 converge —
 // cx/cy is each tile's displacement from the frame center, computed once at module scope.

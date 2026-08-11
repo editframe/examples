@@ -62,7 +62,7 @@ asset. This cut is **music only**; there are no sound effects. See
 
 | Cue | Time (ms) | File | Volume |
 |---|---|---|---|
-| Music bed | 0 – 32000 | `src/assets/music-bed.mp3` (loudnorm −16, fade-in 0.6s, fade-out 30.5–32.0s) | 1.0 |
+| Music bed | 0 – 32000 | `src/assets/linear-agents-demo-music-bed.mp3` (loudnorm −16, fade-in 0.6s, fade-out 30.5–32.0s) | 1.0 |
 
 ---
 
@@ -107,7 +107,7 @@ Linear runs a dark, flat UI — a warm near-black ground, two greys of type, and
     ├── main.tsx               ← TimelineRoot mount
     ├── constants.ts           ← scene durations (SCENES) + palette tokens
     ├── styles.css             ← document reset + every scene's `@keyframes`
-    ├── assets/                ← music-bed.mp3 (fade/loudnorm pre-baked)
+    ├── assets/                ← linear-agents-demo-music-bed.mp3 (fade/loudnorm pre-baked)
     ├── scenes/                ← one file per scene, each its own `<Timegroup mode="fixed">`
     │   ├── TitleIntro.tsx
     │   ├── Backlog.tsx
@@ -137,7 +137,7 @@ NO_COLOR=1 FORCE_COLOR=0 npm run render
 
 1. **Swap the story** — each beat is its own file under `src/scenes/`, sequenced by the inner `<Timegroup mode="sequence">` in `src/Video.tsx`. Edit a scene's own local timing constants directly in that file; scene durations live in `src/constants.ts` (`SCENES`).
 2. **Rebrand** — replace the palette tokens at the top of `src/constants.ts` (and `FONT` / `MONO`, also in `src/constants.ts`). Never use pure `#000` or drop shadows on text.
-3. **Swap the music** — replace `src/assets/music-bed.mp3` (bake any new fade/loudnorm treatment into the file itself with a local ffmpeg pass — no runtime fade logic) and adjust the `<Audio>` `volume` in `src/Video.tsx`; log it in [`CREDITS.md`](CREDITS.md).
+3. **Swap the music** — replace `src/assets/linear-agents-demo-music-bed.mp3` (bake any new fade/loudnorm treatment into the file itself with a local ffmpeg pass — no runtime fade logic) and adjust the `<Audio>` `volume` in `src/Video.tsx`; log it in [`CREDITS.md`](CREDITS.md).
 4. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render`.
 
 ---

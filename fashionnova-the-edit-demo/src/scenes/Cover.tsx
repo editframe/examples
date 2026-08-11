@@ -3,8 +3,8 @@ import { Timegroup } from "@editframe/react";
 import { SCENES, BLACK, MONT, SILVER_GRAD } from "../constants";
 import { imgFill, textWindow } from "../components/textStyles";
 
-const TEX_PAPER = "/assets/tex-paper.png";
-const TEX_INK = "/assets/tex-ink.png";
+const TEX_PAPER = "/fashionnova-the-edit-demo/src/assets/tex-paper.png";
+const TEX_INK = "/fashionnova-the-edit-demo/src/assets/tex-ink.png";
 
 /**
  * COVER — 0 → 4000ms local (4000ms total; the last 300ms cross-fades into SwingRack).

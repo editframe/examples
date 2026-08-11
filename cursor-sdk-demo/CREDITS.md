@@ -12,7 +12,7 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `src/assets/music-bed.mp3`
+### `src/assets/cursor-sdk-demo-music-bed.mp3`
 
 | | |
 |---|---|
@@ -27,14 +27,14 @@ A driving, modern tech-bed that mirrors the Cursor product feel. **Action item:*
 
 ## SFX
 
-### `src/assets/sfx/keyboard.wav`
+### `src/assets/sfx/cursor-sdk-demo-keyboard.wav`
 
 | | |
 |---|---|
 | **Type** | Mechanical keyboard typing |
 | **Source** | Embedded file metadata credits **MographMotions** |
 | **License** | Unverified — confirm commercial-use terms with the source pack before external distribution |
-| **Used for** | Two human-typed cues: `$ uv add cursor-sdk` (Scene1_2_Terminal, offset 200ms / global 200ms) and the `model="composer-2.5-fast"` prompt line (Scene4_CodeBlock, offset 200ms / global 7700ms). No cue on the fast AI-generated code or the terminal-run scene — those type too quickly to read as human typing. |
+| **Used for** | Two human-typed cues: `$ uv add cursor-sdk` (Terminal, offset 200ms / global 200ms) and the `model="composer-2.5-fast"` prompt line (CodeBlock, offset 200ms / global 7700ms). No cue on the fast AI-generated code or the terminal-run scene — those type too quickly to read as human typing. |
 
 ---
 

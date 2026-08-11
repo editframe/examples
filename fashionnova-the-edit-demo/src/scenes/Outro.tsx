@@ -4,9 +4,9 @@ import { SCENES, BLACK, WHITE, MONT, SILVER_GRAD } from "../constants";
 import { CutFlash } from "../components/CutFlash";
 import { textWindow } from "../components/textStyles";
 
-const TEX_INK = "/assets/tex-ink.png";
-const DRESS_2 = "/assets/dress-2.jpg";
-const DRESS_3 = "/assets/dress-3.jpg";
+const TEX_INK = "/fashionnova-the-edit-demo/src/assets/tex-ink.png";
+const DRESS_2 = "/fashionnova-the-edit-demo/src/assets/dress-2.jpg";
+const DRESS_3 = "/fashionnova-the-edit-demo/src/assets/dress-3.jpg";
 
 /**
  * OUTRO — image-filled FASHION NOVA lockup + URL, no redundant %OFF tag.

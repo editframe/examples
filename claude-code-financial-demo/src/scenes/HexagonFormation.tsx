@@ -26,7 +26,7 @@
 import React, { useCallback, useRef } from "react";
 import { Timegroup } from "@editframe/react";
 import { TraceLayer } from "../components/TraceLayer";
-import { track, lerp, clamp, easeOutBack } from "../components/helpers";
+import { track, lerp, clamp, easeOutBack } from "@shared/utils/animation";
 import { TRACE_MODE, TRACE_OPACITY } from "../constants";
 import { eases } from "animejs";
 

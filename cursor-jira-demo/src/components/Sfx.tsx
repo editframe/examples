@@ -1,43 +1,13 @@
-import React from "react";
-import { Audio } from "@editframe/react";
+import { createSfx } from "@shared/components/Sfx";
 
-/**
- * Drop an <Sfx /> inside any `mode="fixed"` <Timegroup> scene.
- *   `cue`    selects which sample to play.
- *   `at`     offset within the scene (seconds).
- *   `dur`    play duration (defaults to 1.2s).
- *   `volume` 0–1.
- *
- * SFX files live in `src/assets/sfx/` and are bundled by the singlefile
- * build like any other local asset (see `<Video>`/`<Audio>` local-asset
- * resolution in the `vite-plugin` skill).
- */
-
-const SFX_PATHS: Record<string, string> = {
-  pop: "/assets/sfx/pop.mp3",
-  notify: "/assets/sfx/notify.mp3",
-  twinkle: "/assets/sfx/twinkle.mp3",
-  reveal: "/assets/sfx/reveal.mp3",
-  "glitch-short": "/assets/sfx/glitch-short.mp3",
-  ping: "/assets/sfx/ping.mp3",
-  confirm: "/assets/sfx/confirm.mp3",
-  "glass-pop": "/assets/sfx/glass-pop.mp3",
-};
-
-export const Sfx: React.FC<{
-  cue: keyof typeof SFX_PATHS;
-  at: number;
-  dur?: number;
-  volume?: number;
-}> = ({ cue, at, dur = 1.2, volume = 1 }) => {
-  const src = SFX_PATHS[cue];
-  if (!src) return null;
-  return (
-    <Audio
-      src={src}
-      offset={`${at}s`}
-      duration={`${dur}s`}
-      volume={volume}
-    />
-  );
-};
+/** Drop inside any `mode="fixed"` <Timegroup> scene: `<Sfx cue="pop" at={1.2} />` */
+export const Sfx = createSfx({
+  pop: "/cursor-jira-demo/src/assets/sfx/cursor-jira-demo-pop.mp3",
+  notify: "/cursor-jira-demo/src/assets/sfx/notify.mp3",
+  twinkle: "/cursor-jira-demo/src/assets/sfx/cursor-jira-demo-twinkle.mp3",
+  reveal: "/cursor-jira-demo/src/assets/sfx/cursor-jira-demo-reveal.mp3",
+  "glitch-short": "/cursor-jira-demo/src/assets/sfx/glitch-short.mp3",
+  ping: "/cursor-jira-demo/src/assets/sfx/cursor-jira-demo-ping.mp3",
+  confirm: "/cursor-jira-demo/src/assets/sfx/cursor-jira-demo-confirm.mp3",
+  "glass-pop": "/cursor-jira-demo/src/assets/sfx/glass-pop.mp3",
+});

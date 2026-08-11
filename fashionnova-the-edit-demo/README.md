@@ -57,7 +57,7 @@ The soundtrack is a single **music-only** bed — the purpose-built track "Velve
 
 | Cue | Master ms | Source |
 |---|---|---|
-| Music bed | 0 – 25000 | `src/assets/music-bed.mp3` (fade-in 0.3s, fade-out 1.5s, peak-limited 0.97, baked in) |
+| Music bed | 0 – 25000 | `src/assets/fashionnova-the-edit-demo-music-bed.mp3` (fade-in 0.3s, fade-out 1.5s, peak-limited 0.97, baked in) |
 
 All audio is cleared for commercial use → see [`CREDITS.md`](CREDITS.md).
 
@@ -104,7 +104,7 @@ Fashion Nova is a **black & white brand** (theme `#000000`, no fixed accent colo
     ├── main.tsx                        ← TimelineRoot mount
     ├── constants.ts                    ← palette / type / SCENES durations + overlap
     ├── styles.css                      ← Montserrat @font-face + all @keyframes + Tailwind
-    ├── assets/                         ← look photos, textures, Montserrat woff2, music-bed.mp3 (real files, no base64)
+    ├── assets/                         ← look photos, textures, Montserrat woff2, fashionnova-the-edit-demo-music-bed.mp3 (real files, no base64)
     ├── scenes/                         ← one file per scene, each its own <Timegroup mode="fixed">
     │   ├── Cover.tsx                   ← wordmark + silver tag
     │   ├── SwingRack.tsx               ← swing-tickets drop onto the rack
@@ -135,7 +135,7 @@ NO_COLOR=1 FORCE_COLOR=0 npm run render
 1. **Swap the story** — each scene lives in its own file under `src/scenes/`, as its own `<Timegroup mode="fixed">` animated declaratively with CSS (`@keyframes` in `styles.css`, `Reveal` for one-shot callouts); retune a scene's local-ms delays or its `@keyframes` to re-cut a beat. `src/constants.ts` (`SCENES`) documents each scene's duration and the shared crossfade `overlap`.
 2. **Rebrand** — edit the palette/type/silver-accent tokens in `src/constants.ts`. Keep built graphics mono; let real photos keep their color.
 3. **Swap the looks** — replace the jpg/png files in `src/assets/` (referenced via `<Image src="/assets/...">` in the relevant scene file).
-4. **Swap audio** — replace `src/assets/music-bed.mp3` (bake any fades/normalization in with a local ffmpeg pass first) and adjust the `<Audio>` `volume` in `src/Video.tsx`; log in [`CREDITS.md`](CREDITS.md).
+4. **Swap audio** — replace `src/assets/fashionnova-the-edit-demo-music-bed.mp3` (bake any fades/normalization in with a local ffmpeg pass first) and adjust the `<Audio>` `volume` in `src/Video.tsx`; log in [`CREDITS.md`](CREDITS.md).
 5. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render`.
 
 ---

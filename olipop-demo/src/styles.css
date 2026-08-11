@@ -1,13 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700;1,800;1,900&family=Archivo:wght@500;600;700;800;900&display=swap");
 @import "tailwindcss";
+@import "@shared/styles/reveal.css";
 
 @source "../src";
-@source "../index.html";
 
 html, body, #root { height: 100%; margin: 0; padding: 0; }
 * { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 
-/* === Shared (used across multiple scenes + components/Reveal.tsx) === */
 @keyframes spin-cw {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
@@ -15,14 +14,6 @@ html, body, #root { height: 100%; margin: 0; padding: 0; }
 @keyframes spin-ccw {
   from { transform: rotate(0deg); }
   to   { transform: rotate(-360deg); }
-}
-@keyframes reveal-in {
-  from { opacity: 0; transform: translateY(var(--reveal-y, 20px)); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes reveal-out {
-  from { opacity: 1; transform: translateY(0); }
-  to   { opacity: 0; transform: translateY(var(--reveal-exit-y, 0px)); }
 }
 /* Whole-video ambient camera breathing (see Video.tsx). Approximates the original's three
    independent sine waves on incommensurate periods with one clean loop — combining those

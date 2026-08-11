@@ -2,10 +2,10 @@ import React, { useEffect, useRef } from "react";
 import { Timegroup, Image } from "@editframe/react";
 import { SCENES, W, H, BLACK, WHITE, GREY, SILVER, SILVER_GRAD, MONT, PRICE } from "../constants";
 import { RegMark } from "../components/RegMark";
-import { Reveal } from "../components/Reveal";
-import { clamp, lerp, track, easeOutCubic, easeInOutQuad, outBack } from "../components/helpers";
+import { Reveal } from "@shared/components/Reveal";
+import { clamp, lerp, track, easeOutCubic, easeInOutQuad, outBack } from "@shared/utils/animation";
 
-const TEX_PAPER = "/assets/tex-paper.png";
+const TEX_PAPER = "/fashionnova-the-edit-demo/src/assets/tex-paper.png";
 
 interface TimegroupElement extends HTMLElement {
   initializer?: (instance: TimegroupElement) => (() => void) | void;
@@ -16,12 +16,12 @@ const CARD_W = 360;
 const CARD_H = 540;
 type Look = { src: string; no: string; name: string; objPos: string; off: string };
 const LOOKS: Look[] = [
-  { src: "/assets/dress-2.jpg", no: "01", name: "MIDNIGHT MAXI", objPos: "50% 18%", off: "50" },
-  { src: "/assets/ed01.jpg", no: "02", name: "PLUM BODYCON", objPos: "50% 30%", off: "60" },
-  { src: "/assets/ed11.jpg", no: "03", name: "IVORY GOWN", objPos: "50% 22%", off: "40" },
-  { src: "/assets/ed07.jpg", no: "04", name: "LUXE BLAZER", objPos: "50% 38%", off: "70" },
-  { src: "/assets/ed10.jpg", no: "05", name: "CREAM COWL", objPos: "50% 40%", off: "55" },
-  { src: "/assets/dress-3.jpg", no: "06", name: "NOIR EDITION", objPos: "50% 20%", off: "65" },
+  { src: "/fashionnova-the-edit-demo/src/assets/dress-2.jpg", no: "01", name: "MIDNIGHT MAXI", objPos: "50% 18%", off: "50" },
+  { src: "/fashionnova-the-edit-demo/src/assets/ed01.jpg", no: "02", name: "PLUM BODYCON", objPos: "50% 30%", off: "60" },
+  { src: "/fashionnova-the-edit-demo/src/assets/ed11.jpg", no: "03", name: "IVORY GOWN", objPos: "50% 22%", off: "40" },
+  { src: "/fashionnova-the-edit-demo/src/assets/ed07.jpg", no: "04", name: "LUXE BLAZER", objPos: "50% 38%", off: "70" },
+  { src: "/fashionnova-the-edit-demo/src/assets/ed10.jpg", no: "05", name: "CREAM COWL", objPos: "50% 40%", off: "55" },
+  { src: "/fashionnova-the-edit-demo/src/assets/dress-3.jpg", no: "06", name: "NOIR EDITION", objPos: "50% 20%", off: "65" },
 ];
 // fly-in origins (offscreen), relative to scene centre (W/2, H/2)
 const FLYIN = [
@@ -83,7 +83,7 @@ export const FanToEdit: React.FC = () => {
           if (!card) continue;
           const flyP = track(ms, FLY0 + i * 90, FLY0 + 600 + i * 90, easeOutCubic);
           const fanP = track(ms, FAN0 + i * 40, FAN0 + 700 + i * 40, easeInOutQuad);
-          const dealP = track(ms, DEAL0 + i * 90, DEAL0 + 700 + i * 90, outBack);
+          const dealP = track(ms, DEAL0 + i * 90, DEAL0 + 700 + i * 90, outBack(1.7));
           const from = FLYIN[i], deck = DECK[i], fan = FAN[i], grid = GRID[i];
           let x = lerp(from.x, deck.x, flyP);
           let y = lerp(from.y, deck.y, flyP);
@@ -101,7 +101,7 @@ export const FanToEdit: React.FC = () => {
           }
           const stamp = stampRefs.current[i];
           if (stamp) {
-            const sp = track(ms, STAMP0 + i * 90, STAMP0 + 300 + i * 90, outBack);
+            const sp = track(ms, STAMP0 + i * 90, STAMP0 + 300 + i * 90, outBack(1.7));
             stamp.style.opacity = String(clamp(sp));
             stamp.style.transform = `rotate(-9deg) scale(${lerp(1.5, 1, clamp(sp))})`;
           }

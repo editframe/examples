@@ -12,7 +12,7 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `src/assets/music.mp3`
+### `src/assets/fal-ai-demo-music.mp3`
 
 | | |
 |---|---|

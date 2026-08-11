@@ -1,6 +1,6 @@
 import React from "react";
 import { Timegroup } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { Sunburst, Star, PalmEmblem } from "../components/retro";
 import { SCENES, CORAL, SOFT_PINK, CREAM, CREAM_LT, TEAL_INK, SUNSET_GOLD } from "../constants";
 

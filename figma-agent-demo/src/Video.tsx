@@ -6,7 +6,7 @@ import { SceneBprime_OnboardingGeneration } from "./scenes/SceneBprime_Onboardin
 import { SceneC_ThenGoDeep } from "./scenes/SceneC_ThenGoDeep";
 import { SceneD_LogoCard } from "./scenes/SceneD_LogoCard";
 
-const MUSIC = "/assets/music-bed.mp3";
+const MUSIC = "/figma-agent-demo/src/assets/figma-agent-demo-music-bed.mp3";
 const TOTAL_MS = 30800;
 
 /**
@@ -41,9 +41,9 @@ const TOTAL_MS = 30800;
  *                                local clock, sequenced by the inner `mode="sequence"`
  *                                Timegroup below (no crossfade `overlap` — scenes
  *                                hard-cut via their own internal solid-color wash)
- *   src/components/Reveal.tsx    shared declarative fade+translate/scale entrance/exit
+ *   @shared/components/Reveal    shared declarative fade+translate/scale entrance/exit
  *   src/components/Sfx.tsx       per-scene sound-effect cue helper
- *   src/components/helpers.ts    small math helpers (clamp/lerp/typewriter/easing)
+ *   @shared/utils/animation      small math helpers (clamp/lerp/typewriter/easing)
  *   src/components/FigmaLogo.tsx the 5-color Figma "F" mark (SceneD)
  *
  * Every scene animates against its own local time via CSS `@keyframes`/`Reveal`

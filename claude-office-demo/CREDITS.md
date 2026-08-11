@@ -12,7 +12,7 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `src/assets/music-bed.mp3`
+### `src/assets/claude-office-demo-music-bed.mp3`
 
 | | |
 |---|---|
@@ -29,7 +29,7 @@ A calm, modern tech-bed that matches the editorial Claude feel — clean, no voc
 
 ## SFX
 
-### `src/assets/sfx/keyboard.wav`
+### `src/assets/sfx/claude-office-demo-keyboard.wav`
 
 | | |
 |---|---|
@@ -38,7 +38,7 @@ A calm, modern tech-bed that matches the editorial Claude feel — clean, no voc
 | **License** | [Pixabay Content License](https://pixabay.com/service/license-summary/) — commercial use cleared |
 | **Used for** | The typed prompt in Scene 3 (1.4s, master `9500ms`) |
 
-### `src/assets/sfx/click.mp3`
+### `src/assets/sfx/claude-office-demo-click.mp3`
 
 | | |
 |---|---|

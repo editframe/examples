@@ -1,9 +1,9 @@
 import React from "react";
 import { Image } from "@editframe/react";
-import { Reveal } from "./Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { W, SOFT_PINK, WARM_WHITE, SANS, SERIF, GRAIN } from "../constants";
 
-const GEM_DEWY_MACRO = "/assets/gem-dewy-macro.jpg";
+const GEM_DEWY_MACRO = "/rhode-demo/src/assets/gem-dewy-macro.jpg";
 
 /**
  * DEWY TEXTURE bridge — sensorial macro of the blush cream swirl, "the dewy finish /

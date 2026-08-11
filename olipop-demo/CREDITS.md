@@ -7,7 +7,7 @@ Sources documented below. If you replace any file, update this document so
 downstream forkers can verify provenance.
 
 The shipped [`output/demo.mp4`](output/demo.mp4) already has this music baked in;
-`src/assets/music-bed.mp3` (referenced natively via `<Audio>` in `src/Video.tsx`) already
+`src/assets/olipop-demo-music-bed.mp3` (referenced natively via `<Audio>` in `src/Video.tsx`) already
 has the fades/normalization baked in.
 
 </div>
@@ -16,7 +16,7 @@ has the fades/normalization baked in.
 
 ## Music
 
-### `src/assets/music-bed.mp3`
+### `src/assets/olipop-demo-music-bed.mp3`
 
 | | |
 |---|---|
@@ -29,7 +29,7 @@ This cut is **music only** — there are no sound effects in the 20s timeline.
 Replace freely with any royalty-free track ([Pixabay Music](https://pixabay.com/music/),
 [Free Music Archive](https://freemusicarchive.org/), [Incompetech](https://incompetech.com/music/royalty-free/)) —
 bake fades/normalization in locally with FFmpeg (audio-only, no video) before dropping
-the replacement at `src/assets/music-bed.mp3`, or update the `MUSIC` constant in
+the replacement at `src/assets/olipop-demo-music-bed.mp3`, or update the `MUSIC` constant in
 `src/Video.tsx` if you rename it.
 
 ---

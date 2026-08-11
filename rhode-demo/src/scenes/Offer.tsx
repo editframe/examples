@@ -1,10 +1,10 @@
 import React from "react";
 import { Timegroup } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { ProductCard } from "../components/ProductCard";
 import { SCENES, LEFT_COL, DUSTY_ROSE, OAT, ESPRESSO, BROWN, SANS, SERIF } from "../constants";
 
-const SUMMER_KIT = "/assets/flat/summer-kit.png";
+const SUMMER_KIT = "/rhode-demo/src/assets/flat/summer-kit.png";
 
 /**
  * OFFER — The Summer Kit. 2200ms local (200ms cross-fades in as Range's montage

@@ -1,11 +1,11 @@
 import React from "react";
 import { Timegroup, Image } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { knitTexture } from "../components/texture";
 import { SCENES, OAT, SAND, COOL_OAT, INK, LINE, STONE, SAGE, TAUPE, DUSTY_BLUE, GEOGRAPH, MONO } from "../constants";
 
-const TREE_TOP = "/assets/tree-top.png";
-const MAT_MERINO_TEE = "/assets/mat-merino-tee.png";
+const TREE_TOP = "/allbirds-tree-runner-demo/src/assets/tree-top.png";
+const MAT_MERINO_TEE = "/allbirds-tree-runner-demo/src/assets/mat-merino-tee.png";
 
 const eyebrow: React.CSSProperties = {
   fontFamily: GEOGRAPH, fontWeight: 500, textTransform: "uppercase",

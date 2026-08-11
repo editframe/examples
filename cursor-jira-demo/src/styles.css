@@ -1,5 +1,7 @@
-@import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import "tailwindcss";
+@import "@shared/styles/reveal.css";
+@import "@shared/styles/cursor-border.css";
 
 @theme {
   /* Jira / Atlassian palette */
@@ -34,33 +36,8 @@
   }
 }
 
-/* ---------- Cursor animated rainbow border ---------- */
-@property --cursor-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
-.cursor-border {
-  position: relative;
-  border-radius: 8px;
-  padding: 2px;
-  background:
-    conic-gradient(
-      from var(--cursor-angle),
-      #FF7A45 0%,
-      #E64980 33%,
-      #4263EB 66%,
-      #FF7A45 100%
-    );
-}
-
-.cursor-border-inner {
-  background: #FFFFFF;
-  border-radius: 6px;
-  width: 100%;
-  height: 100%;
-}
+/* cursor-border / cursor-border-inner / --cursor-angle now live in
+   @shared/styles/cursor-border.css (see @import above) */
 
 /* Soft halo behind "Improve writing" */
 .improve-halo {
@@ -107,28 +84,6 @@
   animation:
     sweep-move 1000ms 21100ms cubic-bezier(0.65, 0, 0.35, 1) both,
     sweep-opacity 1100ms 21100ms both;
-}
-
-/* ---------- Reveal (see src/components/Reveal.tsx) — declarative fade + translate/scale ---------- */
-@keyframes reveal-in {
-  from {
-    opacity: 0;
-    transform: translate(var(--reveal-x, 0px), var(--reveal-y, 20px)) scale(var(--reveal-scale, 1));
-  }
-  to {
-    opacity: 1;
-    transform: translate(0, 0) scale(1);
-  }
-}
-@keyframes reveal-out {
-  from {
-    opacity: 1;
-    transform: translate(0, 0) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translate(var(--reveal-exit-x, 0px), var(--reveal-exit-y, 0px)) scale(var(--reveal-exit-scale, 1));
-  }
 }
 
 /* ---------- CursorJiraScene (src/scenes/CursorJiraScene.tsx) ---------- */

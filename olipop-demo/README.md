@@ -76,7 +76,7 @@ asset itself, no runtime mux. See [`CREDITS.md`](CREDITS.md) for provenance.
 
 | Cue | Master ms | Source file |
 |---|---|---|
-| Music bed | 0 – 20000 | `src/assets/music-bed.mp3` (loudnorm −16, fade-in 0.6s, fade-out 18.5s baked in) |
+| Music bed | 0 – 20000 | `src/assets/olipop-demo-music-bed.mp3` (loudnorm −16, fade-in 0.6s, fade-out 18.5s baked in) |
 
 ---
 
@@ -133,7 +133,7 @@ grotesque sans) handles tracked caps and body. Tokens are the source of truth in
     │                            derived from the shared crossfade overlap)
     ├── styles.css             ← fonts, base reset, every scene's @keyframes
     ├── assets/                ← can/pack/poster art (raw PNG + optimized WebP, referenced
-    │                            directly via <Image src="/assets/opt/...">) + music-bed.mp3
+    │                            directly via <Image src="/assets/opt/...">) + olipop-demo-music-bed.mp3
     │                            (fades/normalization baked in, referenced via <Audio>)
     ├── scenes/                ← one file per beat, each its own <Timegroup mode="fixed">
     │   ├── Hook.tsx
@@ -169,7 +169,7 @@ NO_COLOR=1 FORCE_COLOR=0 npm run render
 3. **Re-skin the well** — drop a new clip at `assets/well-video.mp4` and a matching
    720×720 alpha mask at `assets/well-mask.png`; the well rect stays `180,640,720,720`.
 4. **Swap the music** — bake fades/normalization into a replacement track locally with
-   FFmpeg (audio-only, no video) and drop it at `src/assets/music-bed.mp3`, then update
+   FFmpeg (audio-only, no video) and drop it at `src/assets/olipop-demo-music-bed.mp3`, then update
    the `MUSIC` constant in `src/Video.tsx` if you rename it; log it in
    [`CREDITS.md`](CREDITS.md).
 5. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render` (chains the Editframe render and the well-compositing pass into one command).

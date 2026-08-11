@@ -1,47 +1,18 @@
 import React from "react";
+import { WindowChrome, type WindowChromeProps } from "@shared/components/WindowChrome";
 
 /**
- * macOS-style terminal window with chrome (traffic lights + centered title)
- * and a body slot. Used both as the hero terminal and the scatter terminals.
+ * macOS-style terminal window with chrome (traffic lights + centered title) and a body
+ * slot. Used both as the hero terminal and the scatter terminals. Thin project-local
+ * adapter over `@shared/components/WindowChrome` — `dimChrome` maps to the shared
+ * component's `dimmed`.
  */
-
-interface Props {
-  title?: string;
-  width: number;
-  height: number;
-  children?: React.ReactNode;
-  style?: React.CSSProperties;
-  bodyStyle?: React.CSSProperties;
-  className?: string;
-  dimChrome?: boolean;       // for background scatter terminals
+interface Props extends Omit<WindowChromeProps, "dimmed"> {
+  dimChrome?: boolean; // for background scatter terminals
 }
 
-const Terminal = React.forwardRef<HTMLDivElement, Props>(
-  ({ title, width, height, children, style, bodyStyle, className, dimChrome }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={`terminal ${className ?? ""}`}
-        style={{
-          width,
-          height,
-          opacity: dimChrome ? 0.92 : 1,
-          ...style,
-        }}
-      >
-        <div className="terminal-chrome">
-          <span className="tl-dot" style={{ background: "var(--light-red)" }} />
-          <span className="tl-dot" style={{ background: "var(--light-yellow)" }} />
-          <span className="tl-dot" style={{ background: "var(--light-green)" }} />
-          <span className="terminal-title">{title ?? "acme — claude — 84×24"}</span>
-          <span style={{ width: 36 }} />
-        </div>
-        <div className="terminal-body" style={bodyStyle}>
-          {children}
-        </div>
-      </div>
-    );
-  }
-);
+const Terminal = React.forwardRef<HTMLDivElement, Props>(({ dimChrome, ...rest }, ref) => (
+  <WindowChrome ref={ref} dimmed={dimChrome} {...rest} />
+));
 Terminal.displayName = "Terminal";
 export default Terminal;

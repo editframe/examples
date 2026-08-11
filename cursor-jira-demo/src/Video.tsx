@@ -4,7 +4,7 @@ import { TicketScatter } from "./scenes/TicketScatter";
 import { CursorJiraScene } from "./scenes/CursorJiraScene";
 import { LogoCard } from "./scenes/LogoCard";
 
-const MUSIC = "/assets/audio-bed.mp3";
+const MUSIC = "/cursor-jira-demo/src/assets/audio-bed.mp3";
 const DURATION_MS = 28500; // 3500 (TicketScatter) + 21500 (CursorJiraScene) + 3500 (LogoCard)
 
 /**

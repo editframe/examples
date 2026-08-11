@@ -2,20 +2,20 @@ import React from "react";
 import { Timegroup, Image } from "@editframe/react";
 import { SCENES, BLACK, WHITE, SILVER, SILVER_GRAD, MONT } from "../constants";
 import { Barcode } from "../components/Barcode";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { CutFlash } from "../components/CutFlash";
 
-const TEX_PAPER = "/assets/tex-paper.png";
+const TEX_PAPER = "/fashionnova-the-edit-demo/src/assets/tex-paper.png";
 
 const cover = (extra: React.CSSProperties = {}): React.CSSProperties => ({
   position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", ...extra,
 });
 
 const BANDS = [
-  { src: "/assets/dress-3.jpg", no: "01", name: "MIDNIGHT MAXI", objPos: "50% 16%", specs: ["FLOOR-LENGTH MAXI", "RIBBED KNIT · COWL BACK", "SIZES XS–XL"] },
-  { src: "/assets/ed01.jpg", no: "02", name: "PLUM BODYCON", objPos: "50% 26%", specs: ["RUCHED MINI", "STRETCH MESH · SQUARE NECK", "SIZES XS–L"] },
-  { src: "/assets/ed07.jpg", no: "04", name: "LUXE BLAZER", objPos: "50% 30%", specs: ["OVERSIZED BLAZER DRESS", "TAILORED SUITING · DOUBLE-BREASTED", "SIZES S–XL"] },
-  { src: "/assets/ed11.jpg", no: "07", name: "IVORY GOWN", objPos: "50% 18%", specs: ["SATIN SLIP GOWN", "BIAS-CUT · OPEN BACK", "SIZES XS–XL"] },
+  { src: "/fashionnova-the-edit-demo/src/assets/dress-3.jpg", no: "01", name: "MIDNIGHT MAXI", objPos: "50% 16%", specs: ["FLOOR-LENGTH MAXI", "RIBBED KNIT · COWL BACK", "SIZES XS–XL"] },
+  { src: "/fashionnova-the-edit-demo/src/assets/ed01.jpg", no: "02", name: "PLUM BODYCON", objPos: "50% 26%", specs: ["RUCHED MINI", "STRETCH MESH · SQUARE NECK", "SIZES XS–L"] },
+  { src: "/fashionnova-the-edit-demo/src/assets/ed07.jpg", no: "04", name: "LUXE BLAZER", objPos: "50% 30%", specs: ["OVERSIZED BLAZER DRESS", "TAILORED SUITING · DOUBLE-BREASTED", "SIZES S–XL"] },
+  { src: "/fashionnova-the-edit-demo/src/assets/ed11.jpg", no: "07", name: "IVORY GOWN", objPos: "50% 18%", specs: ["SATIN SLIP GOWN", "BIAS-CUT · OPEN BACK", "SIZES XS–XL"] },
 ];
 
 /**

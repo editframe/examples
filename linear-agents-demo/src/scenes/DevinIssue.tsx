@@ -1,6 +1,6 @@
 import React from "react";
 import { Timegroup } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { Cursor, TeamIcon, Avatar, DevinIcon, DevinCluster, BreadcrumbTail } from "../components/icons";
 import { SCENES, FONT, MONO } from "../constants";
 

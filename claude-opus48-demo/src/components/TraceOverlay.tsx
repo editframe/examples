@@ -18,7 +18,7 @@ import { TRACE_OPACITY } from "../constants";
  */
 const TRACE_FRAMES: { ms: number; src: string }[] = Array.from({ length: 25 }, (_, i) => ({
   ms: i * 1000,
-  src: `/assets/trace/frame-${String(i * 1000).padStart(6, "0")}ms.jpg`,
+  src: `/claude-opus48-demo/src/assets/trace/frame-${String(i * 1000).padStart(6, "0")}ms.jpg`,
 }));
 
 const FRAME_WINDOWS = TRACE_FRAMES.map((f, i) => {

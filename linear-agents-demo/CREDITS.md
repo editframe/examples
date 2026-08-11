@@ -8,7 +8,7 @@ downstream forkers can verify provenance.
 
 The shipped [`output/demo.mp4`](output/demo.mp4) already has this music baked in — it plays as
 a native `<Audio>` element on the composition timeline (`src/Video.tsx`), with the fade-in,
-fade-out, and loudnorm normalization pre-baked directly into `src/assets/music-bed.mp3`.
+fade-out, and loudnorm normalization pre-baked directly into `src/assets/linear-agents-demo-music-bed.mp3`.
 
 </div>
 
@@ -16,7 +16,7 @@ fade-out, and loudnorm normalization pre-baked directly into `src/assets/music-b
 
 ## Music
 
-### `src/assets/music-bed.mp3`
+### `src/assets/linear-agents-demo-music-bed.mp3`
 
 | | |
 |---|---|
@@ -28,8 +28,8 @@ fade-out, and loudnorm normalization pre-baked directly into `src/assets/music-b
 This cut is **music only** — there are no sound effects in the 32s timeline.
 Replace freely with any royalty-free track ([Pixabay Music](https://pixabay.com/music/),
 [Free Music Archive](https://freemusicarchive.org/), [Incompetech](https://incompetech.com/music/royalty-free/)) —
-keep the filename `music-bed.mp3` (already fade/loudnorm-baked) or re-run your own ffmpeg
-pass and update `src/assets/music-bed.mp3` directly.
+keep the filename `linear-agents-demo-music-bed.mp3` (already fade/loudnorm-baked) or re-run your own ffmpeg
+pass and update `src/assets/linear-agents-demo-music-bed.mp3` directly.
 
 ---
 

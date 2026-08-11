@@ -16,7 +16,7 @@
 import React from "react";
 import { Timegroup } from "@editframe/react";
 import { TraceLayer } from "../components/TraceLayer";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { TRACE_MODE, TRACE_OPACITY, OVERLAP_MS } from "../constants";
 
 export const MANAGED_AGENTS_START    = 12000;

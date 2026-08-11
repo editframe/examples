@@ -8,7 +8,7 @@ commercial license. Swap them before any real-world use.
 ## Music
 | Track | Used as | Treatment |
 |---|---|---|
-| **"The Sharp Pivot"** (`src/assets/music-bed.mp3`) | Music bed, 0–25s | 25s excerpt (from 1:40 of the track) as an `<Audio>` bed; fades in (1.2s) and out (from 0:19), volume 1.0. |
+| **"The Sharp Pivot"** (`src/assets/allbirds-tree-runner-demo-music-bed.mp3`) | Music bed, 0–25s | 25s excerpt (from 1:40 of the track) as an `<Audio>` bed; fades in (1.2s) and out (from 0:19), volume 1.0. |
 
 There are **no sound effects** in this video — it is music only.
 

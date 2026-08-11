@@ -28,7 +28,7 @@
 import React from "react";
 import { Timegroup, Audio } from "@editframe/react";
 import { TraceLayer } from "../components/TraceLayer";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { TRACE_MODE, TRACE_OPACITY, OVERLAP_MS } from "../constants";
 
 export const TITLE_PILLS_START    = 1900;
@@ -100,7 +100,7 @@ const PILL_BUMPS = PILL_CROSSING_MS.slice(0, -1).map((ms, i) => {
 });
 const LAST_PILL_CROSSING_MS = PILL_CROSSING_MS[PILL_CROSSING_MS.length - 1];
 
-const TICK = "/assets/sfx/tick.wav";
+const TICK = "/claude-code-financial-demo/src/assets/sfx/tick.wav";
 
 /**
  * Scroll-tick SFX — one per pill crossing center. Absolute-ms values are the `adelay`

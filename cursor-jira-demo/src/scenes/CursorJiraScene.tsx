@@ -24,7 +24,7 @@ import {
   IconCursorCube,
 } from "../components/JiraIcons";
 import { Sfx } from "../components/Sfx";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 
 const clamp = (n: number, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, n));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -344,7 +344,7 @@ export const CursorJiraScene: React.FC = () => {
       <Sfx cue="notify" at={20.7} dur={0.9} volume={0.32} />
       {/* "Suggest a reply..." chip cursor-click (mux script v16, master 21500ms
           = local 18000ms — this scene starts at master 3500ms, no overlap). */}
-      <Audio src="/assets/sfx/click-hd-loud.mp3" offset="18s" duration="1.5s" volume={0.5} />
+      <Audio src="/cursor-jira-demo/src/assets/sfx/cursor-jira-demo-click-hd-loud.mp3" offset="18s" duration="1.5s" volume={0.5} />
 
       {/* White surface */}
       <div style={{ position: "absolute", inset: 0, background: "#FFFFFF" }} />
@@ -632,7 +632,7 @@ export const CursorJiraScene: React.FC = () => {
           enter={[2000, 2700]}
           exit={[10300, 10900]}
           y={18}
-          scale={0.985}
+          scaleFrom={0.985}
           exitY={-6}
           exitScale={0.99}
           easeIn="out-cubic"
@@ -783,7 +783,7 @@ export const CursorJiraScene: React.FC = () => {
                   <Reveal
                     enter={[6500, 6760]}
                     y={0}
-                    scale={0.55}
+                    scaleFrom={0.55}
                     easeIn="out-back"
                     style={{
                       display: "inline-flex",

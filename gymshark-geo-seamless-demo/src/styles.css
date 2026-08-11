@@ -1,19 +1,10 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Archivo+Black&family=Inter:wght@400;500;600;700;800;900&display=swap");
 @import "tailwindcss";
+@import "@shared/styles/reveal.css";
 
 @source "../src";
-@source "../index.html";
 
 html, body, #root { height: 100%; margin: 0; padding: 0; }
-
-/* === Reveal (see src/components/Reveal.tsx) — declarative fade + float-up/out === */
-@keyframes reveal-in {
-  from { opacity: 0; transform: translateY(var(--reveal-y, 20px)); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes reveal-out {
-  from { opacity: 1; transform: translateY(0); }
-  to   { opacity: 0; transform: translateY(var(--reveal-exit-y, 0px)); }
-}
 
 /* === Shared ambient (camo.ts drift + AmbientField grain) — infinite, no JS === */
 @keyframes camo-drift {

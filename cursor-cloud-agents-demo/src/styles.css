@@ -1,5 +1,6 @@
-@import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import "tailwindcss";
+@import "@shared/styles/reveal.css";
 
 @theme {
   /* Jira / Atlassian palette */
@@ -32,34 +33,6 @@
     -webkit-font-smoothing: antialiased;
     overflow: hidden;
   }
-}
-
-/* ---------- Cursor animated rainbow border ---------- */
-@property --cursor-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
-.cursor-border {
-  position: relative;
-  border-radius: 8px;
-  padding: 2px;
-  background:
-    conic-gradient(
-      from var(--cursor-angle),
-      #FF7A45 0%,
-      #E64980 33%,
-      #4263EB 66%,
-      #FF7A45 100%
-    );
-}
-
-.cursor-border-inner {
-  background: #FFFFFF;
-  border-radius: 6px;
-  width: 100%;
-  height: 100%;
 }
 
 /* Soft halo behind "Improve writing" */
@@ -122,17 +95,7 @@
   to { opacity: 1; }
 }
 
-/* === Reveal (see src/components/Reveal.tsx) — declarative fade + translate === */
-@keyframes reveal-in {
-  from { opacity: 0; transform: translate(var(--reveal-x, 0px), var(--reveal-y, 16px)); }
-  to { opacity: 1; transform: translate(0, 0); }
-}
-@keyframes reveal-out {
-  from { opacity: 1; transform: translate(0, 0); }
-  to { opacity: 0; transform: translate(var(--reveal-exit-x, 0px), var(--reveal-exit-y, 0px)); }
-}
-
-/* === Scene 1 — Chatbox (src/scenes/Scene1_Chatbox.tsx) ===
+/* === Scene 1 — Chatbox (src/scenes/Chatbox.tsx) ===
  * Panel: scaleY 0->1 over 600ms (ease-out-cubic) while opacity 0->1 over 400ms (linear).
  * Two separate animations (different durations/easings) on the same element. */
 @keyframes scene1-panel-fold-in {
@@ -140,7 +103,7 @@
   to { transform: scaleY(1); }
 }
 
-/* === Scene 2 (zoom-to-dropdown) — src/scenes/Scene2_ZoomToDropdown.tsx ===
+/* === Scene 2 (zoom-to-dropdown) — src/scenes/ZoomToDropdown.tsx ===
  * Camera: ONE continuous zoom from Scene1's held framing to the dropdown dead-centre,
  * over the first 1500ms of this 2000ms scene (ease-in-out-cubic), then holds. */
 @keyframes scene2d-camera-zoom {
@@ -152,7 +115,7 @@
   to { opacity: 0; }
 }
 
-/* === Scene 4 — Create Environment popup (src/scenes/Scene4_CreateEnv.tsx) === */
+/* === Scene 4 — Create Environment popup (src/scenes/CreateEnv.tsx) === */
 @keyframes scene4-panel-in {
   from { opacity: 0; transform: translate(-50%, calc(-50% + 20px)); }
   to { opacity: 1; transform: translate(-50%, -50%); }
@@ -196,7 +159,7 @@
   to { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
 }
 
-/* === Scene 5 — Checklist (src/scenes/Scene5_Checklist.tsx) ===
+/* === Scene 5 — Checklist (src/scenes/Checklist.tsx) ===
  * Per-item state machine baked into fixed percentage stops of the 2500ms scene.
  * Pending dashed-circle: visible from 0ms until the item leaves the "pending" state —
  * item 0 at SPIN_START=200ms (8%, since it starts spinning), items 1-3 at their own
@@ -250,7 +213,7 @@
 @keyframes checklist-text-2 { 0%, 55.999% { color: rgba(255,255,255,0.35); } 56%, 100% { color: #FFFFFF; } }
 @keyframes checklist-text-3 { 0%, 65.999% { color: rgba(255,255,255,0.35); } 66%, 100% { color: #FFFFFF; } }
 
-/* === Scene 6 — Folded panels / paper-stack (src/scenes/Scene6_FoldedPanels.tsx) ===
+/* === Scene 6 — Folded panels / paper-stack (src/scenes/FoldedPanels.tsx) ===
  * All percentages are of this scene's 5000ms duration. */
 @keyframes scene6-unified-window {
   0% { opacity: 0; animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
@@ -292,7 +255,7 @@
   100% { transform: translate(2200px, 0px); opacity: 1; }
 }
 
-/* === Scene 8 — Cube logo outro (src/scenes/Scene8_CubeLogo.tsx) === */
+/* === Scene 8 — Cube logo outro (src/scenes/CubeLogo.tsx) === */
 @keyframes scene8-cube-scale-in {
   from { transform: scale(0.8); }
   to { transform: scale(1); }

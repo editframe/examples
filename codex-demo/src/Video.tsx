@@ -9,31 +9,31 @@
  * `animation-delay` — there is no master-ms clock and no imperative ref-driven style
  * mutation anywhere in this composition except a small number of scene-scoped `onFrame`
  * callbacks kept for genuinely irreducible per-frame text (a "Working for Xs" counter,
- * and Scene2's char-by-char typewriter effect) — see the file header comment in each of
+ * and PromptType's char-by-char typewriter effect) — see the file header comment in each of
  * those scenes for why.
  *
  * Scene timing (all compressed per FIX 2):
- * Scene1:  0–2500ms   — "Computer Use / in Codex on Mac" title on codex-gradient bg
- * Scene2:  2500–4500ms — CloudTicTacToe headline + typing (fast, 2000ms)
- * Scene3:  4500–6000ms — Send click + transition (1500ms)
- * Scene4:  6000–8500ms — Dual-panel ZOOMED IN 1.4x + Thinking (2500ms)
- * Scene5:  8500–13000ms — More agent steps, Working counter (4500ms)
- * Scene6:  13000–14500ms — Cursor zooms + RUN click + TicTacToe SPAWNS (1500ms)
- * Scene7:  14500–17500ms — 3-window layout settles (3000ms)
- * Scene8:  17500–22000ms — Cursor → center cell, X+Os spawn, fade out (4500ms)
+ * TitleCard:      0–2500ms   — "Computer Use / in Codex on Mac" title on codex-gradient bg
+ * PromptType:     2500–4500ms — CloudTicTacToe headline + typing (fast, 2000ms)
+ * SendTransition: 4500–6000ms — Send click + transition (1500ms)
+ * PanelZoomOut:   6000–8500ms — Dual-panel ZOOMED IN 1.4x + Thinking (2500ms)
+ * AgentWorking:   8500–13000ms — More agent steps, Working counter (4500ms)
+ * RunZoom:        13000–14500ms — Cursor zooms + RUN click + TicTacToe SPAWNS (1500ms)
+ * AppLaunch:      14500–17500ms — 3-window layout settles (3000ms)
+ * GameFadeOut:    17500–22000ms — Cursor → center cell, X+Os spawn, fade out (4500ms)
  */
 import React from "react";
 import { Timegroup, Audio } from "@editframe/react";
-import { Scene1 } from "./scenes/Scene1";
-import { Scene2 } from "./scenes/Scene2";
-import { Scene3 } from "./scenes/Scene3";
-import { Scene4 } from "./scenes/Scene4";
-import { Scene5 } from "./scenes/Scene5";
-import { Scene6 } from "./scenes/Scene6";
-import { Scene7 } from "./scenes/Scene7";
-import { Scene8 } from "./scenes/Scene8";
+import { TitleCard } from "./scenes/TitleCard";
+import { PromptType } from "./scenes/PromptType";
+import { SendTransition } from "./scenes/SendTransition";
+import { PanelZoomOut } from "./scenes/PanelZoomOut";
+import { AgentWorking } from "./scenes/AgentWorking";
+import { RunZoom } from "./scenes/RunZoom";
+import { AppLaunch } from "./scenes/AppLaunch";
+import { GameFadeOut } from "./scenes/GameFadeOut";
 
-const MUSIC = "/assets/music-bed.mp3";
+const MUSIC = "/codex-demo/src/assets/codex-demo-music-bed.mp3";
 const TOTAL_MS = 22000;
 
 export const Video: React.FC = () => (
@@ -48,14 +48,14 @@ export const Video: React.FC = () => (
     }}
   >
     <Timegroup mode="sequence" className="absolute inset-0">
-      <Scene1 />
-      <Scene2 />
-      <Scene3 />
-      <Scene4 />
-      <Scene5 />
-      <Scene6 />
-      <Scene7 />
-      <Scene8 />
+      <TitleCard />
+      <PromptType />
+      <SendTransition />
+      <PanelZoomOut />
+      <AgentWorking />
+      <RunZoom />
+      <AppLaunch />
+      <GameFadeOut />
     </Timegroup>
 
     {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the

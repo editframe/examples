@@ -13,7 +13,7 @@ swap in a freshly-sourced track per the guidance below.
 
 ## Music
 
-### `src/assets/music-bed.mp3`
+### `src/assets/claude-code-financial-demo-music-bed.mp3`
 
 | | |
 |---|---|

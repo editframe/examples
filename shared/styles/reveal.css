@@ -1,0 +1,20 @@
+/*
+ * Shared `reveal-in` / `reveal-out` keyframes backing @shared/components/Reveal.tsx.
+ * Superset of every per-example variant this was consolidated from: a plain
+ * `translateY` fade is just this with `--reveal-x`/`--reveal-scale-from` left at their
+ * defaults (0px / 1), so every existing usage renders identically.
+ */
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translate(var(--reveal-x, 0px), var(--reveal-y, 20px)) scale(var(--reveal-scale-from, 1));
+  }
+  to { opacity: 1; transform: translate(0, 0) scale(1); }
+}
+@keyframes reveal-out {
+  from { opacity: 1; transform: translate(0, 0) scale(1); }
+  to {
+    opacity: 0;
+    transform: translate(var(--reveal-exit-x, 0px), var(--reveal-exit-y, 0px)) scale(var(--reveal-exit-scale, 1));
+  }
+}

@@ -1,8 +1,8 @@
 import React, { useCallback, useRef } from "react";
 import { Timegroup, Audio } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { Sfx } from "../components/Sfx";
-import { clamp, lerp, typewriter } from "../components/helpers";
+import { clamp, lerp, typewriter } from "@shared/utils/animation";
 
 /**
  * SceneB — Agent prompt close-up (6s).
@@ -137,7 +137,7 @@ export const SceneB_AgentPrompt: React.FC = () => {
       <Sfx cue="ping" at={4.3} dur={0.5} volume={0.32} />
       <Sfx cue="reveal" at={5.7} dur={0.5} volume={0.32} />
       {/* Keyboard typing clatter under the prompt-text typewriter (0.6–3.7s local). */}
-      <Audio src="/assets/sfx/keyboard-sceneb.mp3" offset="0.6s" duration="3.1s" volume={0.28} />
+      <Audio src="/figma-agent-demo/src/assets/sfx/keyboard-sceneb.mp3" offset="0.6s" duration="3.1s" volume={0.28} />
 
       {/* White wash out */}
       <div

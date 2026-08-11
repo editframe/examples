@@ -12,7 +12,7 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `src/assets/music-bed.mp3`
+### `src/assets/codex-demo-music-bed.mp3`
 
 | | |
 |---|---|
@@ -27,16 +27,16 @@ A driving, modern tech-bed. **Action item:** re-source from Pixabay, [Free Music
 
 ## SFX
 
-### `src/assets/sfx/keyboard.wav`
+### `src/assets/sfx/codex-demo-keyboard.wav`
 
 | | |
 |---|---|
 | **Type** | Mechanical keyboard typing |
 | **Source** | Embedded file metadata credits **MographMotions** |
 | **License** | Unverified — confirm commercial-use terms with the source pack before external distribution |
-| **Used for** | Scene2 chat-input typewriter effect, at scene-local 0.8s (global 3.3s) |
+| **Used for** | PromptType chat-input typewriter effect, at scene-local 0.8s (global 3.3s) |
 
-### `src/assets/sfx/click.mp3`
+### `src/assets/sfx/codex-demo-click.mp3`
 
 | | |
 |---|---|
@@ -44,7 +44,7 @@ A driving, modern tech-bed. **Action item:** re-source from Pixabay, [Free Music
 | **Source** | Not documented upstream of this template |
 | **License** | Unverified — confirm commercial-use rights before external distribution |
 | **Treatment** | Baked one-time via local `ffmpeg` (`volume=2.2`) to match in-mix loudness; 0.6s of leading silence in the source is trimmed live via each `<Sfx>`'s `sourceIn` prop, not baked into the file |
-| **Used for** | Three cues — Scene3 Send-button click (scene-local 0.2s / global 4.7s), Scene6 Xcode RUN click (scene-local 0.76s / global 13.76s), Scene8 center-cell click (scene-local 1.0s / global 18.5s) |
+| **Used for** | Three cues — SendTransition Send-button click (scene-local 0.2s / global 4.7s), RunZoom Xcode RUN click (scene-local 0.76s / global 13.76s), GameFadeOut center-cell click (scene-local 1.0s / global 18.5s) |
 
 ---
 

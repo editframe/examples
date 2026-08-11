@@ -1,8 +1,6 @@
-@import "tailwindcss";
-
-/* Geist Sans + Geist Mono are loaded via <link> in index.html.
-   Falls back to the @import below if HTML link is stripped. */
 @import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap");
+@import "tailwindcss";
+@import "@shared/styles/reveal.css";
 
 @theme {
   /* Vercel canonical concrete-gray ramp — memorized from gray-100 → gray-950 */
@@ -46,16 +44,6 @@
   }
 }
 
-/* === Shared across scenes (see src/components/Reveal.tsx) === */
-@keyframes reveal-in {
-  from { opacity: 0; transform: translateY(var(--reveal-y, 20px)); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes reveal-out {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(var(--reveal-exit-y, 0px)); }
-}
-
 /* Whole-scene crossfade-out during the shared sequence `overlap` window — applied
    to each scene's content wrapper (see src/Video.tsx / constants.ts SCENES). */
 @keyframes scene-fade-out {
@@ -85,13 +73,13 @@
   100% { opacity: 1; stroke-dashoffset: 0; }
 }
 
-/* === Scene1 (src/scenes/Scene1_TerminalPush.tsx) === */
+/* === Scene1 (src/scenes/TerminalPush.tsx) === */
 @keyframes rule-draw-in {
   from { opacity: 0; transform: scaleX(0); }
   to { opacity: 1; transform: scaleX(1); }
 }
 
-/* === Scene2 (src/scenes/Scene2_FileTreeRoute.tsx) === */
+/* === Scene2 (src/scenes/FileTreeRoute.tsx) === */
 @keyframes row-glow-in {
   from { opacity: 0; transform: scaleY(0.2); }
   to { opacity: 1; transform: scaleY(1); }
@@ -101,7 +89,7 @@
   50%, 100% { opacity: 1; }
 }
 
-/* === Scene4 (src/scenes/Scene4_BuildLog.tsx) — one-shot "Ready" pulse === */
+/* === Scene4 (src/scenes/BuildLog.tsx) — one-shot "Ready" pulse === */
 @keyframes ready-pulse-text {
   0%, 100% { transform: scale(1); text-shadow: 0 0 0 rgba(255, 255, 255, 0.55); }
   50% { transform: scale(1.04); text-shadow: 0 0 12px rgba(255, 255, 255, 0.55); }

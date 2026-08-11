@@ -1,7 +1,7 @@
 import React from "react";
 import { Image } from "@editframe/react";
 
-const GYMSHARK_FIN = "/assets/gymshark-fin.png";
+const GYMSHARK_FIN = "/gymshark-geo-seamless-demo/src/assets/gymshark-fin.png";
 
 /**
  * The Gymshark fin mark, cropped from the official logo lockup. One real asset used at

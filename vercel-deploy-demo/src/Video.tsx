@@ -1,14 +1,14 @@
 import React from "react";
 import { Timegroup, Audio } from "@editframe/react";
-import { Scene1_TerminalPush } from "./scenes/Scene1_TerminalPush";
-import { Scene2_FileTreeRoute } from "./scenes/Scene2_FileTreeRoute";
-import { Scene3_CodeToConcept } from "./scenes/Scene3_CodeToConcept";
-import { Scene4_BuildLog } from "./scenes/Scene4_BuildLog";
-import { Scene5_OutputCard } from "./scenes/Scene5_OutputCard";
-import { Scene9_LogoCard } from "./scenes/Scene9_LogoCard";
+import { TerminalPush } from "./scenes/TerminalPush";
+import { FileTreeRoute } from "./scenes/FileTreeRoute";
+import { CodeToConcept } from "./scenes/CodeToConcept";
+import { BuildLog } from "./scenes/BuildLog";
+import { OutputCard } from "./scenes/OutputCard";
+import { LogoCard } from "./scenes/LogoCard";
 import { OVERLAP_MS, DURATION_MS } from "./constants";
 
-const MUSIC = "/assets/music-bed.mp3";
+const MUSIC = "/vercel-deploy-demo/src/assets/vercel-deploy-demo-music-bed.mp3";
 
 /**
  * Vercel — Delba-canon rebuild v4 (jeremy-vercel-1)
@@ -76,12 +76,12 @@ export const Video = () => {
       style={{ background: "#0A0A0A" }}
     >
       <Timegroup mode="sequence" overlap={`${OVERLAP_MS}ms`} className="absolute inset-0">
-        <Scene1_TerminalPush />
-        <Scene2_FileTreeRoute />
-        <Scene3_CodeToConcept />
-        <Scene4_BuildLog />
-        <Scene5_OutputCard />
-        <Scene9_LogoCard />
+        <TerminalPush />
+        <FileTreeRoute />
+        <CodeToConcept />
+        <BuildLog />
+        <OutputCard />
+        <LogoCard />
       </Timegroup>
 
       {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the

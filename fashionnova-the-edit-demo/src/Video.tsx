@@ -9,7 +9,7 @@ import { SpecStack } from "./scenes/SpecStack";
 import { Outro } from "./scenes/Outro";
 import { OFF_WHITE, OVERLAP_MS, DURATION_MS } from "./constants";
 
-const MUSIC = "/assets/music-bed.mp3";
+const MUSIC = "/fashionnova-the-edit-demo/src/assets/fashionnova-the-edit-demo-music-bed.mp3";
 
 /**
  * FASHION NOVA — "The Edit" · 9:16 · 1080×1920 @ 30fps, ~25s total.

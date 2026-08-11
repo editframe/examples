@@ -12,7 +12,7 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `src/assets/music-bed.mp3`
+### `src/assets/claude-code-demo-music-bed.mp3`
 
 | | |
 |---|---|
@@ -24,13 +24,13 @@ document so downstream forkers can verify provenance.
 | **Attribution required** | ❌ No (credit appreciated) |
 | **Redistribution** | ✅ Permitted as part of derivative work |
 
-The track is a slow-burn cinematic bed that pairs well with the orchestrated-agents narrative. Replace freely with anything from Pixabay, [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/) — keep the filename `music-bed.mp3` or update the `<Audio>` reference in `src/Video.tsx` accordingly. Note the committed file already has its fade-in/fade-out and limiting baked in (see `src/Video.tsx` for the `<Audio>` usage) — a replacement track should be pre-processed the same way before dropping it in.
+The track is a slow-burn cinematic bed that pairs well with the orchestrated-agents narrative. Replace freely with anything from Pixabay, [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/) — keep the filename `claude-code-demo-music-bed.mp3` or update the `<Audio>` reference in `src/Video.tsx` accordingly. Note the committed file already has its fade-in/fade-out and limiting baked in (see `src/Video.tsx` for the `<Audio>` usage) — a replacement track should be pre-processed the same way before dropping it in.
 
 ---
 
 ## SFX
 
-### `src/assets/sfx/keyboard.wav`
+### `src/assets/sfx/claude-code-demo-keyboard.wav`
 
 | | |
 |---|---|

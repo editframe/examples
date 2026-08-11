@@ -1,6 +1,6 @@
 import React from "react";
 import { Timegroup, Image } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { Sunburst } from "../components/retro";
 import { SCENES, CREAM_LT, FL_TROPICAL } from "../constants";
 
@@ -13,12 +13,12 @@ const RAINBOW_CAN0 = 970;
 const PER_CAN = 540;
 
 const FLAVORS = [
-  { src: "/assets/opt/tropical-can.webp", name: "tropical punch" },
-  { src: "/assets/opt/flavor-pineapple.webp", name: "pineapple paradise" },
-  { src: "/assets/opt/flavor-gingerale.webp", name: "ginger ale" },
-  { src: "/assets/opt/flavor-crispapple.webp", name: "crisp apple" },
-  { src: "/assets/opt/flavor-shirley.webp", name: "shirley temple" },
-  { src: "/assets/opt/flavor-vintagecola.webp", name: "vintage cola" },
+  { src: "/olipop-demo/src/assets/opt/tropical-can.webp", name: "tropical punch" },
+  { src: "/olipop-demo/src/assets/opt/flavor-pineapple.webp", name: "pineapple paradise" },
+  { src: "/olipop-demo/src/assets/opt/flavor-gingerale.webp", name: "ginger ale" },
+  { src: "/olipop-demo/src/assets/opt/flavor-crispapple.webp", name: "crisp apple" },
+  { src: "/olipop-demo/src/assets/opt/flavor-shirley.webp", name: "shirley temple" },
+  { src: "/olipop-demo/src/assets/opt/flavor-vintagecola.webp", name: "vintage cola" },
 ].map((f, i) => {
   const col = i % 3;
   const row = Math.floor(i / 3);

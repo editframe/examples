@@ -1,5 +1,6 @@
-@import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import "tailwindcss";
+@import "@shared/styles/reveal.css";
 
 @theme {
   /* Jira / Atlassian palette */
@@ -34,34 +35,6 @@
   }
 }
 
-/* ---------- Cursor animated rainbow border ---------- */
-@property --cursor-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
-.cursor-border {
-  position: relative;
-  border-radius: 8px;
-  padding: 2px;
-  background:
-    conic-gradient(
-      from var(--cursor-angle),
-      #FF7A45 0%,
-      #E64980 33%,
-      #4263EB 66%,
-      #FF7A45 100%
-    );
-}
-
-.cursor-border-inner {
-  background: #FFFFFF;
-  border-radius: 6px;
-  width: 100%;
-  height: 100%;
-}
-
 /* Soft halo behind "Improve writing" */
 .improve-halo {
   position: absolute;
@@ -73,29 +46,19 @@
   z-index: 0;
 }
 
-/* === Reveal (see src/components/Reveal.tsx) — declarative fade + float-up/out === */
-@keyframes reveal-in {
-  from { opacity: 0; transform: translateY(var(--reveal-y, 20px)); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes reveal-out {
-  from { opacity: 1; transform: translateY(0); }
-  to   { opacity: 0; transform: translateY(var(--reveal-exit-y, 0px)); }
-}
-
-/* === Scene1 (src/scenes/Scene1.tsx) — cursor drifts right edge inward === */
+/* === TitleCard (src/scenes/TitleCard.tsx) — cursor drifts right edge inward === */
 @keyframes s1-cursor-drift {
   from { left: 1480px; top: 480px; }
   to   { left: 1380px; top: 490px; }
 }
 
-/* === Scene2 (src/scenes/Scene2.tsx) — chat input caret blink === */
+/* === PromptType (src/scenes/PromptType.tsx) — chat input caret blink === */
 @keyframes s2-caret-blink {
   0%, 49%  { opacity: 1; }
   50%, 100% { opacity: 0; }
 }
 
-/* === Scene3 (src/scenes/Scene3.tsx) === */
+/* === SendTransition (src/scenes/SendTransition.tsx) === */
 @keyframes s3-contents-out {
   from { opacity: 1; }
   to   { opacity: 0; }
@@ -106,7 +69,7 @@
   100% { transform: scale(1); }
 }
 
-/* === Scene4 (src/scenes/Scene4.tsx) — camera zoom-out + panel reveals === */
+/* === PanelZoomOut (src/scenes/PanelZoomOut.tsx) — camera zoom-out + panel reveals === */
 @keyframes s4-camera-zoom-out {
   from { transform: scale(3.2); }
   to   { transform: scale(1.4); }
@@ -120,7 +83,7 @@
   to   { opacity: 1; transform: translateX(0); }
 }
 
-/* === Scene6 (src/scenes/Scene6.tsx) — camera push-in/hold/pull-out + cursor + click === */
+/* === RunZoom (src/scenes/RunZoom.tsx) — camera push-in/hold/pull-out + cursor + click === */
 /* cubic-bezier(0.65,0,0.35,1) === easeInOutCubic (standard equivalent, same technique as
    the easeOutCubic/easeInCubic/easeInOutQuad mappings used elsewhere in this file). */
 @keyframes s6-camera {
@@ -156,13 +119,13 @@
   to   { opacity: 0; transform: translate(-50%, -50%) scale(3.0); }
 }
 
-/* === Scene7 (src/scenes/Scene7.tsx) — TicTacToe window launch === */
+/* === AppLaunch (src/scenes/AppLaunch.tsx) — TicTacToe window launch === */
 @keyframes s7-ttt-in {
   from { opacity: 0; transform: translateY(16px) scale(0.82); }
   to   { opacity: 1; transform: translateY(0) scale(1.0); }
 }
 
-/* === Scene8 (src/scenes/Scene8.tsx) — center-cell click, X/O spawns, fade to black === */
+/* === GameFadeOut (src/scenes/GameFadeOut.tsx) — center-cell click, X/O spawns, fade to black === */
 @keyframes s8-cursor-move {
   from { left: 1080px; top: 300px; }
   to   { left: 940px; top: 392px; }

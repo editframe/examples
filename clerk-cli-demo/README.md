@@ -15,4 +15,4 @@ npm run render        # -> output/demo.mp4 (native, single pass)
 
 The rendered video is saved to `output/`.
 
-Music and SFX play as native `<Audio>` elements on the composition timeline (`src/Video.tsx`, `src/scenes/SceneTerminal.tsx`) — no post-render mux step. Audio files live in `src/assets/` and are fully cleared for commercial use — see [CREDITS.md](CREDITS.md) for license details.
+Music and SFX play as native `<Audio>` elements on the composition timeline (`src/Video.tsx`, `src/scenes/Terminal.tsx`) — no post-render mux step. Audio files live in `src/assets/` and are fully cleared for commercial use — see [CREDITS.md](CREDITS.md) for license details.

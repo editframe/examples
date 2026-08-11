@@ -1,6 +1,6 @@
 import React from "react";
 import { Timegroup, Image } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { Sunburst, Star } from "../components/retro";
 import { SCENES, CANVAS_W, CANVAS_H, WELL_X, WELL_Y, WELL_W, WELL_H, WELL_R, SEAFOAM, SEAFOAM_LT, TEAL_INK, TEAL_DEEP, CREAM_LT, CORAL, SUNSET_GOLD } from "../constants";
 
@@ -10,7 +10,7 @@ const SANS = "'Archivo', -apple-system, 'Helvetica Neue', Arial, sans-serif";
 const W = CANVAS_W;
 const H = CANVAS_H;
 
-const VID_POSTER = "/assets/opt/vid-poster.jpg";
+const VID_POSTER = "/olipop-demo/src/assets/opt/vid-poster.jpg";
 
 const trackedCaps: React.CSSProperties = {
   fontFamily: SANS, fontWeight: 700, letterSpacing: 3, color: CREAM_LT, textTransform: "uppercase",

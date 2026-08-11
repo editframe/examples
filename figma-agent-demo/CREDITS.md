@@ -12,7 +12,7 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `src/assets/music-bed.mp3`
+### `src/assets/figma-agent-demo-music-bed.mp3`
 
 | | |
 |---|---|
@@ -41,7 +41,7 @@ A bright, optimistic, lightly bouncy bed that matches Figma's collaborative, cre
 
 Both files are the same source clip (`keyboard.wav`), looped and trimmed once to the exact cue duration needed in each scene (`src/scenes/SceneB_AgentPrompt.tsx`, `src/scenes/SceneC_ThenGoDeep.tsx`).
 
-### `src/assets/sfx/click-hd-loud.mp3`
+### `src/assets/sfx/figma-agent-demo-click-hd-loud.mp3`
 
 | | |
 |---|---|

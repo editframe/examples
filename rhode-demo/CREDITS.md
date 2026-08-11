@@ -7,7 +7,7 @@ Sources documented below. If you replace any file, update this document so
 downstream forkers can verify provenance.
 
 The shipped [`output/demo.mp4`](output/demo.mp4) already has this music baked in — the
-fades/normalization are pre-rendered directly into `src/assets/music-bed.mp3`, played as a
+fades/normalization are pre-rendered directly into `src/assets/rhode-demo-music-bed.mp3`, played as a
 single `<Audio>` element on the composition timeline (`src/Video.tsx`).
 
 </div>
@@ -16,7 +16,7 @@ single `<Audio>` element on the composition timeline (`src/Video.tsx`).
 
 ## Music
 
-### `src/assets/music-bed.mp3`
+### `src/assets/rhode-demo-music-bed.mp3`
 
 | | |
 |---|---|
@@ -28,7 +28,7 @@ single `<Audio>` element on the composition timeline (`src/Video.tsx`).
 This cut is **music only** — there are no sound effects in the 20s timeline.
 Replace freely with any royalty-free track ([Pixabay Music](https://pixabay.com/music/),
 [Free Music Archive](https://freemusicarchive.org/), [Incompetech](https://incompetech.com/music/royalty-free/)) —
-keep the filename `music-bed.mp3` or update the `<Audio src="...">` in `src/Video.tsx`.
+keep the filename `rhode-demo-music-bed.mp3` or update the `<Audio src="...">` in `src/Video.tsx`.
 
 ---
 

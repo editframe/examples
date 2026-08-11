@@ -10,7 +10,7 @@ import { Offer } from "./scenes/Offer";
 import { Cta } from "./scenes/Cta";
 import { OVERLAP_MS, DURATION_MS, TEAL_DEEP } from "./constants";
 
-const MUSIC = "/assets/music-bed.mp3";
+const MUSIC = "/olipop-demo/src/assets/olipop-demo-music-bed.mp3";
 
 /**
  * OLIPOP — short-form social ad (9:16). 1080×1920 @ 30fps, 20s. Music bed is a native

@@ -1,10 +1,10 @@
 import React from "react";
 import { Timegroup, Image } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { SCENES, LEFT_COL, W2_X, W2_Y, W2_W, W2_H, W2_R, W2_PAD, COCOA, ESPRESSO, ESPRESSO_BG_LO, WARM_WHITE, SOFT_PINK, SANS, SERIF, BROWN } from "../constants";
 
-const GEM_SKIN_MACRO = "/assets/gem-skin-macro.jpg";
-const LIFE_GRID1 = "/assets/life-grid1.jpg";
+const GEM_SKIN_MACRO = "/rhode-demo/src/assets/gem-skin-macro.jpg";
+const LIFE_GRID1 = "/rhode-demo/src/assets/life-grid1.jpg";
 
 /**
  * RESULT / LIFESTYLE — 3680ms local (200ms cross-fades in — timed to land just after

@@ -1,5 +1,6 @@
-@import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import "tailwindcss";
+@import "@shared/styles/reveal.css";
 
 @theme {
   /* Jira / Atlassian palette */
@@ -32,34 +33,6 @@
     -webkit-font-smoothing: antialiased;
     overflow: hidden;
   }
-}
-
-/* ---------- Cursor animated rainbow border ---------- */
-@property --cursor-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
-.cursor-border {
-  position: relative;
-  border-radius: 8px;
-  padding: 2px;
-  background:
-    conic-gradient(
-      from var(--cursor-angle),
-      #FF7A45 0%,
-      #E64980 33%,
-      #4263EB 66%,
-      #FF7A45 100%
-    );
-}
-
-.cursor-border-inner {
-  background: #FFFFFF;
-  border-radius: 6px;
-  width: 100%;
-  height: 100%;
 }
 
 /* Soft halo behind "Improve writing" */
@@ -103,12 +76,6 @@
   will-change: transform, left, opacity;
 }
 
-/* === Shared one-shot fade-out (used at the tail of Scene5_TerminalRun) === */
-@keyframes reveal-out {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
-
 /* === Shared blinking-cursor phases, used by every typewriter scene ===
  * `cursor-blink` alone (with `backwards` fill and an `animation-delay` equal to the
  * moment typing finishes) reproduces "solid while waiting/typing, then blinks" in one
@@ -132,7 +99,7 @@
   to   { opacity: 0; }
 }
 
-/* === Monospace character-reveal typewriter (Scene1_2_Terminal, Scene5_TerminalRun) ===
+/* === Monospace character-reveal typewriter (Terminal, TerminalRun) ===
  * Safe because both scenes use a real monospace font (JetBrains Mono): `1ch` is exactly
  * one glyph's width for every character, so animating `width` from 0 to `Nch` in
  * `steps(N, end)` reveals exactly one character per step with no mid-glyph clipping.
@@ -143,7 +110,7 @@
   from { width: 0; }
 }
 
-/* === Scene1_2_Terminal — stack-up reflow, computed once from OUTPUT_LINES/spawnAt ===
+/* === Terminal — stack-up reflow, computed once from OUTPUT_LINES/spawnAt ===
  * Every subsequent output line "pushes" the ones above it up by one row the instant it
  * spawns. Each line's resting position only ever changes at another line's fixed spawnAt,
  * so the whole sequence is a deterministic step function — expressed here as duplicate-
@@ -191,7 +158,7 @@
   to   { opacity: 1; }
 }
 
-/* === Scene8_LogoOutro — entrance only, holds forever (no exit) === */
+/* === LogoOutro — entrance only, holds forever (no exit) === */
 @keyframes logo-outro-in {
   from { opacity: 0; transform: scale(0.85); }
   to   { opacity: 1; transform: scale(1); }

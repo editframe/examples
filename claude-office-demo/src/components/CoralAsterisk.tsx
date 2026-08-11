@@ -1,6 +1,6 @@
 import React, { useCallback, useImperativeHandle, useRef } from "react";
 import { eases } from "animejs";
-import { track, lerp, clamp } from "./helpers";
+import { track, lerp, clamp } from "@shared/utils/animation";
 
 /**
  * CoralAsterisk — the Anthropic brand asterisk spinner.
@@ -197,7 +197,7 @@ export const CoralAsterisk = React.forwardRef<CoralAsteriskHandle, CoralAsterisk
 /**
  * ImperativeCoralAsterisk — version driven entirely by onFrame tick.
  * Uses a canvas-based approach for zero-React-re-render animation.
- * This is what Scene3_OutlookChrome uses for the standalone Thinking asterisk.
+ * This is what OutlookChromeAndType uses for the standalone Thinking asterisk.
  */
 interface CanvasAsteriskProps {
   cx: number;

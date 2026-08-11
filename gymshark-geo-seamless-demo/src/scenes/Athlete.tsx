@@ -1,11 +1,11 @@
 import React from "react";
 import { Timegroup, Image } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { Fin } from "../components/Fin";
 import { camoBg, facetedCamo } from "../components/camo";
 import { SCENES, OVERLAP_MS, WELL_A, NEAR_BLACK, WHITE, OFF_WHITE, GREY_MID, COOL_ACCENT, COOL_ACCENT_DIM, COOL_ACCENT_GLOW, DISPLAY, HEAVY } from "../constants";
 
-const MODEL_0030 = "/assets/model-0030.jpg";
+const MODEL_0030 = "/gymshark-geo-seamless-demo/src/assets/model-0030.jpg";
 
 /**
  * ATHLETE · WELL_A — 4600ms local (nominal 4150ms solo + OVERLAP_MS, abs 3900–8500).

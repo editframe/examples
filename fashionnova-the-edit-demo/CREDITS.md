@@ -12,7 +12,7 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `src/assets/music-bed.mp3`
+### `src/assets/fashionnova-the-edit-demo-music-bed.mp3`
 
 | | |
 |---|---|
@@ -30,7 +30,7 @@ fast, glam, black-and-white-energy bed that matches Fashion Nova's voice.
 
 ## Want to swap audio?
 
-1. Replace `src/assets/music-bed.mp3` with your new track, baking in any fades/normalization
+1. Replace `src/assets/fashionnova-the-edit-demo-music-bed.mp3` with your new track, baking in any fades/normalization
    with a local ffmpeg pass first (the file is played back as-is, with no runtime processing).
 2. Update the row above with the new source + license info.
 3. Update the `<Audio src="...">` path in `src/Video.tsx` if you renamed the file.

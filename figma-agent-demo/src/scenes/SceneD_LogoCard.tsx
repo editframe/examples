@@ -1,7 +1,7 @@
 import React from "react";
 import { Timegroup } from "@editframe/react";
 import { FigmaLogo } from "../components/FigmaLogo";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { Sfx } from "../components/Sfx";
 
 /**

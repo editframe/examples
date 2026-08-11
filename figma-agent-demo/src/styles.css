@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@shared/styles/reveal.css";
 
 @theme {
   /* Figma chrome */
@@ -40,21 +41,7 @@
   * { box-sizing: border-box; }
 }
 
-/* === Reveal (see src/components/Reveal.tsx) — declarative fade + translate/scale === */
-@keyframes reveal-in {
-  from {
-    opacity: 0;
-    transform: translate(var(--reveal-x, 0px), var(--reveal-y, 20px)) scale(var(--reveal-scale-from, 1));
-  }
-  to { opacity: 1; transform: translate(0, 0) scale(1); }
-}
-@keyframes reveal-out {
-  from { opacity: 1; transform: translate(0, 0) scale(1); }
-  to {
-    opacity: 0;
-    transform: translate(var(--reveal-exit-x, 0px), var(--reveal-exit-y, 0px)) scale(var(--reveal-exit-scale, 1));
-  }
-}
+/* reveal-in/reveal-out keyframes now live in @shared/styles/reveal.css (see @import above) */
 
 /* === Shared solid-color scene-transition wash (see Sfx/transition overlays in each scene) === */
 @keyframes wash-in {
@@ -63,19 +50,9 @@
 }
 
 /* === SceneA (src/scenes/SceneA_FigmaWindow.tsx) === */
-/* Camera rig — one continuous multi-hold pan/zoom across the whole 10s scene. Every
-   moving segment in the original per-frame version used the same ease-in-out-cubic
-   curve, so a single `animation-timing-function` covers every stop. */
-@keyframes scenea-camera {
-  0%   { transform: translate(0px, 0px) scale(0.92); }
-  15%  { transform: translate(0px, 0px) scale(1); }
-  35%  { transform: translate(0px, 0px) scale(1); }
-  45%  { transform: translate(760px, 120px) scale(1.5); }
-  55%  { transform: translate(760px, 120px) scale(1.5); }
-  68%  { transform: translate(-680px, 200px) scale(1.6); }
-  80%  { transform: translate(-680px, 200px) scale(1.6); }
-  100% { transform: translate(0px, 0px) scale(1); }
-}
+/* Camera rig is now `<Camera stops={CAMERA_STOPS}>` (see the scene file) — a real
+   dolly+tilt shot list via @shared/components/Camera, replacing the flat translate/scale
+   @keyframes that used to live here. */
 @keyframes scenea-topbar-in {
   from { transform: translateY(-100%); }
   to   { transform: translateY(0); }

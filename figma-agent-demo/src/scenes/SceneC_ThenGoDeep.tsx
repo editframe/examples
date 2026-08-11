@@ -1,8 +1,8 @@
 import React, { useCallback, useRef } from "react";
 import { Timegroup, Audio } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { Sfx } from "../components/Sfx";
-import { typewriter } from "../components/helpers";
+import { typewriter } from "@shared/utils/animation";
 
 /**
  * SceneC — "Then go deep" hero (5.8s).
@@ -62,7 +62,7 @@ export const SceneC_ThenGoDeep: React.FC = () => {
       <Sfx cue="pop" at={0.95} dur={0.4} volume={0.26} />
       <Sfx cue="plop" at={1.5} dur={0.4} volume={0.22} />
       {/* Keyboard typing clatter under the chat-input typewriter (1.8–4.4s local). */}
-      <Audio src="/assets/sfx/keyboard-scenec.mp3" offset="1.8s" duration="2.6s" volume={0.28} />
+      <Audio src="/figma-agent-demo/src/assets/sfx/keyboard-scenec.mp3" offset="1.8s" duration="2.6s" volume={0.28} />
 
       {/* Fade to dark for SceneD */}
       <div

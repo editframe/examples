@@ -1,10 +1,10 @@
 import React from "react";
 import { Timegroup, Image, Video as Clip } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { SCENES, WELL_A, COOL_OAT, INK, LINE, GEOGRAPH, STONE } from "../constants";
 import { CornerMarks } from "../components/CornerMarks";
 
-const POSTER_PORTRAIT = "/assets/poster-portrait.jpg";
+const POSTER_PORTRAIT = "/allbirds-tree-runner-demo/src/assets/poster-portrait.jpg";
 
 const eyebrow: React.CSSProperties = {
   fontFamily: GEOGRAPH, fontWeight: 500, textTransform: "uppercase",
@@ -30,7 +30,7 @@ export const WellA: React.FC = () => (
       <div className="absolute inset-0" style={{ animation: "well-poster-in 600ms 650ms cubic-bezier(0.33,1,0.68,1) backwards" }}>
         <Image src={POSTER_PORTRAIT} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
         <Clip
-          src="/assets/well-a-people-walk.mp4"
+          src="/allbirds-tree-runner-demo/src/assets/well-a-people-walk.mp4"
           duration={`${SCENES.wellA.duration}ms`}
           sourcein="0.5s"
           mute

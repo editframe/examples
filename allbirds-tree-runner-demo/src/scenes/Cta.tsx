@@ -1,9 +1,9 @@
 import React from "react";
 import { Timegroup, Image } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { SCENES, W, INK, OAT, STONE, GEOGRAPH } from "../constants";
 
-const TREE_LEFT = "/assets/tree-left.png";
+const TREE_LEFT = "/allbirds-tree-runner-demo/src/assets/tree-left.png";
 
 const eyebrow: React.CSSProperties = {
   fontFamily: GEOGRAPH, fontWeight: 500, textTransform: "uppercase",

@@ -1,8 +1,5 @@
-@import "tailwindcss";
-
-/* Geist Sans + Geist Mono are loaded via <link> in index.html.
-   Falls back to the @import below if HTML link is stripped. */
 @import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap");
+@import "tailwindcss";
 
 @theme {
   /* Vercel canonical concrete-gray ramp — memorized from gray-100 → gray-950 */
@@ -46,7 +43,7 @@
   }
 }
 
-/* === Scene4_ArticlePage (src/scenes/Scene4_ArticlePage.tsx) ===
+/* === ArticlePage (src/scenes/ArticlePage.tsx) ===
    Percent stops mirror the scene's original scene-local ms marks over its
    4500ms total duration (600/1800/2600/3600 -> 13.33/40/57.78/80%).
    cubic-bezier(0.65,0,0.35,1) is the standard easeInOutCubic equivalent. */

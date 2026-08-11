@@ -1,12 +1,12 @@
 import React, { useCallback, useRef } from "react";
 import { Timegroup, Image } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { Fin } from "../components/Fin";
 import { camoBg } from "../components/camo";
-import { track, easeOutCubic } from "../components/helpers";
+import { track, easeOutCubic } from "@shared/utils/animation";
 import { SCENES, OVERLAP_MS, WELL_B, NEAR_BLACK, WHITE, OFF_WHITE, GREY_LINE, COOL_ACCENT, COOL_ACCENT_GLOW, DISPLAY, HEAVY } from "../constants";
 
-const POSTER_FABRIC = "/assets/poster-fabric.jpg";
+const POSTER_FABRIC = "/gymshark-geo-seamless-demo/src/assets/poster-fabric.jpg";
 
 const SPECS = [
   { label: "STRETCH RECOVERY", kind: "num" as const, fill: 0.98 },

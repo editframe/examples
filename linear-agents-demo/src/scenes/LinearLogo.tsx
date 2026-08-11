@@ -1,6 +1,6 @@
 import React from "react";
 import { Timegroup } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { SCENES, FONT } from "../constants";
 
 /**

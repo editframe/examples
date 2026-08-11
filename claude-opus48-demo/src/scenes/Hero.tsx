@@ -1,6 +1,6 @@
 import React from "react";
 import { Timegroup } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import TerminalWindow, { AppSection, type AppRow } from "../components/TerminalWindow";
 import { SCENES, HERO_TERM_W, HERO_TERM_H, HERO_TERM_CX, HERO_TERM_CY } from "../constants";
 

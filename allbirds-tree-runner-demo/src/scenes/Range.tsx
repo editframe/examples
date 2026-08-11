@@ -1,6 +1,6 @@
 import React from "react";
 import { Timegroup, Image } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { SCENES, OAT, COOL_OAT, SAND, INK, LINE, GEOGRAPH, STONE } from "../constants";
 
 const eyebrow: React.CSSProperties = {
@@ -9,15 +9,15 @@ const eyebrow: React.CSSProperties = {
 };
 
 const COLORWAYS = [
-  { img: "/assets/cw-mushroom.png", name: "Mushroom" },
-  { img: "/assets/cw-navy.png", name: "Navy" },
-  { img: "/assets/cw-lightgrey.png", name: "Light Grey" },
-  { img: "/assets/cw-anthracite.png", name: "Anthracite" },
-  { img: "/assets/cw-seaspray.png", name: "Seaspray" },
-  { img: "/assets/cw-port.png", name: "Port" },
-  { img: "/assets/cw-gold.png", name: "Gold" },
-  { img: "/assets/cw-black.png", name: "Black" },
-  { img: "/assets/cw-auburn.png", name: "Auburn" },
+  { img: "/allbirds-tree-runner-demo/src/assets/cw-mushroom.png", name: "Mushroom" },
+  { img: "/allbirds-tree-runner-demo/src/assets/cw-navy.png", name: "Navy" },
+  { img: "/allbirds-tree-runner-demo/src/assets/cw-lightgrey.png", name: "Light Grey" },
+  { img: "/allbirds-tree-runner-demo/src/assets/cw-anthracite.png", name: "Anthracite" },
+  { img: "/allbirds-tree-runner-demo/src/assets/cw-seaspray.png", name: "Seaspray" },
+  { img: "/allbirds-tree-runner-demo/src/assets/cw-port.png", name: "Port" },
+  { img: "/allbirds-tree-runner-demo/src/assets/cw-gold.png", name: "Gold" },
+  { img: "/allbirds-tree-runner-demo/src/assets/cw-black.png", name: "Black" },
+  { img: "/allbirds-tree-runner-demo/src/assets/cw-auburn.png", name: "Auburn" },
 ];
 
 /**

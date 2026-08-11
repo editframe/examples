@@ -16,29 +16,29 @@ There is no music in this video — SFX only, per spec.
 
 ## SFX
 
-### `src/assets/sfx/click.mp3`
+### `src/assets/sfx/vercel-knowledge-base-demo-click.mp3`
 
 | | |
 |---|---|
 | **Type** | UI click |
 | **Source** | Free UI SFX collection |
 | **License** | Royalty-free, commercial use cleared |
-| **Used for** | Filter-button click (offset 9200ms) and Sandbox-row click (offset 9900ms) in `Scene1_HeroToOverview`; thumbs-up click (offset 13060ms) in `Scene5_AIChatPanel` |
+| **Used for** | Filter-button click (offset 9200ms) and Sandbox-row click (offset 9900ms) in `HeroToOverview`; thumbs-up click (offset 13060ms) in `AIChatPanel` |
 
-### `src/assets/sfx/keyboard.wav`
+### `src/assets/sfx/vercel-knowledge-base-demo-keyboard.wav`
 
 | | |
 |---|---|
 | **Type** | Mechanical keyboard typing |
 | **Source** | Free UI SFX collection |
 | **License** | Royalty-free, commercial use cleared |
-| **Used for** | Ask-AI prompt typewriter keystrokes (offset 1500ms) in `Scene5_AIChatPanel` |
+| **Used for** | Ask-AI prompt typewriter keystrokes (offset 1500ms) in `AIChatPanel` |
 
 ---
 
 ## Want to swap audio?
 
-Keep the replacement in `src/assets/sfx/`, update the corresponding `<Audio src="...">` reference in `src/scenes/Scene1_HeroToOverview.tsx` / `src/scenes/Scene5_AIChatPanel.tsx`, and update the table above with the real source + license.
+Keep the replacement in `src/assets/sfx/`, update the corresponding `<Audio src="...">` reference in `src/scenes/HeroToOverview.tsx` / `src/scenes/AIChatPanel.tsx`, and update the table above with the real source + license.
 
 For 100% safe royalty-free sources:
 

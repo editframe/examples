@@ -12,7 +12,7 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `src/assets/music-bed.mp3`
+### `src/assets/vercel-deploy-demo-music-bed.mp3`
 
 | | |
 |---|---|
@@ -24,7 +24,7 @@ document so downstream forkers can verify provenance.
 | **Attribution required** | ❌ No (credit appreciated) |
 | **Redistribution** | ✅ Permitted as part of derivative work |
 
-Driving electronic bed that fits the Vercel deploy-payoff curve. Replace freely with anything from Pixabay, [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/) — keep the filename `music-bed.mp3` or update the `<Audio src="/assets/music-bed.mp3">` path in `src/Video.tsx`.
+Driving electronic bed that fits the Vercel deploy-payoff curve. Replace freely with anything from Pixabay, [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/) — keep the filename `vercel-deploy-demo-music-bed.mp3` or update the `<Audio src="/assets/vercel-deploy-demo-music-bed.mp3">` path in `src/Video.tsx`.
 
 The bundled file is pre-baked with a 1.5s fade-in, a 2.0s fade-out starting at 20.5s, and master volume 0.16 — played back at `volume={1}` on the `<Audio>` element since the fades/level are already committed to the asset.
 

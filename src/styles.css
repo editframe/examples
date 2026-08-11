@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+/* Base document reset for the workbench shell. Each example's own styles.css
+   (loaded dynamically per active project, see src/App.tsx) supplies its own
+   canvas background -- this covers the page before any project has loaded. */
+@layer base {
+  html,
+  body,
+  #root {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+}

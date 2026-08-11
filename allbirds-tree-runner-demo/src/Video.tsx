@@ -10,7 +10,7 @@ import { Range } from "./scenes/Range";
 import { Cta } from "./scenes/Cta";
 import { OAT, INK, GEOGRAPH, OVERLAP_MS, DURATION_MS } from "./constants";
 
-const MUSIC = "/assets/music-bed.mp3";
+const MUSIC = "/allbirds-tree-runner-demo/src/assets/allbirds-tree-runner-demo-music-bed.mp3";
 
 /**
  * ALLBIRDS — Tree Runner NZ · 9:16 · "Natural Materials" cut.

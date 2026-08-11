@@ -2,10 +2,10 @@ import React from "react";
 import { Timegroup, Image } from "@editframe/react";
 import { SCENES, OAT, ESPRESSO, ESPRESSO_BG, BROWN, COCOA, WARM_WHITE, DUSTY_ROSE, SOFT_PINK, SANS, SERIF } from "../constants";
 
-const HIGHLIGHT_MILK = "/assets/flat/highlight-milk.png";
-const SIP = "/assets/flat/sip.png";
-const MACADAMIA = "/assets/flat/macadamia-butter.png";
-const SUMMER_KIT = "/assets/flat/summer-kit.png";
+const HIGHLIGHT_MILK = "/rhode-demo/src/assets/flat/highlight-milk.png";
+const SIP = "/rhode-demo/src/assets/flat/sip.png";
+const MACADAMIA = "/rhode-demo/src/assets/flat/macadamia-butter.png";
+const SUMMER_KIT = "/rhode-demo/src/assets/flat/summer-kit.png";
 
 const BEST_SELLERS = [
   { img: HIGHLIGHT_MILK, name: "highlight milk", price: "$28" },

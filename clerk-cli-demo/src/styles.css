@@ -1,7 +1,6 @@
-@import "tailwindcss";
-
-/* JetBrains Mono + Inter via <link> in index.html. Fallback import below. */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap");
+@import "tailwindcss";
+@import "@shared/styles/reveal.css";
 
 @theme {
   /* Clerk canonical color system */
@@ -40,12 +39,6 @@
   }
 }
 
-/* === Reveal (see src/components/Reveal.tsx) — declarative fade + float-up entrance === */
-@keyframes reveal-in {
-  from { opacity: 0; transform: translateY(var(--reveal-y, 12px)); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
 /* === Typewriter (see src/components/Typewriter.tsx) — steps() width reveal for monospace text === */
 @keyframes typewriter-reveal {
   from { width: 0; }
@@ -61,7 +54,7 @@
   to { opacity: 0; }
 }
 
-/* === SceneTerminal (src/scenes/SceneTerminal.tsx) — window fade, height expand, 5-stage camera === */
+/* === Terminal (src/scenes/Terminal.tsx) — window fade, height expand, 5-stage camera === */
 @keyframes term-win-fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -77,9 +70,9 @@
 }
 /* 5-stage camera choreography (pan/zoom A -> B -> hold -> D -> hold -> E -> hold), converted
    from a per-frame lerp/track composition to a single fixed-duration keyframe timeline —
-   every stage boundary is a known fraction of SceneTerminal's own 11500ms duration, so no
+   every stage boundary is a known fraction of Terminal's own 11500ms duration, so no
    per-frame math is needed. --cam-*-x/-y/-s are set inline from the same TX_*/TY_*/S_*
-   constants the derivation comments in SceneTerminal.tsx explain. */
+   constants the derivation comments in Terminal.tsx explain. */
 @keyframes terminal-camera {
   0%       { transform: translate(var(--cam-a-x), var(--cam-a-y)) scale(var(--cam-a-s)); animation-timing-function: linear; }
   26.9565% { transform: translate(var(--cam-a-x), var(--cam-a-y)) scale(var(--cam-a-s)); animation-timing-function: cubic-bezier(0.33,1,0.68,1); }

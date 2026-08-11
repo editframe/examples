@@ -66,7 +66,7 @@ fade-in and a 1.5s fade-out baked directly into the committed asset. This cut is
 
 | Cue | Master ms | Source file |
 |---|---|---|
-| Music bed | `0 – 20000` | `src/assets/music-bed.mp3` (loudnorm −16, fade-in 0.6s, fade-out 18.5–20.0s) |
+| Music bed | `0 – 20000` | `src/assets/rhode-demo-music-bed.mp3` (loudnorm −16, fade-in 0.6s, fade-out 18.5–20.0s) |
 
 ---
 
@@ -115,7 +115,7 @@ the source of truth for the tokens; full spec in [`brand-rules-rhode.md`](brand-
     ├── styles.css             ← all @keyframes (shared Reveal/wipe/bob + per-scene ones)
     ├── constants.ts           ← palette, well specs, SCENES (durations + overlap math)
     ├── assets/                ← product PNGs + campaign lifestyle/macro stills (real
-    │                             files — no base64 in source) + music-bed.mp3
+    │                             files — no base64 in source) + rhode-demo-music-bed.mp3
     ├── scenes/                ← one file per beat, each its own `<Timegroup mode="fixed">`
     │   ├── Hook.tsx
     │   ├── Hero.tsx
@@ -152,7 +152,7 @@ npm run render
    shadows on text.
 3. **Re-skin assets** — drop new product/lifestyle imagery into `src/assets/` and point
    the relevant scene's `<Image src="/assets/...">` at the new file.
-4. **Swap the music** — replace `src/assets/music-bed.mp3` and adjust the `<Audio>`
+4. **Swap the music** — replace `src/assets/rhode-demo-music-bed.mp3` and adjust the `<Audio>`
    `volume` in `src/Video.tsx`; log it in [`CREDITS.md`](CREDITS.md).
 5. **Render** — `npm run render`.
 

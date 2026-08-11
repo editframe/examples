@@ -1,9 +1,9 @@
 import React from "react";
 import { Timegroup, Image } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { SCENES, OVERLAP_MS, NEAR_BLACK, WHITE, OFF_WHITE, DISPLAY, HEAVY } from "../constants";
 
-const MODEL_A = "/assets/model-a.jpg";
+const MODEL_A = "/gymshark-geo-seamless-demo/src/assets/model-a.jpg";
 
 /**
  * HERO — PRODUCT HERO. 3550ms local (nominal 3100ms solo + OVERLAP_MS, abs 800–4350).

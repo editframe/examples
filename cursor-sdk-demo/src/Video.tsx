@@ -10,22 +10,22 @@
  * Nearly every scene animates against its own local clock via plain CSS `@keyframes` /
  * `steps()` typewriter clips / the shared `cursor-blink` cursor — no master-ms clock, no
  * imperative ref-driven style mutation. Two scenes keep a small, explicitly-justified
- * `addFrameTask` for math that has no reasonable static-CSS equivalent: Scene4_CodeBlock's
- * accelerating camera chase + per-token text reveal, and Scene5_TerminalRun's
+ * `addFrameTask` for math that has no reasonable static-CSS equivalent: CodeBlock's
+ * accelerating camera chase + per-token text reveal, and TerminalRun's
  * viewport-follow scroll smoothing (see each file's own comment for why).
  */
 import React from "react";
 import { Timegroup, Audio } from "@editframe/react";
 import { TOTAL_MS } from "./constants";
-import { Scene1_2_Terminal } from "./scenes/Scene1_2_Terminal";
-import { Scene3_ComposerText } from "./scenes/Scene3_ComposerText";
-import { Scene4_CodeBlock } from "./scenes/Scene4_CodeBlock";
-import { Scene5_TerminalRun } from "./scenes/Scene5_TerminalRun";
-import { Scene6_TitleCard } from "./scenes/Scene6_TitleCard";
-import { Scene7_NowAvailable } from "./scenes/Scene7_NowAvailable";
-import { Scene8_LogoOutro } from "./scenes/Scene8_LogoOutro";
+import { Terminal } from "./scenes/Terminal";
+import { ComposerText } from "./scenes/ComposerText";
+import { CodeBlock } from "./scenes/CodeBlock";
+import { TerminalRun } from "./scenes/TerminalRun";
+import { TitleCard } from "./scenes/TitleCard";
+import { NowAvailable } from "./scenes/NowAvailable";
+import { LogoOutro } from "./scenes/LogoOutro";
 
-const MUSIC = "/assets/music-bed.mp3";
+const MUSIC = "/cursor-sdk-demo/src/assets/cursor-sdk-demo-music-bed.mp3";
 
 export const Video: React.FC = () => (
   <Timegroup
@@ -39,13 +39,13 @@ export const Video: React.FC = () => (
     }}
   >
     <Timegroup mode="sequence" className="absolute w-full h-full">
-      <Scene1_2_Terminal />
-      <Scene3_ComposerText />
-      <Scene4_CodeBlock />
-      <Scene5_TerminalRun />
-      <Scene6_TitleCard />
-      <Scene7_NowAvailable />
-      <Scene8_LogoOutro />
+      <Terminal />
+      <ComposerText />
+      <CodeBlock />
+      <TerminalRun />
+      <TitleCard />
+      <NowAvailable />
+      <LogoOutro />
     </Timegroup>
 
     {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the

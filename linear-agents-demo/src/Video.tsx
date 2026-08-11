@@ -10,7 +10,7 @@ import { OutroTitle } from "./scenes/OutroTitle";
 import { LinearLogo } from "./scenes/LinearLogo";
 import { BG, DURATION_MS } from "./constants";
 
-const MUSIC = "/assets/music-bed.mp3";
+const MUSIC = "/linear-agents-demo/src/assets/linear-agents-demo-music-bed.mp3";
 
 /**
  * Linear for Agents — 1:1 reproduction, 0–32s. 1920×1080 @ 30fps.

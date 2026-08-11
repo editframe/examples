@@ -10,7 +10,7 @@ import { Cta } from "./scenes/Cta";
 import { DewyBridge } from "./components/DewyBridge";
 import { OAT, GRAIN, OVERLAP_MS, DURATION_MS } from "./constants";
 
-const MUSIC = "/assets/music-bed.mp3";
+const MUSIC = "/rhode-demo/src/assets/rhode-demo-music-bed.mp3";
 
 /**
  * rhode — "summer '26" eCommerce product ad. 1080×1920 portrait @ 30fps, ~20s total.

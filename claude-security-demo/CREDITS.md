@@ -12,7 +12,7 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `src/assets/music-bed.mp3`
+### `src/assets/claude-security-demo-music-bed.mp3`
 
 | | |
 |---|---|
@@ -24,13 +24,13 @@ document so downstream forkers can verify provenance.
 | **Attribution required** | ❌ No (credit appreciated) |
 | **Redistribution** | ✅ Permitted as part of derivative work |
 
-A slow-burn cinematic bed that underscores the editorial security-finding narrative without competing with the headline. Replace freely with anything from Pixabay, [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/) — keep the filename `music-bed.mp3` or update the `MUSIC` constant in `src/Video.tsx` accordingly.
+A slow-burn cinematic bed that underscores the editorial security-finding narrative without competing with the headline. Replace freely with anything from Pixabay, [Free Music Archive](https://freemusicarchive.org/), or [Incompetech](https://incompetech.com/music/royalty-free/) — keep the filename `claude-security-demo-music-bed.mp3` or update the `MUSIC` constant in `src/Video.tsx` accordingly.
 
 ---
 
 ## SFX
 
-### `src/assets/click-hd-loud.mp3`
+### `src/assets/claude-security-demo-click-hd-loud.mp3`
 
 | | |
 |---|---|

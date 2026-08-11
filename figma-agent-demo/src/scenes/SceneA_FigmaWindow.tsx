@@ -1,8 +1,29 @@
 import React, { useCallback, useRef } from "react";
 import { Timegroup, Audio } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
+import { Camera } from "@shared/components/Camera";
+import { holdAt, dollyIn, tilt } from "@shared/camera/shots";
+import type { CameraStop } from "@shared/camera/types";
 import { Sfx } from "../components/Sfx";
-import { clamp, lerp, typewriter } from "../components/helpers";
+import { clamp, lerp, typewriter } from "@shared/utils/animation";
+
+/**
+ * Camera shot list — a `<Camera>` retrofit of the flat `scenea-camera` CSS-keyframe rig
+ * (formerly a single `translate()/scale()` @keyframes block in styles.css). The two
+ * mid-scene punches are now real `dollyIn` + `tilt` moves (z-depth + a couple degrees of
+ * rotation) instead of a flat `scale()`, so they read as camera dolly moves with genuine
+ * perspective foreshortening under `<Camera perspective>` rather than a CSS zoom.
+ */
+const CAMERA_STOPS: CameraStop[] = [
+  { at: 0, frame: { x: 0, y: 0, z: -120 } },
+  { at: 1500, frame: holdAt({ x: 0, y: 0, z: 0 }), ease: "inOutCubic" },
+  { at: 3500, frame: holdAt({ x: 0, y: 0, z: 0 }), hold: true },
+  { at: 4500, frame: tilt(dollyIn(420, { x: 340, y: 60 }), -2, 3), ease: "inOutCubic" },
+  { at: 5500, frame: tilt(dollyIn(420, { x: 340, y: 60 }), -2, 3), hold: true },
+  { at: 6800, frame: tilt(dollyIn(480, { x: -300, y: 90 }), 1, -3), ease: "inOutCubic" },
+  { at: 8000, frame: tilt(dollyIn(480, { x: -300, y: 90 }), 1, -3), hold: true },
+  { at: 10000, frame: holdAt({ x: 0, y: 0, z: 0 }), ease: "inOutCubic" },
+];
 
 /**
  * SceneA — Figma window (10s).
@@ -32,15 +53,17 @@ import { clamp, lerp, typewriter } from "../components/helpers";
  *   t=8     scale 1.0,  tx=0,  ty=0 (wide release)
  *   t=10    fade to next scene
  *
- * NOTE: the camera magnitudes actually implemented (see `scenea-camera` in
- * styles.css) were re-tuned so the cursor's clicks land on visible targets —
- * see the click-target derivation comments further down. The values above are
- * the original design intent; the shipped numbers are 1.5/1.5/1.0→3.5/1.0/tx0
- * →4.5/1.5/tx760,ty120→5.5(hold)→6.8/1.6/tx-680,ty200→8.0(hold)→10/1.0/tx0.
+ * NOTE: the camera magnitudes actually implemented (see `CAMERA_STOPS` above) were
+ * re-tuned so the cursor's clicks land on visible targets — see the click-target
+ * derivation comments further down. The values above are the original design intent;
+ * the shipped shot list is a `<Camera>` dolly+tilt retrofit of the original
+ * 1.5/1.5/1.0→3.5/1.0/tx0→4.5/1.5/tx760,ty120→5.5(hold)→6.8/1.6/tx-680,ty200→8.0(hold)→
+ * 10/1.0/tx0 flat translate/scale rig.
  *
- * Camera + panel/mockup/badge/stagger animations are all fully declarative CSS
- * (see `scenea-*` keyframes in styles.css and the `Reveal` usages below). Two
- * things are kept as a small scene-scoped `addFrameTask`:
+ * The camera is now the declarative `<Camera stops={CAMERA_STOPS}>` primitive (see
+ * @shared/components/Camera); panel/mockup/badge/stagger animations remain plain CSS
+ * (see `scenea-*` keyframes in styles.css and the `Reveal` usages below). Two things are
+ * kept as a small scene-scoped `addFrameTask`:
  *   1. The file-name typewriter — CSS cannot mutate text content over time.
  *   2. The cursor sweep + both click "consequences" (Progress Card row
  *      selection, Fill swatch → color-picker → hue-drag → button recolor,
@@ -300,18 +323,12 @@ export const SceneA_FigmaWindow: React.FC = () => {
       <Sfx cue="confirm" at={8.9} dur={0.5} volume={0.28} />
       {/* Cursor-click SFX — keyed to the exact same click timestamps (4.6s, 7.0s)
           as the cursor sweep + click-consequence choreography above. */}
-      <Audio src="/assets/sfx/click-hd-loud.mp3" offset="4.6s" duration="1.5s" volume={0.45} />
-      <Audio src="/assets/sfx/click-hd-loud.mp3" offset="7.0s" duration="1.5s" volume={0.45} />
+      <Audio src="/figma-agent-demo/src/assets/sfx/figma-agent-demo-click-hd-loud.mp3" offset="4.6s" duration="1.5s" volume={0.45} />
+      <Audio src="/figma-agent-demo/src/assets/sfx/figma-agent-demo-click-hd-loud.mp3" offset="7.0s" duration="1.5s" volume={0.45} />
 
-      {/* ===== CAMERA RIG ===== */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          transformOrigin: "50% 50%",
-          animation: "scenea-camera 10000ms cubic-bezier(0.65,0,0.35,1) both",
-        }}
-      >
+      {/* ===== CAMERA RIG ===== (50%/50% transform-origin is CSS's default, applied per-stop
+          via `Frame.origin` if ever needed — see shared/camera/shots.ts) */}
+      <Camera stops={CAMERA_STOPS} className="absolute inset-0">
         {/* ===== TOP BAR ===== */}
         <div
           style={{
@@ -1454,7 +1471,7 @@ export const SceneA_FigmaWindow: React.FC = () => {
             Jack
           </div>
         </div>
-      </div>
+      </Camera>
     </Timegroup>
   );
 };

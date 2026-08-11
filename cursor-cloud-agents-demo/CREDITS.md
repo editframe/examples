@@ -12,7 +12,7 @@ document so downstream forkers can verify provenance.
 
 ## Music
 
-### `src/assets/music.mp3`
+### `src/assets/cursor-cloud-agents-demo-music.mp3`
 
 | | |
 |---|---|
@@ -27,20 +27,20 @@ Same source track as `clerk-cli-demo` (which uses the intro segment instead) —
 
 ## SFX
 
-### `src/assets/sfx/click.mp3`
+### `src/assets/sfx/cursor-cloud-agents-demo-click.mp3`
 
 | | |
 |---|---|
 | **Type** | UI click |
 | **Source** | Free UI SFX collection |
 | **License** | Royalty-free, commercial use cleared |
-| **Used for** | "Start Agent" button click in `Scene4_CreateEnv` (offset 1500ms, global ~8000ms) |
+| **Used for** | "Start Agent" button click in `CreateEnv` (offset 1500ms, global ~8000ms) |
 
 ---
 
 ## Want to swap audio?
 
-Keep the replacement in `src/assets/` (or `src/assets/sfx/`), update the corresponding `<Audio src="...">` reference in `src/Video.tsx` / `src/scenes/Scene4_CreateEnv.tsx`, and update the table above with the real source + license.
+Keep the replacement in `src/assets/` (or `src/assets/sfx/`), update the corresponding `<Audio src="...">` reference in `src/Video.tsx` / `src/scenes/CreateEnv.tsx`, and update the table above with the real source + license.
 
 For 100% safe royalty-free sources:
 

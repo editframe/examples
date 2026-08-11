@@ -5,7 +5,7 @@ import { RegMark } from "../components/RegMark";
 import { Barcode } from "../components/Barcode";
 import { CutFlash } from "../components/CutFlash";
 
-const TEX_PAPER = "/assets/tex-paper.png";
+const TEX_PAPER = "/fashionnova-the-edit-demo/src/assets/tex-paper.png";
 
 // perforated dashed edge (swing-tag look)
 const PERF = `repeating-linear-gradient(90deg, ${BLACK} 0 7px, transparent 7px 14px)`;
@@ -16,9 +16,9 @@ const cover = (extra: React.CSSProperties = {}): React.CSSProperties => ({
 
 // BIGGER tags (fill the frame): src, badge no., x offset, card size, string length
 const TAGS = [
-  { src: "/assets/dress-2.jpg", num: "01", x: 60, tw: 366, th: 600, str: 110 },
-  { src: "/assets/ed01.jpg", num: "02", x: 380, tw: 396, th: 640, str: 250 },
-  { src: "/assets/ed11.jpg", num: "03", x: 728, tw: 366, th: 600, str: 150 },
+  { src: "/fashionnova-the-edit-demo/src/assets/dress-2.jpg", num: "01", x: 60, tw: 366, th: 600, str: 110 },
+  { src: "/fashionnova-the-edit-demo/src/assets/ed01.jpg", num: "02", x: 380, tw: 396, th: 640, str: 250 },
+  { src: "/fashionnova-the-edit-demo/src/assets/ed11.jpg", num: "03", x: 728, tw: 366, th: 600, str: 150 },
 ];
 
 /** Swing-ticket TAG face (look photo cropped in + mono/silver chrome). */

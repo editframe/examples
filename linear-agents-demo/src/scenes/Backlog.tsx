@@ -1,6 +1,6 @@
 import React, { useCallback, useRef } from "react";
 import { Timegroup } from "@editframe/react";
-import { clamp, lerp, track, easeOutCubic, easeInOutQuad } from "../components/helpers";
+import { clamp, lerp, track, easeOutCubic, easeInOutQuad } from "@shared/utils/animation";
 import { Checkbox, PriorityBars, PriorityUrgent, StatusInProgress, StatusTodo, AssigneeRing, CodegenRowIcon, TeamIcon, Cursor, AGENT_ICON, MODAL_AGENTS } from "../components/icons";
 import { SCENES, FONT } from "../constants";
 

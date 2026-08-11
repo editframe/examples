@@ -1,6 +1,6 @@
 import React from "react";
 import { Timegroup, Image } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { Fin } from "../components/Fin";
 import { camoBg, facetedCamo } from "../components/camo";
 import { SCENES, OVERLAP_MS, NEAR_BLACK, WHITE, OFF_WHITE, GREY_MID, GREY_LINE, DISPLAY, HEAVY } from "../constants";
@@ -9,14 +9,14 @@ import { SCENES, OVERLAP_MS, NEAR_BLACK, WHITE, OFF_WHITE, GREY_MID, GREY_LINE, 
 // `obj` = objectPosition tuned per shot so the chest/torso (where the colorway reads) is
 // framed in both the swatch + the main preview.
 const COLORWAYS = [
-  { name: "ONYX BLACK", sub: "GEO SEAMLESS", src: "/assets/model-a.jpg", obj: "50% 30%" },
-  { name: "TEAL", sub: "GEO SEAMLESS", src: "/assets/cw-blue.jpg", obj: "50% 42%" },
-  { name: "SAGE GREEN", sub: "GEO SEAMLESS", src: "/assets/cw-green.jpg", obj: "50% 42%" },
-  { name: "EARTH BROWN", sub: "GEO SEAMLESS", src: "/assets/cw-brown.jpg", obj: "50% 42%" },
-  { name: "BONE WHITE", sub: "GEO SEAMLESS", src: "/assets/cw-white.jpg", obj: "50% 44%" },
-  { name: "SMOKE BLUE", sub: "SEAMLESS PLAIN", src: "/assets/cw-smokeblue.jpg", obj: "50% 42%" },
-  { name: "LINEN BROWN", sub: "GEO SEAMLESS", src: "/assets/cw-linenbrown.jpg", obj: "50% 42%" },
-  { name: "LIGHT GREY", sub: "GEO SEAMLESS", src: "/assets/cw-lightgrey.jpg", obj: "50% 42%" },
+  { name: "ONYX BLACK", sub: "GEO SEAMLESS", src: "/gymshark-geo-seamless-demo/src/assets/model-a.jpg", obj: "50% 30%" },
+  { name: "TEAL", sub: "GEO SEAMLESS", src: "/gymshark-geo-seamless-demo/src/assets/cw-blue.jpg", obj: "50% 42%" },
+  { name: "SAGE GREEN", sub: "GEO SEAMLESS", src: "/gymshark-geo-seamless-demo/src/assets/cw-green.jpg", obj: "50% 42%" },
+  { name: "EARTH BROWN", sub: "GEO SEAMLESS", src: "/gymshark-geo-seamless-demo/src/assets/cw-brown.jpg", obj: "50% 42%" },
+  { name: "BONE WHITE", sub: "GEO SEAMLESS", src: "/gymshark-geo-seamless-demo/src/assets/cw-white.jpg", obj: "50% 44%" },
+  { name: "SMOKE BLUE", sub: "SEAMLESS PLAIN", src: "/gymshark-geo-seamless-demo/src/assets/cw-smokeblue.jpg", obj: "50% 42%" },
+  { name: "LINEN BROWN", sub: "GEO SEAMLESS", src: "/gymshark-geo-seamless-demo/src/assets/cw-linenbrown.jpg", obj: "50% 42%" },
+  { name: "LIGHT GREY", sub: "GEO SEAMLESS", src: "/gymshark-geo-seamless-demo/src/assets/cw-lightgrey.jpg", obj: "50% 42%" },
 ];
 
 // selection schedule: colorway 0 shows as soon as the preview pops in (530ms local); the

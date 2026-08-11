@@ -4,20 +4,20 @@
  *
  * Scene breakdown (verified against each scene's own DURATION_MS — this table
  * was previously out of sync with the actual per-scene constants):
- *   Scene1_IconsIntro           — 3500ms  (0–3500ms)       FIX1: slower logo exit
- *   Scene2_OutlookFocus         — 3000ms  (3500–6500ms)    FIX2: clean fade entrance
- *   Scene3_OutlookChromeAndType — 6500ms  (6500–13000ms)   FIX3+4: outline + 3-pane
- *   Scene4_Thinking             — 3000ms  (13000–16000ms)  FIX5: brighter shimmer
- *   Scene5_ResponseAndScroll    — 8500ms  (16000–24500ms)  FIX6+7: highlight+pan
+ *   IconsIntro           — 3500ms  (0–3500ms)       FIX1: slower logo exit
+ *   OutlookFocus         — 3000ms  (3500–6500ms)    FIX2: clean fade entrance
+ *   OutlookChromeAndType — 6500ms  (6500–13000ms)   FIX3+4: outline + 3-pane
+ *   Thinking             — 3000ms  (13000–16000ms)  FIX5: brighter shimmer
+ *   ResponseAndScroll    — 8500ms  (16000–24500ms)  FIX6+7: highlight+pan
  *   Total: 24500ms
  */
 import React from "react";
 import { Timegroup, Audio } from "@editframe/react";
-import { Scene1_IconsIntro } from "./scenes/Scene1_IconsIntro";
-import { Scene2_OutlookFocus } from "./scenes/Scene2_OutlookFocus";
-import { Scene3_OutlookChromeAndType } from "./scenes/Scene3_OutlookChromeAndType";
-import { Scene4_Thinking } from "./scenes/Scene4_Thinking";
-import { Scene5_ResponseAndScroll } from "./scenes/Scene5_ResponseAndScroll";
+import { IconsIntro } from "./scenes/IconsIntro";
+import { OutlookFocus } from "./scenes/OutlookFocus";
+import { OutlookChromeAndType } from "./scenes/OutlookChromeAndType";
+import { Thinking } from "./scenes/Thinking";
+import { ResponseAndScroll } from "./scenes/ResponseAndScroll";
 
 const TOTAL_MS = 24500;
 
@@ -33,17 +33,17 @@ export const Video: React.FC = () => (
     }}
   >
     <Timegroup mode="sequence" className="absolute w-full h-full">
-      <Scene1_IconsIntro />
-      <Scene2_OutlookFocus />
-      <Scene3_OutlookChromeAndType />
-      <Scene4_Thinking />
-      <Scene5_ResponseAndScroll />
+      <IconsIntro />
+      <OutlookFocus />
+      <OutlookChromeAndType />
+      <Thinking />
+      <ResponseAndScroll />
     </Timegroup>
 
     {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the
         composition's total runtime regardless of the source file's own length. Sibling of
         the sequence (not a child of it) so it spans the whole timeline as a background
         track instead of being treated as an extra sequential scene. */}
-    <Audio src="/assets/music-bed.mp3" volume={1} duration={`${TOTAL_MS}ms`} />
+    <Audio src="/claude-office-demo/src/assets/claude-office-demo-music-bed.mp3" volume={1} duration={`${TOTAL_MS}ms`} />
   </Timegroup>
 );

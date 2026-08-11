@@ -1,4 +1,7 @@
+@import url("https://fonts.googleapis.com/css2?family=VT323&family=JetBrains+Mono:wght@400;500;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap");
 @import "tailwindcss";
+@import "@shared/styles/reveal.css";
+@import "@shared/styles/window-chrome.css";
 
 /* Opus 4.8 ad — palette (mirrors src/brand.ts; sampled from reference frames) */
 :root {
@@ -87,54 +90,9 @@ html, body, #root {
   shape-rendering: crispEdges;
 }
 
-/* Terminal chrome — FLAT (no drop shadows, paper-style 2D card per brand rules) */
-.terminal {
-  background: var(--terminal-bg);
-  border-radius: 10px;
-  /* Single 1px inner hairline keeps card readable on sage paper without depth */
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
-  overflow: hidden;
-  position: relative;
-}
-
-.terminal-chrome {
-  background: var(--terminal-chrome);
-  height: 32px;
-  padding: 0 14px;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  border-bottom: 1px solid var(--terminal-border);
-}
-
-.tl-dot {
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.terminal-title {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 12px;
-  color: var(--text-dim);
-  flex: 1;
-  text-align: center;
-  letter-spacing: 0.02em;
-}
-
-.terminal-body {
-  padding: 16px 22px;
-  font-family: "VT323", ui-monospace, monospace;
-  font-size: 26px;
-  line-height: 1.18;
-  color: var(--text-primary);
-  height: calc(100% - 32px);
-  overflow: hidden;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
+/* Terminal chrome (.terminal/.terminal-chrome/.tl-dot/.terminal-title/.terminal-body) now
+   lives in @shared/styles/window-chrome.css (see @import above) — FLAT (no drop shadows,
+   paper-style 2D card per brand rules), backing @shared/components/WindowChrome.tsx. */
 
 /* Flat scene container — kept as a class for layout parity, but NO 3D.
    Per Claude brand rules (flat-only mandate): no perspective, no preserve-3d. */
@@ -284,16 +242,6 @@ html, body, #root {
  * from-state differs from the element's un-animated default, `forwards` when
  * the to-state does, `both` for either/both — audited per animation below).
  * ========================================================================= */
-
-/* === Reveal (src/components/Reveal.tsx) — declarative fade + float-up/out === */
-@keyframes reveal-in {
-  from { opacity: 0; transform: translateY(var(--reveal-y, 20px)); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes reveal-out {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(var(--reveal-exit-y, 0px)); }
-}
 
 /* === Generic instant (steps(1)) show/hide — status-line swaps, prompt/chip
    swaps, the trace overlay. `--instant-opacity` lets a caller cap the "shown"

@@ -1,10 +1,10 @@
 import React from "react";
 import { Timegroup } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { ProductCard } from "../components/ProductCard";
 import { SCENES, LEFT_COL, DUSTY_ROSE, SOFT_PINK, ESPRESSO, BROWN, COCOA, SANS, SERIF } from "../constants";
 
-const HIGHLIGHT_MILK = "/assets/flat/highlight-milk.png";
+const HIGHLIGHT_MILK = "/rhode-demo/src/assets/flat/highlight-milk.png";
 
 /**
  * HERO 1 — Highlight Milk. 2600ms local (200ms cross-fades in from Hook, 200ms

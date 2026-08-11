@@ -1,6 +1,6 @@
 import React from "react";
 import { Timegroup } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { TeamIcon, CodegenSquare, StatusInProgress, StatusInReview, Avatar, GitHubMark, BreadcrumbTail } from "../components/icons";
 import { SCENES, FONT, MONO } from "../constants";
 

@@ -1,13 +1,13 @@
 import React from "react";
 import { Timegroup, Audio } from "@editframe/react";
-import Scene1_Demo from "./scenes/Scene1_Demo";
-import Scene2_Reveal from "./scenes/Scene2_Reveal";
-import Scene3_ArmPull from "./scenes/Scene3_ArmPull";
-import Scene4_SecondPrompt from "./scenes/Scene4_SecondPrompt";
-import Scene5_Curtain from "./scenes/Scene5_Curtain";
-import Scene6_LogoCard from "./scenes/Scene6_LogoCard";
+import AgentSpawn from "./scenes/AgentSpawn";
+import MascotReveal from "./scenes/MascotReveal";
+import ArmPull from "./scenes/ArmPull";
+import SecondPrompt from "./scenes/SecondPrompt";
+import Curtain from "./scenes/Curtain";
+import LogoCard from "./scenes/LogoCard";
 
-const MUSIC = "/assets/music-bed.mp3";
+const MUSIC = "/claude-code-demo/src/assets/claude-code-demo-music-bed.mp3";
 const TOTAL_MS = 36000;
 
 /**
@@ -39,12 +39,12 @@ export const Video: React.FC = () => (
     style={{ background: "var(--paper)" }}
   >
     <Timegroup mode="sequence" className="absolute w-full h-full">
-      <Scene1_Demo />
-      <Scene2_Reveal />
-      <Scene3_ArmPull />
-      <Scene4_SecondPrompt />
-      <Scene5_Curtain />
-      <Scene6_LogoCard />
+      <AgentSpawn />
+      <MascotReveal />
+      <ArmPull />
+      <SecondPrompt />
+      <Curtain />
+      <LogoCard />
     </Timegroup>
 
     {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the

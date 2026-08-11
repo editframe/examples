@@ -81,7 +81,7 @@ durations live in `SCENES` in `src/constants.ts`.
     ├── main.tsx                <- TimelineRoot entry
     ├── constants.ts            <- palette, type, well rects, SCENES (durations + overlap)
     ├── styles.css              <- Tailwind + base64-embedded fonts + all scene `@keyframes`
-    ├── assets/                 <- woff2 fonts, product/colorway/poster imagery, music-bed.mp3, well-a-people-walk.mp4, well-b-material-macro.mp4
+    ├── assets/                 <- woff2 fonts, product/colorway/poster imagery, allbirds-tree-runner-demo-music-bed.mp3, well-a-people-walk.mp4, well-b-material-macro.mp4
     ├── scenes/                 <- one component per beat, each its own `<Timegroup mode="fixed">`
     │   ├── Hook.tsx
     │   ├── Hero.tsx
@@ -105,7 +105,7 @@ Music-only — no sound effects.
 
 | Cue | Time (ms) | File | Volume |
 |---|---|---|---|
-| Music bed | 0 – 25000 | `src/assets/music-bed.mp3` | 1.0 |
+| Music bed | 0 – 25000 | `src/assets/allbirds-tree-runner-demo-music-bed.mp3` | 1.0 |
 
 Bed fades in (1.2s) and out (from 0:19).
 
@@ -139,7 +139,7 @@ npm run render
 1. **Re-time beats** — scene durations + the shared crossfade length live in `SCENES` / `OVERLAP_MS` in `src/constants.ts`; each scene's own enter/exit timing lives in its file under `src/scenes/`, as local ms offsets from that scene's own start (`<Reveal enter={...} exit="transition">` for fades, `@keyframes` in `styles.css` for anything more custom).
 2. **Rebrand** — replace palette and font `@font-face` declarations in `src/constants.ts` and `src/styles.css`.
 3. **Re-skin wells** — replace `src/assets/well-a-people-walk.mp4` / `well-b-material-macro.mp4` and update `WELL_A` / `WELL_B` rects in `src/constants.ts`.
-4. **Swap audio** — replace `src/assets/music-bed.mp3` and adjust the `<Audio>` `volume` in `src/Video.tsx`; log in [`CREDITS.md`](CREDITS.md).
+4. **Swap audio** — replace `src/assets/allbirds-tree-runner-demo-music-bed.mp3` and adjust the `<Audio>` `volume` in `src/Video.tsx`; log in [`CREDITS.md`](CREDITS.md).
 
 ---
 

@@ -19,8 +19,8 @@
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   Scene1 (src/scenes/Scene1.tsx) — nav walkthrough + Assets dashboard reveal
-   All percentages below are fixed points on Scene1's own 8000ms Timegroup
+   AssetsDashboard (src/scenes/AssetsDashboard.tsx) — nav walkthrough + Assets dashboard reveal
+   All percentages below are fixed points on AssetsDashboard's own 8000ms Timegroup
    clock (see SCENES.scene1 in constants.ts) — every one of these keyframes
    is played with `animation: NAME 8000ms linear both` on its element, so a
    given keyframe's own percentage IS that constant / 8000.
@@ -43,7 +43,7 @@
 
 /* Panel: strip → full dashboard, same 4000–5400ms window as the camera zoom-out.
    Width/left never change — only height/top (see --panel-* custom properties set
-   inline by Scene1.tsx). */
+   inline by AssetsDashboard.tsx). */
 @keyframes scene1-panel {
   0%     { height: var(--panel-strip-h); top: var(--panel-strip-top); }
   50%    { height: var(--panel-strip-h); top: var(--panel-strip-top); animation-timing-function: cubic-bezier(0.65,0,0.35,1); }
@@ -114,14 +114,14 @@
 }
 
 /* Staggered tile cascade — shared by all 14 dashboard tiles, each with its own
-   `animation-delay` computed once from its index (see Scene1.tsx). */
+   `animation-delay` computed once from its index (see AssetsDashboard.tsx). */
 @keyframes scene1-tile-reveal {
   from { opacity: 0; transform: scale(0.94); }
   to   { opacity: 1; transform: scale(1); }
 }
 
 /* Cursor opacity — fades in once (150–450ms), holds, fades out (4000–4350ms). Position
-   (transform) is driven by Scene1's one remaining addFrameTask, not this animation. */
+   (transform) is driven by AssetsDashboard's one remaining addFrameTask, not this animation. */
 @keyframes scene1-cursor-opacity {
   0%      { opacity: 0; }
   1.875%  { opacity: 0; animation-timing-function: cubic-bezier(0.33,1,0.68,1); }
@@ -132,7 +132,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   Scene2 (src/scenes/Scene2.tsx) — "Introducing fal Assets" reveal
+   AssetsIntro (src/scenes/AssetsIntro.tsx) — "Introducing fal Assets" reveal
    ════════════════════════════════════════════════════════════════════════ */
 
 @keyframes pill-in {
@@ -163,7 +163,7 @@
   to   { clip-path: inset(0 0 0 0); }
 }
 
-/* Scattered corner pixels (Scene2 + Scene3's sparse twinkle) — each cycles forever on
+/* Scattered corner pixels (AssetsIntro + LogoOutro's sparse twinkle) — each cycles forever on
    its own duration/phase via a per-element negative `animation-delay` (same technique as
    the allbirds reference's AmbientField fiber-drift), computed once at module load. */
 @keyframes pixel-twinkle {
@@ -175,7 +175,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   Scene3 (src/scenes/Scene3.tsx) — fal logo outro
+   LogoOutro (src/scenes/LogoOutro.tsx) — fal logo outro
    ════════════════════════════════════════════════════════════════════════ */
 
 /* Converging pixel cloud — each particle collapses from its own start position

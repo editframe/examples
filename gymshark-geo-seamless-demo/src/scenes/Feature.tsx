@@ -3,7 +3,7 @@ import { Timegroup, Image } from "@editframe/react";
 import { facetedCamo } from "../components/camo";
 import { SCENES, OVERLAP_MS, NEAR_BLACK, WHITE, OFF_WHITE, GREY_MID, GREY_LINE, COOL_ACCENT_DIM, DISPLAY, HEAVY } from "../constants";
 
-const MODEL_0049 = "/assets/model-0049.jpg";
+const MODEL_0049 = "/gymshark-geo-seamless-demo/src/assets/model-0049.jpg";
 
 const CALLOUTS = [
   { k: "01", t: "SEAMLESS KNIT", delay: 850 },

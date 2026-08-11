@@ -1,8 +1,8 @@
 /* Linear for Agents — global render canvas styles.
  * All scene styling is inline in Video.tsx; this just resets the
  * document so the 1920×1080 composition fills the frame with no
- * scrollbars or default margins. Fonts are loaded in index.html
- * (Inter for UI/headlines, Roboto Mono as the monospace fallback). */
+ * scrollbars or default margins. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap");
 
 html,
 body {
@@ -22,16 +22,6 @@ body {
 
 * {
   box-sizing: border-box;
-}
-
-/* === Reveal (see src/components/Reveal.tsx) — declarative fade + float-up/out === */
-@keyframes reveal-in {
-  from { opacity: 0; transform: translateY(var(--reveal-y, 20px)); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes reveal-out {
-  from { opacity: 1; transform: translateY(0); }
-  to   { opacity: 0; transform: translateY(var(--reveal-exit-y, 0px)); }
 }
 
 /* === Generic, reused across scenes === */

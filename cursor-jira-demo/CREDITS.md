@@ -30,7 +30,7 @@ A driving, modern tech-bed that mirrors the Cursor product feel — clean rhythm
 
 ## SFX
 
-### `src/assets/sfx/click-hd-loud.mp3`
+### `src/assets/sfx/cursor-jira-demo-click-hd-loud.mp3`
 
 | | |
 |---|---|

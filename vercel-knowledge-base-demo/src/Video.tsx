@@ -9,15 +9,15 @@
  * with its own local clock. No master-ms clock spans the whole video.
  *
  * Scene layout:
- *  Scene1_HeroToOverview  0–12000ms      (merged: hero close-up → pan-out → scroll → filter → Sandbox click)
- *  Scene4_ArticlePage     12000–16500ms
- *  Scene5_AIChatPanel     16500–30000ms
+ *  HeroToOverview  0–12000ms      (merged: hero close-up → pan-out → scroll → filter → Sandbox click)
+ *  ArticlePage     12000–16500ms
+ *  AIChatPanel     16500–30000ms
  */
 import React from "react";
 import { Timegroup } from "@editframe/react";
-import { Scene1_HeroToOverview } from "./scenes/Scene1_HeroToOverview";
-import { Scene4_ArticlePage } from "./scenes/Scene4_ArticlePage";
-import { Scene5_AIChatPanel } from "./scenes/Scene5_AIChatPanel";
+import { HeroToOverview } from "./scenes/HeroToOverview";
+import { ArticlePage } from "./scenes/ArticlePage";
+import { AIChatPanel } from "./scenes/AIChatPanel";
 
 export const Video: React.FC = () => (
   <Timegroup
@@ -29,8 +29,8 @@ export const Video: React.FC = () => (
       background: "#000000",
     }}
   >
-    <Scene1_HeroToOverview />
-    <Scene4_ArticlePage />
-    <Scene5_AIChatPanel />
+    <HeroToOverview />
+    <ArticlePage />
+    <AIChatPanel />
   </Timegroup>
 );

@@ -13,24 +13,24 @@
  *   Scene 8: 18500–20000ms — Cursor cube outro (white bg + cube mark)
  *
  * Music bed (LowTide, 66s-in segment) is baked (fade/loudnorm) into
- * src/assets/music.mp3 and pinned to the composition's total runtime via an
+ * src/assets/cursor-cloud-agents-demo-music.mp3 and pinned to the composition's total runtime via an
  * explicit `duration` (see the `composition`/`css-animations` skills and
  * allbirds-tree-runner-demo/src/Video.tsx for the reference pattern). The
  * "Start Agent" click SFX is a scene-local `<Audio offset>` cue inside
- * Scene4_CreateEnv — see that file.
+ * CreateEnv — see that file.
  */
 import React from "react";
 import { Timegroup, Audio } from "@editframe/react";
-import { Scene1_Chatbox } from "./scenes/Scene1_Chatbox";
-import { Scene2_ZoomToDropdown } from "./scenes/Scene2_ZoomToDropdown";
-import { Scene3_Tagline } from "./scenes/Scene3_Tagline";
-import { Scene4_CreateEnv } from "./scenes/Scene4_CreateEnv";
-import { Scene5_Checklist } from "./scenes/Scene5_Checklist";
-import { Scene6_FoldedPanels } from "./scenes/Scene6_FoldedPanels";
-import { Scene7_DevTagline } from "./scenes/Scene7_DevTagline";
-import { Scene8_CubeLogo } from "./scenes/Scene8_CubeLogo";
+import { Chatbox } from "./scenes/Chatbox";
+import { ZoomToDropdown } from "./scenes/ZoomToDropdown";
+import { Tagline } from "./scenes/Tagline";
+import { CreateEnv } from "./scenes/CreateEnv";
+import { Checklist } from "./scenes/Checklist";
+import { FoldedPanels } from "./scenes/FoldedPanels";
+import { DevTagline } from "./scenes/DevTagline";
+import { CubeLogo } from "./scenes/CubeLogo";
 
-const MUSIC = "/assets/music.mp3";
+const MUSIC = "/cursor-cloud-agents-demo/src/assets/cursor-cloud-agents-demo-music.mp3";
 const TOTAL_MS = 20000;
 
 export const Video: React.FC = () => (
@@ -45,14 +45,14 @@ export const Video: React.FC = () => (
     }}
   >
     <Timegroup mode="sequence" className="absolute inset-0">
-      <Scene1_Chatbox />
-      <Scene2_ZoomToDropdown />
-      <Scene3_Tagline />
-      <Scene4_CreateEnv />
-      <Scene5_Checklist />
-      <Scene6_FoldedPanels />
-      <Scene7_DevTagline />
-      <Scene8_CubeLogo />
+      <Chatbox />
+      <ZoomToDropdown />
+      <Tagline />
+      <CreateEnv />
+      <Checklist />
+      <FoldedPanels />
+      <DevTagline />
+      <CubeLogo />
     </Timegroup>
 
     {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the

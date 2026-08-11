@@ -6,7 +6,7 @@ import { SCENES, SEAFOAM, SEAFOAM_LT, TEAL_INK, CORAL } from "../constants";
 const SERIF = "'Playfair Display', Georgia, 'Times New Roman', serif";
 const SANS = "'Archivo', -apple-system, 'Helvetica Neue', Arial, sans-serif";
 
-const PACK_12 = "/assets/opt/tropical-12pack.webp";
+const PACK_12 = "/olipop-demo/src/assets/opt/tropical-12pack.webp";
 
 /**
  * OFFER — the 12-pack pushes in, "build your variety pack" drops, the supporting line

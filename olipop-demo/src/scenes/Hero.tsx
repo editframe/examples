@@ -1,6 +1,6 @@
 import React from "react";
 import { Timegroup, Image } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { Sunburst, Rings } from "../components/retro";
 import { SCENES, CANVAS_H, CORAL, CORAL_DEEP, CREAM_LT, SEAFOAM } from "../constants";
 
@@ -9,7 +9,7 @@ const SANS = "'Archivo', -apple-system, 'Helvetica Neue', Arial, sans-serif";
 
 const H = CANVAS_H;
 
-const CAN_TROPICAL = "/assets/opt/tropical-can.webp";
+const CAN_TROPICAL = "/olipop-demo/src/assets/opt/tropical-can.webp";
 
 const trackedCaps: React.CSSProperties = {
   fontFamily: SANS, fontWeight: 700, letterSpacing: 5, color: CREAM_LT, textTransform: "uppercase",

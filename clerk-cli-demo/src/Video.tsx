@@ -1,9 +1,9 @@
 /**
  * Clerk CLI Setup Demo — v7 round-6 (consolidated terminal)
  * 1920×1080 @ 30fps · 17s total
- * Scene sequence: SceneTerminal(11.5s) + Scene6(2s) + Scene7(3.5s) = 17s
+ * Scene sequence: Terminal(11.5s) + Tagline(2s) + LogoCard(3.5s) = 17s
  *
- * SceneTerminal replaces the former Scene1–Scene5 (deleted — they were dead,
+ * Terminal replaces the former Scene1–Scene5 (deleted — they were dead,
  * unimported code once this scene took over; see git history for the originals).
  * ONE continuous terminal accumulates all CLI output with a content-following
  * camera anchored bottom-left.
@@ -18,12 +18,12 @@
  */
 import React from "react";
 import { Timegroup, Audio } from "@editframe/react";
-import { SceneTerminal } from "./scenes/SceneTerminal";
-import { Scene6 } from "./scenes/Scene6";
-import { Scene7 } from "./scenes/Scene7";
+import { Terminal } from "./scenes/Terminal";
+import { Tagline } from "./scenes/Tagline";
+import { LogoCard } from "./scenes/LogoCard";
 import { DURATION_MS } from "./constants";
 
-const MUSIC = "/assets/music.mp3";
+const MUSIC = "/clerk-cli-demo/src/assets/clerk-cli-demo-music.mp3";
 
 export const Video: React.FC = () => (
   <Timegroup
@@ -36,9 +36,9 @@ export const Video: React.FC = () => (
     }}
   >
     <Timegroup mode="sequence" className="absolute w-full h-full">
-      <SceneTerminal />
-      <Scene6 />
-      <Scene7 />
+      <Terminal />
+      <Tagline />
+      <LogoCard />
     </Timegroup>
 
     {/* Explicit duration (rather than `mode="fit"`, unsupported on <Audio>) pins this to the

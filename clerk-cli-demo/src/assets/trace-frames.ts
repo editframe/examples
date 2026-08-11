@@ -15,7 +15,7 @@ export const TRACE_FRAME_INTERVAL_MS = 200;
 
 export const TRACE_FRAMES: string[] = Array.from(
   { length: 85 },
-  (_, i) => `/assets/trace-frames/frame-${String(i).padStart(4, "0")}.jpg`
+  (_, i) => `/clerk-cli-demo/src/assets/trace-frames/frame-${String(i).padStart(4, "0")}.jpg`
 );
 
 export function getTraceFrameForMs(ms: number): string {

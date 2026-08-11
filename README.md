@@ -2,7 +2,10 @@
 
 Ready-to-run video composition examples built with the [Editframe](https://editframe.com) React SDK.
 
-Each example is a self-contained project. Clone the repo, install dependencies, and render.
+This repo is a single Editframe workbench project. One `npm install` and `npm start` gives
+you a picker UI to browse, preview, and scrub through every example below in one dev server —
+each example still lives in its own folder with its own `src/`, `README.md`, `CREDITS.md`, and
+`output/demo.mp4`.
 
 ## Examples
 
@@ -15,19 +18,67 @@ Each example is a self-contained project. Clone the repo, install dependencies, 
 | [`claude-code-demo`](claude-code-demo/) | Claude Code agent view with orchestrated parallel subagents — 36s |
 | [`claude-office-demo`](claude-office-demo/) | Claude for Excel, PowerPoint, and Word — 30s |
 | [`claude-code-financial-demo`](claude-code-financial-demo/) | Claude Code agent templates for financial services — 30s |
+| [`claude-opus48-demo`](claude-opus48-demo/) | Claude Code agent view with orchestrated parallel subagents — 36s |
 | [`cursor-jira-demo`](cursor-jira-demo/) | Cursor replying to a Jira comment inside the editor — 28.5s |
 | [`cursor-sdk-demo`](cursor-sdk-demo/) | Cursor SDK product demo (light paper variant) — 25.3s |
 | [`cursor-cloud-agents-demo`](cursor-cloud-agents-demo/) | Cursor Cloud Agents — 20.4s |
 | [`fal-ai-demo`](fal-ai-demo/) | fal.ai Assets introduction — 15.1s |
 | [`clerk-cli-demo`](clerk-cli-demo/) | Clerk CLI setup — 17.1s |
-| [`codex-demo`](codex-demo/) | OpenAI Codex bug fix workflow — 30s |
+| [`codex-demo`](codex-demo/) | OpenAI Codex bug fix workflow — 22s |
+| [`linear-agents-demo`](linear-agents-demo/) | Linear for Agents product demo — 32s |
+| [`allbirds-tree-runner-demo`](allbirds-tree-runner-demo/) | Allbirds Tree Runner NZ — vertical social ad — 25s |
+| [`fashionnova-the-edit-demo`](fashionnova-the-edit-demo/) | Fashion Nova — The Edit — vertical social ad — 25s |
+| [`gymshark-geo-seamless-demo`](gymshark-geo-seamless-demo/) | Gymshark Geo Seamless — vertical social ad — 19s |
+| [`olipop-demo`](olipop-demo/) | OLIPOP — vertical social ad — 20s |
+| [`rhode-demo`](rhode-demo/) | rhode summer '26 — vertical social ad — 20s |
 
 ## Quick start
 
 ```bash
-cd <example>
 npm install
-npm run render
+npm start
+```
+
+`npm start` opens the Editframe preview server with a project picker in the top-right corner —
+pick any example from the dropdown to scrub its timeline live. The picker also syncs to the URL
+(`?project=<example>`) so you can share a link straight to one example.
+
+## Rendering
+
+Every example has its own `render:<example>` script that renders straight to that example's
+`output/demo.mp4`:
+
+```bash
+npm run render:figma-agent-demo
+npm run render:vercel-deploy-demo
+# ... one render:<example> script per folder above
+```
+
+A couple of examples finish with an extra local compositing pass (real footage/audio muxed in
+after the Editframe render) — see [`olipop-demo/composite-well.sh`](olipop-demo/composite-well.sh)
+and [`gymshark-geo-seamless-demo/add-audio.sh`](gymshark-geo-seamless-demo/add-audio.sh) for
+details; those scripts are already wired into `render:olipop-demo` where applicable.
+
+## Project structure
+
+```
+examples/
+├── package.json          # single root project — shared deps, start/render scripts
+├── vite.config.ts        # one shared dev server for every example
+├── tsconfig.json
+├── index.html            # single entry point, mounts the workbench shell
+├── src/
+│   ├── main.tsx           # React root
+│   ├── App.tsx            # picker UI + render-data bypass for CLI renders
+│   ├── ProjectPicker.tsx  # the floating project switcher
+│   ├── projects.ts        # registry of every example (title, poster, dynamic imports)
+│   └── styles.css
+└── <example>/
+    ├── src/                # Video.tsx, scenes/, components/, assets/ — unchanged internals
+    ├── README.md
+    ├── CREDITS.md
+    ├── poster.jpg
+    └── output/demo.mp4
 ```
 
 https://github.com/user-attachments/assets/18070c4e-ab5f-4b68-b80f-ac6e35cebbf3
@@ -79,7 +130,4 @@ https://github.com/user-attachments/assets/c8c74dcd-826e-4310-af73-b8f507e4b94c
 
 
 https://github.com/user-attachments/assets/40e13133-7637-4c0e-aa0a-3989965a6620
-
-
-
 

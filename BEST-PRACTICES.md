@@ -80,6 +80,32 @@ In priority order:
   holding one that did is a visible bug. Check `from`-state and `to`-state independently,
   for every `animation:` declaration.
 
+**Counting/ticking numbers — reserve the final width, never let digits reflow:**
+- A number that animates from `0` up to its final value must never resize its own box as it
+  gains digits. `font-variant-numeric: tabular-nums` alone only equalizes *per-digit* width —
+  it does not stop the string growing from `"0"` (1 char) to `"54,800"` (6 chars), which still
+  reflows anything next to or centered on it.
+- Compute the box's width once, from the **final** value, never the current one —
+  `width: ${finalFormatted.length}ch` (a small `numCellWidth(finalValue, formatter)` helper
+  is enough), set as a static inline style, not recomputed per frame. Pair it with
+  `fontVariantNumeric: "tabular-nums"` so the reserved width is also correct mid-count.
+- A panel doing its own scale/translate entrance around the number is a **separate** effect —
+  don't mistake a `scaleFrom`/overshoot pop-in for digit-width jitter when auditing one.
+  Verify by sampling the number's own `getBoundingClientRect()` after the panel's entrance
+  animation has settled, not during it.
+
+**Centering + an enter/exit `animation` — never on the same element:**
+- `position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)` and a
+  `Reveal`-style `animation:` (or any other keyframe touching `transform`) cannot coexist on
+  one element. A CSS animation **replaces** the whole `transform` property for its duration —
+  it does not compose with a static inline `transform`. The element loses its centering offset
+  while the animation runs, then snaps back to centered the instant the animation ends (or
+  immediately, if it lacks `forwards`).
+- Fix: split it into two elements. An **unanimated** wrapper does the centering
+  (`className="absolute inset-0 flex items-center justify-center"`); the animated
+  `Reveal`/keyframed element is its child, free to animate its own `transform` for enter/exit
+  without fighting the parent's.
+
 ## 3. Assets: real files, not embedded base64
 
 - Product/lifestyle imagery, video, audio are real files under `src/assets/`, referenced by

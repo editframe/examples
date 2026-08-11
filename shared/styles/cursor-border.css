@@ -1,0 +1,34 @@
+/* ---------- Cursor animated rainbow border ----------
+ * A two-layer "border" trick: an outer element paints a conic-gradient background and
+ * a small padding, and an inner element (opaque, radius-matched) covers everything but
+ * that padding — the gradient peeking out around the edges reads as an animated border.
+ * `--cursor-angle` is a registered custom property (typed `<angle>`) so animating it (see
+ * each scene's own spin keyframes, e.g. `cursor-angle-spin` in cursor-jira-demo) rotates
+ * the gradient smoothly instead of jumping between discrete values.
+ */
+@property --cursor-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.cursor-border {
+  position: relative;
+  border-radius: 8px;
+  padding: 2px;
+  background:
+    conic-gradient(
+      from var(--cursor-angle),
+      #FF7A45 0%,
+      #E64980 33%,
+      #4263EB 66%,
+      #FF7A45 100%
+    );
+}
+
+.cursor-border-inner {
+  background: #FFFFFF;
+  border-radius: 6px;
+  width: 100%;
+  height: 100%;
+}

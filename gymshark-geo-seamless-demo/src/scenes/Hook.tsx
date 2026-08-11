@@ -1,10 +1,10 @@
 import React from "react";
 import { Timegroup, Image } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { camoBg } from "../components/camo";
 import { SCENES, NEAR_BLACK, OFF_WHITE } from "../constants";
 
-const GYMSHARK_LOGO = "/assets/gymshark-logo.png";
+const GYMSHARK_LOGO = "/gymshark-geo-seamless-demo/src/assets/gymshark-logo.png";
 const HEAVY = "'Archivo', Inter, sans-serif";
 
 /**

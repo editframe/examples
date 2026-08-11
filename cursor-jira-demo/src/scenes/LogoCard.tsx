@@ -1,7 +1,7 @@
 import React from "react";
 import { Timegroup } from "@editframe/react";
 import { IconCursorCube } from "../components/JiraIcons";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 
 /**
  * Final logo card (3.5s) — Cursor mark + wordmark on black.
@@ -35,7 +35,7 @@ export const LogoCard: React.FC = () => {
           exit={[3000, 3500]}
           easeOut="out-cubic"
           y={0}
-          scale={0.72}
+          scaleFrom={0.72}
           style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
         >
           <IconCursorCube size={150} color="#FFFFFF" notch="#000000" />

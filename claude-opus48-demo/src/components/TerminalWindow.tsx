@@ -1,14 +1,15 @@
 import React, { forwardRef } from "react";
+import { WindowChrome } from "@shared/components/WindowChrome";
 
 /**
  * The "Claude Code" terminal window from the Opus 4.8 ad.
  *
- * Chrome: 3 traffic-light dots (left), centered "acme — claude" title.
+ * Chrome: 3 traffic-light dots (left), centered "acme — claude" title — from
+ * `@shared/components/WindowChrome`.
  * Header: "Claude Code" (bold white) / "Opus 4.7 · ~/acme" (grey) / status line.
  * Body:   section labels ("Working" / "Needs input") + app rows. Each app row =
  *         a leading status glyph, the app name, a right-aligned message + count.
  *         One row may be highlighted (selectable-row band).
- * Footer: hint line ("> describe a task for a new session" / shortcuts) — optional.
  *
  * This component renders STRUCTURE; the scene drives which rows/labels are
  * visible via refs (opacity). Pass children for fully-custom bodies (e.g. the
@@ -38,44 +39,36 @@ interface Props {
 }
 
 const TerminalWindow = forwardRef<HTMLDivElement, Props>(
-  ({ width, height, title = "acme — claude", headerTitle, subtitle, status, children, bodyStyle, style, className, hideChrome }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={`terminal ${className ?? ""}`}
-        style={{ width, height, ...style }}
-      >
-        {!hideChrome && (
-          <div className="terminal-chrome">
-            <span className="tl-dot" style={{ background: "var(--light-red)" }} />
-            <span className="tl-dot" style={{ background: "var(--light-yellow)" }} />
-            <span className="tl-dot" style={{ background: "var(--light-green)" }} />
-            <span className="terminal-title">{title}</span>
-            <span style={{ width: 39 }} />
-          </div>
-        )}
-        <div className="terminal-body" style={bodyStyle}>
-          {/* Header block */}
-          {(headerTitle || subtitle || status) && (
-            <div style={{ marginBottom: 14 }}>
-              {headerTitle && (
-                <div style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: 30, lineHeight: 1.1 }}>
-                  {headerTitle}
-                </div>
-              )}
-              {subtitle && (
-                <div style={{ color: "var(--text-secondary)", fontSize: 27, marginTop: 2 }}>{subtitle}</div>
-              )}
-              {status && (
-                <div style={{ color: "var(--text-secondary)", fontSize: 27, marginTop: 2 }}>{status}</div>
-              )}
+  ({ width, height, title = "acme — claude", headerTitle, subtitle, status, children, bodyStyle, style, className, hideChrome }, ref) => (
+    <WindowChrome
+      ref={ref}
+      width={width}
+      height={height}
+      title={title}
+      style={style}
+      className={className}
+      bodyStyle={bodyStyle}
+      hideChrome={hideChrome}
+      spacerWidth={39}
+    >
+      {(headerTitle || subtitle || status) && (
+        <div style={{ marginBottom: 14 }}>
+          {headerTitle && (
+            <div style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: 30, lineHeight: 1.1 }}>
+              {headerTitle}
             </div>
           )}
-          {children}
+          {subtitle && (
+            <div style={{ color: "var(--text-secondary)", fontSize: 27, marginTop: 2 }}>{subtitle}</div>
+          )}
+          {status && (
+            <div style={{ color: "var(--text-secondary)", fontSize: 27, marginTop: 2 }}>{status}</div>
+          )}
         </div>
-      </div>
-    );
-  }
+      )}
+      {children}
+    </WindowChrome>
+  )
 );
 TerminalWindow.displayName = "TerminalWindow";
 

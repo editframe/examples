@@ -1,11 +1,11 @@
 import React from "react";
 import { Timegroup, Image } from "@editframe/react";
-import { Reveal } from "../components/Reveal";
+import { Reveal } from "@shared/components/Reveal";
 import { SCENES, LEFT_COL, WARM_WHITE, OAT, CARD_CREAM, ESPRESSO, BROWN, COCOA, SANS, SERIF } from "../constants";
 
-const SIP = "/assets/flat/sip.png";
-const MACADAMIA = "/assets/flat/macadamia-butter.png";
-const SUMMER_KIT = "/assets/flat/summer-kit.png";
+const SIP = "/rhode-demo/src/assets/flat/sip.png";
+const MACADAMIA = "/rhode-demo/src/assets/flat/macadamia-butter.png";
+const SUMMER_KIT = "/rhode-demo/src/assets/flat/summer-kit.png";
 
 const TILES = [
   { img: SIP, name: "pocket blush", price: "$22", left: 70, imgInset: 40 },

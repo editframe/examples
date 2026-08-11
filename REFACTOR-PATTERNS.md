@@ -202,8 +202,33 @@ TimelineRoot -> Video
   "does the *from* state differ from default → needs backwards" and "does the *to* state
   differ from default → needs forwards", independently, for every single one.
 
+**Counting-number smell:** a stat that animates `0 → finalValue` (`track(ms, start, end,
+easeOutCubic) * finalValue`, formatted with commas) with no reserved width on its container.
+`font-variant-numeric: tabular-nums` alone doesn't fix this — it only equalizes per-digit
+width, the string still grows from `"0"` to `"54,800"` and reflows its own box (and anything
+centered on it) as digits accumulate. Fix: compute the box's width **once from the final
+value** — `width: ${finalFormatted.length}ch` (see `numCellWidth()` in
+`recess-templates/*/src/components/helpers.ts` for a worked helper) — as a static inline
+style, plus `tabular-nums` so the reserved width stays correct mid-count too. Don't confuse
+this with a panel's own scale/translate entrance animation running at the same time (common,
+since both usually start at scene-open) — that's a separate, intentional effect; isolate the
+two by sampling `getBoundingClientRect()` only after the panel's entrance settles.
+
+**Dead-centered `Reveal` smell:** a `position: absolute; top: 50%; left: 50%;
+transform: translate(-50%,-50%)` panel that *also* carries its own enter/exit
+`animation:`/`Reveal` on the same element. A CSS animation replaces the whole `transform`
+property for its duration rather than composing with the static centering one — the panel
+loses its centering offset while animating, then snaps to center the instant the animation
+ends (immediately, if it lacks `forwards`). This reads as "the incoming card snaps to center
+right as the transition finishes." Fix (applied across `nerds/{Mission,Testimonial,Packs,
+Impact}.tsx` and `amazinggrass/{Hero,Testimonial}.tsx`): split into an unanimated centering
+wrapper (`className="absolute inset-0 flex items-center justify-center"`) whose child is the
+animated `Reveal` — the wrapper owns positioning, the child owns its own `transform` freely.
+
 **Where else this applies:** all 19 other projects (every one is a single-`Timegroup` +
-`onFrame` composition today).
+`onFrame` composition today). The two smells above apply specifically to any project with a
+counting stat or a dead-centered animated panel — check `Video.tsx` and every `scenes/*.tsx`
+for both patterns even in projects that already use `Timegroup`/`Reveal` correctly otherwise.
 
 ### 2c. Constants hygiene
 

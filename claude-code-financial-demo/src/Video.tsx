@@ -31,7 +31,7 @@ import { ManagedAgents } from "./scenes/ManagedAgents";
 import { ArqosDashboard } from "./scenes/ArqosDashboard";
 import { OVERLAP_MS, DURATION_MS } from "./constants";
 
-const MUSIC = "/assets/music-bed.mp3";
+const MUSIC = "/claude-code-financial-demo/src/assets/claude-code-financial-demo-music-bed.mp3";
 
 export const Video: React.FC = () => (
   <Timegroup
