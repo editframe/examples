@@ -71,6 +71,7 @@ export const projects: ProjectDef[] = [
     aspect: "landscape",
     loadVideo: () => import("../claude-office-demo/src/Video").then((m) => m.Video),
     loadStylesUrl: () => import("../claude-office-demo/src/styles.css?url").then((m) => m.default),
+    loadPosterUrl: () => import("../claude-office-demo/poster.jpg").then((m) => m.default),
   },
   {
     id: "claude-code-financial-demo",
@@ -160,6 +161,7 @@ export const projects: ProjectDef[] = [
     aspect: "landscape",
     loadVideo: () => import("../linear-agents-demo/src/Video").then((m) => m.Video),
     loadStylesUrl: () => import("../linear-agents-demo/src/styles.css?url").then((m) => m.default),
+    loadPosterUrl: () => import("../linear-agents-demo/poster.jpg").then((m) => m.default),
   },
   {
     id: "allbirds-tree-runner-demo",
@@ -169,6 +171,7 @@ export const projects: ProjectDef[] = [
     aspect: "portrait",
     loadVideo: () => import("../allbirds-tree-runner-demo/src/Video").then((m) => m.Video),
     loadStylesUrl: () => import("../allbirds-tree-runner-demo/src/styles.css?url").then((m) => m.default),
+    loadPosterUrl: () => import("../allbirds-tree-runner-demo/poster.jpg").then((m) => m.default),
   },
   {
     id: "fashionnova-the-edit-demo",
@@ -178,6 +181,7 @@ export const projects: ProjectDef[] = [
     aspect: "portrait",
     loadVideo: () => import("../fashionnova-the-edit-demo/src/Video").then((m) => m.Video),
     loadStylesUrl: () => import("../fashionnova-the-edit-demo/src/styles.css?url").then((m) => m.default),
+    loadPosterUrl: () => import("../fashionnova-the-edit-demo/poster.jpg").then((m) => m.default),
   },
   {
     id: "gymshark-geo-seamless-demo",
@@ -187,6 +191,7 @@ export const projects: ProjectDef[] = [
     aspect: "portrait",
     loadVideo: () => import("../gymshark-geo-seamless-demo/src/Video").then((m) => m.Video),
     loadStylesUrl: () => import("../gymshark-geo-seamless-demo/src/styles.css?url").then((m) => m.default),
+    loadPosterUrl: () => import("../gymshark-geo-seamless-demo/poster.jpg").then((m) => m.default),
   },
   {
     id: "olipop-demo",
@@ -196,6 +201,7 @@ export const projects: ProjectDef[] = [
     aspect: "portrait",
     loadVideo: () => import("../olipop-demo/src/Video").then((m) => m.Video),
     loadStylesUrl: () => import("../olipop-demo/src/styles.css?url").then((m) => m.default),
+    loadPosterUrl: () => import("../olipop-demo/poster.jpg").then((m) => m.default),
   },
   {
     id: "rhode-demo",
@@ -205,6 +211,7 @@ export const projects: ProjectDef[] = [
     aspect: "portrait",
     loadVideo: () => import("../rhode-demo/src/Video").then((m) => m.Video),
     loadStylesUrl: () => import("../rhode-demo/src/styles.css?url").then((m) => m.default),
+    loadPosterUrl: () => import("../rhode-demo/poster.jpg").then((m) => m.default),
   },
 ];
 

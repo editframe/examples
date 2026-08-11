@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ComponentType } from "react";
 import * as ReactDOM from "react-dom/client";
 import { TimelineRoot } from "@editframe/react";
+import type { EFWorkbenchElement } from "@editframe/elements";
 import { getProject, projects, type ProjectDef } from "./projects";
 import { ProjectPicker } from "./ProjectPicker";
 
@@ -36,14 +37,23 @@ const writeProjectToUrl = (id: string) => {
  * render mode (see `main.tsx`'s `virtual:editframe-render-entry` import)
  * mounts the target composition directly with no picker.
  */
-const ProjectStage = ({ project }: { project: ProjectDef }) => {
+const ProjectStage = ({
+  project,
+  onWorkbench,
+}: {
+  project: ProjectDef;
+  onWorkbench: (el: EFWorkbenchElement | null) => void;
+}) => {
   const stageRef = useRef<HTMLDivElement>(null);
+  const onWorkbenchRef = useRef(onWorkbench);
+  onWorkbenchRef.current = onWorkbench;
 
   useEffect(() => {
     const stage = stageRef.current;
     if (!stage) return;
 
     let disposed = false;
+    let raf = 0;
     const container = document.createElement("div");
     container.style.display = "contents";
     const styleLink = document.createElement("link");
@@ -57,10 +67,24 @@ const ProjectStage = ({ project }: { project: ProjectDef }) => {
       stage.appendChild(container);
       root = ReactDOM.createRoot(container);
       root.render(<TimelineRoot id="composition-root" component={Component} />);
+
+      // The composition's root timegroup self-wraps in an <ef-workbench>
+      // during React's commit (its connectedCallback), which is async
+      // relative to this effect — poll frames until it appears, then hand
+      // it up so the picker can portal into the workbench's header.
+      const findWorkbench = () => {
+        if (disposed) return;
+        const workbench = container.querySelector("ef-workbench") as EFWorkbenchElement | null;
+        if (workbench) onWorkbenchRef.current(workbench);
+        else raf = requestAnimationFrame(findWorkbench);
+      };
+      findWorkbench();
     });
 
     return () => {
       disposed = true;
+      cancelAnimationFrame(raf);
+      onWorkbenchRef.current(null);
       root?.unmount();
       container.remove();
       styleLink.remove();
@@ -70,11 +94,12 @@ const ProjectStage = ({ project }: { project: ProjectDef }) => {
   return <div ref={stageRef} style={{ display: "contents" }} />;
 };
 
-/** Dev/preview mode: mounts the active project plus a floating picker overlay. */
+/** Dev/preview mode: mounts the active project plus the header project picker. */
 const DevWorkbench = () => {
   const [activeId, setActiveId] = useState<string>(
     () => readProjectFromUrl() ?? DEFAULT_PROJECT_ID
   );
+  const [workbench, setWorkbench] = useState<EFWorkbenchElement | null>(null);
   const project = useMemo(() => getProject(activeId) ?? projects[0], [activeId]);
 
   const handleSelect = (id: string) => {
@@ -84,8 +109,8 @@ const DevWorkbench = () => {
 
   return (
     <>
-      <ProjectStage key={project.id} project={project} />
-      <ProjectPicker activeId={project.id} onSelect={handleSelect} />
+      <ProjectStage key={project.id} project={project} onWorkbench={setWorkbench} />
+      <ProjectPicker workbench={workbench} activeId={project.id} onSelect={handleSelect} />
     </>
   );
 };

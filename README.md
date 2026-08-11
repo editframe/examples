@@ -39,9 +39,11 @@ npm install
 npm start
 ```
 
-`npm start` opens the Editframe preview server with a project picker in the top-right corner —
-pick any example from the dropdown to scrub its timeline live. The picker also syncs to the URL
-(`?project=<example>`) so you can share a link straight to one example.
+`npm start` opens the Editframe preview server with a project picker in the workbench's header
+(the top-left dropdown) — search or arrow-key through every example and pick one to scrub its
+timeline live. The picker is rendered into the workbench's `toolbar-start` extension slot
+(see `src/ProjectPicker.tsx`) and syncs to the URL (`?project=<example>`) so you can share a
+link straight to one example.
 
 ## Rendering
 
@@ -70,14 +72,14 @@ examples/
 ├── src/
 │   ├── main.tsx           # React root
 │   ├── App.tsx            # picker UI + render-data bypass for CLI renders
-│   ├── ProjectPicker.tsx  # the floating project switcher
+│   ├── ProjectPicker.tsx  # header project switcher (workbench toolbar-start slot)
 │   ├── projects.ts        # registry of every example (title, poster, dynamic imports)
 │   └── styles.css
 └── <example>/
     ├── src/                # Video.tsx, scenes/, components/, assets/ — unchanged internals
     ├── README.md
     ├── CREDITS.md
-    ├── poster.jpg
+    ├── poster.jpg          # picker thumbnail — ./generate-posters.sh <example> refreshes it
     └── output/demo.mp4
 ```
 
