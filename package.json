@@ -29,10 +29,10 @@
     "render:vercel-knowledge-base-demo": "EF_RENDER_PROJECT=vercel-knowledge-base-demo editframe render --data '{\"project\": \"vercel-knowledge-base-demo\"}' -o vercel-knowledge-base-demo/output/demo.mp4"
   },
   "dependencies": {
-    "@editframe/cli": "^0.59.28",
-    "@editframe/elements": "^0.59.28",
-    "@editframe/react": "^0.59.28",
-    "@editframe/vite-plugin": "^0.59.28",
+    "@editframe/cli": "^0.59.29",
+    "@editframe/elements": "^0.59.29",
+    "@editframe/react": "^0.59.29",
+    "@editframe/vite-plugin": "^0.59.29",
     "@fal-ai/client": "^1.10.1",
     "@tailwindcss/vite": "^4.0.0",
     "@vitejs/plugin-react": "^6.0.0",
