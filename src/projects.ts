@@ -14,6 +14,16 @@ export interface ProjectDef {
 
 export const projects: ProjectDef[] = [
   {
+    id: "win11react-demo",
+    title: "Win11React — Web Desktop",
+    description: "A Windows-inspired React desktop intro film",
+    duration: "20s",
+    aspect: "landscape",
+    loadVideo: () => import("../win11react-demo/src/Video").then((m) => m.Video),
+    loadStylesUrl: () => import("../win11react-demo/src/styles.css?url").then((m) => m.default),
+    loadPosterUrl: () => import("../win11react-demo/poster.jpg").then((m) => m.default),
+  },
+  {
     id: "figma-agent-demo",
     title: "Figma — Native Agent",
     description: "AI agent generating an onboarding flow",
