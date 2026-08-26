@@ -31,7 +31,7 @@ each example still lives in its own folder with its own `src/`, `README.md`, `CR
 | [`gymshark-geo-seamless-demo`](gymshark-geo-seamless-demo/) | Gymshark Geo Seamless — vertical social ad — 19s |
 | [`olipop-demo`](olipop-demo/) | OLIPOP — vertical social ad — 20s |
 | [`rhode-demo`](rhode-demo/) | rhode summer '26 — vertical social ad — 20s |
-| [`win11react-demo`](win11react-demo/) | Win11React web-desktop intro — 18s |
+| [`win11react-demo`](win11react-demo/) | Win11React web-desktop intro — snappy showreel with a dark-mode reveal — 20s |
 
 ## Quick start
 
