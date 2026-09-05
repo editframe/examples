@@ -1,0 +1,186 @@
+@import "tailwindcss";
+
+/* Inter — bundled locally */
+@font-face { font-family: "Inter"; src: url("/higgsfield-figma-demo/src/assets/fonts/inter-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+@font-face { font-family: "Inter"; src: url("/higgsfield-figma-demo/src/assets/fonts/inter-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-style: normal; }
+@font-face { font-family: "Inter"; src: url("/higgsfield-figma-demo/src/assets/fonts/inter-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-style: normal; }
+@font-face { font-family: "Inter"; src: url("/higgsfield-figma-demo/src/assets/fonts/inter-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-style: normal; }
+@font-face { font-family: "Inter"; src: url("/higgsfield-figma-demo/src/assets/fonts/inter-latin-800-normal.woff2") format("woff2"); font-weight: 800; font-style: normal; }
+@font-face { font-family: "Inter"; src: url("/higgsfield-figma-demo/src/assets/fonts/inter-latin-900-normal.woff2") format("woff2"); font-weight: 900; font-style: normal; }
+@font-face { font-family: "Inter"; src: url("/higgsfield-figma-demo/src/assets/fonts/inter-latin-700-italic.woff2") format("woff2"); font-weight: 700; font-style: italic; }
+
+:root {
+  --canvas: #E5E5E5;
+  --lime: #D4FF20;
+  --sel: #218AFF;
+  --ink: #393939;
+  --panel: #111215;
+  --input: #030303;
+}
+
+html, body, #root { margin: 0; padding: 0; }
+
+.stage {
+  width: 1920px; height: 1080px;
+  position: relative; overflow: hidden;
+  background: var(--canvas);
+  font-family: "Inter", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* worlds & cameras */
+.w { position: absolute; inset: 0; opacity: 0; }
+/* title layer stays ABOVE the canvas during the 2.4-2.76 zoom-through
+   (cursors sit faintly UNDER the blurred lockup) */
+.w1 { z-index: 2; }
+.cam { position: absolute; inset: 0; transform-origin: 0 0; will-change: transform, filter; }
+
+/* selection frame */
+.sel { position: absolute; border: 2px solid var(--sel); pointer-events: none; }
+.sel .h { position: absolute; width: 12px; height: 12px; background: #fff; border: 2px solid var(--sel); border-radius: 3px; }
+.sel .h.tl { left: -7px; top: -7px; } .sel .h.tr { right: -7px; top: -7px; }
+.sel .h.bl { left: -7px; bottom: -7px; } .sel .h.br { right: -7px; bottom: -7px; }
+
+/* cursors */
+.cursor { position: absolute; z-index: 60; will-change: transform; }
+.cursor svg { display: block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.18)); }
+.cursor .pill {
+  position: absolute; left: 22px; top: 30px;
+  border-radius: 999px; padding: 8px 18px;
+  font-size: 21px; font-weight: 600; color: #fff; white-space: nowrap;
+  box-shadow: 0 3px 8px rgba(0,0,0,.15);
+}
+/* final-grid CalmLama pill hangs lower-right of the big cursor */
+.w8 .cur-calm .pill { left: 48px; top: 54px; }
+
+/* intro */
+.tile { position: absolute; background: #707176; border-radius: 12px; }
+.tile .prog { position: absolute; left: 12px; top: 10px; display: flex; align-items: center; gap: 6px; color: #C6E64E; font-size: 12px; font-weight: 600; }
+.lockup-text { position: absolute; color: var(--ink); font-weight: 700; letter-spacing: -0.02em; white-space: pre; }
+
+/* brief text elements (typed, selected) */
+.typedbox { position: absolute; color: #3A3A3A; font-weight: 600; white-space: pre-line; }
+.typedbox .bg { position: absolute; inset: -6px -10px; background: rgba(212,205,236,0.38); border: 1.5px solid var(--sel); }
+
+/* photo cards on canvas */
+.pcard { position: absolute; border-radius: 18px; overflow: hidden; box-shadow: 0 14px 38px rgba(40,40,40,.16); background: #fff; }
+.pcard img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* Higgsfield panel */
+.hpanel { position: absolute; width: 718px; background: var(--panel); border-radius: 20px; box-shadow: 0 24px 70px rgba(0,0,0,.28); overflow: hidden; }
+.hpanel.p3, .hpanel.p6, .hpanel.p7 { left: 1107px; top: 55px; }
+.site.s4, .site.s6 { left: 275px; top: 97px; }
+.site.s5 { left: 374px; top: 69px; }
+.hpanel .tbar { height: 66px; background: #1B1C1F; display: flex; align-items: center; padding: 0 22px; gap: 12px; }
+.hpanel .tbar .chip { width: 34px; height: 34px; border-radius: 8px; background: var(--lime); display: flex; align-items: center; justify-content: center; }
+.hpanel .tbar .tname { color: #EDEDEF; font-size: 20px; font-weight: 600; }
+.hpanel .tbar .x { margin-left: auto; width: 34px; height: 34px; border-radius: 50%; background: #2A2B2F; color: #B9B9BE; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.hpanel .tabs { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 26px; position: relative; }
+.hpanel .tabs .tabwrap { background: #1B1C1F; border-radius: 14px; padding: 6px; display: flex; gap: 4px; }
+.hpanel .tab { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; color: #808187; font-size: 20px; font-weight: 500; }
+.hpanel .tab.on { background: #33343A; color: #F2F2F4; }
+.hpanel .lay { position: absolute; right: 26px; top: 0; width: 40px; height: 40px; border-radius: 10px; background: #1B1C1F; display: flex; align-items: center; justify-content: center; }
+.hpanel .avatar { position: absolute; left: 26px; top: 0; width: 40px; height: 40px; border-radius: 50%; background: #232428; }
+
+.hinput { position: absolute; left: 24px; right: 24px; bottom: 24px; height: 270px; background: var(--input); border-radius: 24px; }
+.hinput .plus { position: absolute; left: 26px; bottom: 24px; width: 52px; height: 52px; border-radius: 50%; background: #1C1C1F; color: #E8E8EA; font-size: 30px; font-weight: 400; display: flex; align-items: center; justify-content: center; }
+.hinput .send { position: absolute; right: 26px; bottom: 24px; width: 52px; height: 52px; border-radius: 50%; background: var(--lime); color: #101300; display: flex; align-items: center; justify-content: center; }
+.hinput .ptext { position: absolute; left: 32px; right: 32px; top: 28px; color: #C9C9CE; font-size: 30px; font-weight: 400; line-height: 1.4; white-space: pre-wrap; }
+.hinput .thumbs { position: absolute; left: 28px; top: 26px; display: flex; gap: 14px; }
+.hinput .thumb { width: 96px; height: 96px; border-radius: 12px; overflow: hidden; }
+.hinput .thumb img { width: 100%; height: 100%; object-fit: cover; }
+.hinput.hasthumbs .ptext { top: 142px; }
+
+.inprog { position: absolute; display: flex; align-items: center; gap: 10px; color: #B8D93F; font-size: 22px; font-weight: 600; }
+.inprog .spin { width: 18px; height: 18px; border-radius: 50%; border: 3px solid rgba(184,217,63,.25); border-top-color: #B8D93F; }
+
+/* context menu */
+.ctxmenu { position: absolute; background: #17181B; border-radius: 8px; padding: 8px 12px 9px 12px; border: 1px solid rgba(212,242,32,.75); box-shadow: 0 0 26px rgba(212,255,32,.55), 0 8px 22px rgba(0,0,0,.35); }
+.ctxmenu .mi { color: #fff; font-size: 10.5px; font-weight: 600; margin-top: 5px; }
+.ctxmenu .ms { color: #8A8A8E; font-size: 8.5px; margin-top: 2px; }
+
+/* site frame */
+.site { position: absolute; background: #fff; box-shadow: 0 18px 60px rgba(40,40,40,.18); overflow: hidden; }
+.site .inner { width: 1920px; transform-origin: 0 0; position: absolute; left: 0; top: 0; }
+.snav { height: 56px; background: #fff; display: flex; align-items: center; position: relative; }
+.snav .brand { position: absolute; left: 470px; top: 0; height: 56px; display: flex; align-items: center; gap: 10px; font-size: 19px; font-weight: 700; color: #111; }
+.snav .brand img.mark, .snav .brand .mark { width: 30px; height: 30px; }
+.snav .links { position: absolute; left: 850px; top: 0; height: 56px; display: flex; align-items: center; gap: 46px; font-size: 12px; font-weight: 500; color: #5F5F5F; letter-spacing: .04em; }
+.snav .cta { position: absolute; right: 60px; top: 13px; height: 30px; padding: 0 20px; border-radius: 15px; background: var(--lime); color: #101300; font-size: 12px; font-weight: 600; display: flex; align-items: center; }
+.shero { height: 1090px; background: var(--lime); position: relative; overflow: hidden; }
+.shero .wimg { position: absolute; left: 260px; top: 215px; width: 1650px; }
+/* title face is vertically stretched: same glyph widths, ~1.5x cap height */
+.shero .bigtitle { position: absolute; left: 84px; top: 38px; font-size: 315px; font-weight: 800; letter-spacing: -0.045em; line-height: .94; transform: scaleY(1.5); transform-origin: 0 0; background: linear-gradient(180deg, #060800 0%, #2A3606 55%, #3A4A08 100%); -webkit-background-clip: text; background-clip: text; color: transparent; white-space: pre; }
+.shero .cap { position: absolute; left: 668px; top: 885px; width: 585px; border-radius: 14px; background: rgba(32,38,8,.58); color: rgba(255,255,255,.94); font-size: 22px; line-height: 1.45; padding: 18px 24px; text-align: center; }
+.shero .btns { position: absolute; left: 768px; top: 1005px; display: flex; align-items: center; gap: 26px; }
+.shero .btns .pre { background: #fff; color: #111; border-radius: 999px; padding: 15px 30px; font-size: 23px; font-weight: 600; white-space: nowrap; }
+.shero .btns .wt { color: #111; font-size: 23px; font-weight: 700; white-space: nowrap; }
+.sticker { height: 74px; background: #161613; display: flex; align-items: center; overflow: hidden; }
+.sticker .row { display: flex; white-space: nowrap; color: #EDEDE8; font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 19px; letter-spacing: .08em; }
+.sticker .it { padding: 0 26px; } .sticker .sep { color: #6F6F68; }
+.swild { background: #fff; position: relative; height: 1500px; }
+.swild .lbl { position: absolute; left: 380px; top: 128px; display: flex; align-items: center; gap: 10px; font-family: ui-monospace, Consolas, monospace; font-size: 16px; letter-spacing: .12em; color: #111; }
+.swild .lbl .sq { width: 10px; height: 10px; background: var(--lime); }
+.swild .arrows { position: absolute; right: 350px; top: 214px; display: flex; gap: 14px; }
+.swild .arrows .ar { width: 46px; height: 46px; border-radius: 50%; border: 1.5px solid #DDD; color: #333; display: flex; align-items: center; justify-content: center; font-size: 18px; background: #fff; }
+.swild .gcard { position: absolute; width: 912px; height: 522px; border-radius: 20px; background: #F2F2F0; overflow: hidden; }
+.swild .gcard .gt { position: absolute; left: 46px; top: 40px; font-size: 72px; font-weight: 700; color: rgba(255,255,255,.92); line-height: 1.05; }
+.swild .gcard .gs { position: absolute; right: 40px; bottom: 34px; font-size: 24px; color: rgba(255,255,255,.85); text-align: right; }
+.swild .gsub { position: absolute; font-family: ui-monospace, Consolas, monospace; font-size: 14px; letter-spacing: .08em; color: #8A8A85; }
+.sdark { background: #0C0C0C; position: relative; height: 1400px; }
+.sdark .lbl2 { position: absolute; left: 906px; top: 96px; display: flex; gap: 10px; align-items: center; font-family: ui-monospace, Consolas, monospace; font-size: 15px; letter-spacing: .12em; color: #EDEDE8; }
+.sdark .lbl2 .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--lime); }
+.sdark .h2 { position: absolute; left: 0; right: 0; top: 150px; text-align: center; color: #F4F4F2; font-size: 64px; font-weight: 700; line-height: 1.2; }
+.sdark .prow { position: absolute; left: 380px; top: 360px; display: flex; gap: 22px; }
+.sdark .pc { width: 372px; height: 430px; border-radius: 18px; background: #161616; position: relative; }
+.sdark .pc.buy { background: #1A1A18; }
+.sdark .pc .b1 { position: absolute; left: 0; right: 0; top: 34px; text-align: center; color: #9A9A94; font-size: 15px; }
+.sdark .pc .b2 { position: absolute; left: 0; right: 0; top: 62px; text-align: center; color: #F2F2EE; font-size: 26px; font-weight: 700; }
+.sdark .pc .b3 { position: absolute; left: 40px; top: 120px; color: #F2F2EE; font-size: 30px; font-weight: 700; }
+.sdark .pc .b3 .off { display: inline-block; margin-left: 12px; background: var(--lime); color: #101300; font-size: 15px; font-weight: 700; border-radius: 6px; padding: 2px 8px; vertical-align: middle; }
+.sdark .pc .b4 { position: absolute; left: 40px; right: 40px; top: 170px; color: #77776F; font-size: 15px; line-height: 1.5; }
+
+/* vector generation */
+.vgpill { position: absolute; display: flex; align-items: center; gap: 12px; background: #1B1C1F; border-radius: 999px; padding: 12px 26px; color: #F2F2F4; font-size: 24px; font-weight: 600; white-space: nowrap; }
+.vgcard { position: absolute; background: #fff; border-radius: 24px; display: flex; align-items: center; justify-content: center; }
+
+/* 2x2 grid tiles */
+.gtile { position: absolute; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 30px rgba(40,40,40,.10); }
+.gtile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* filename pill (Logo.svg) */
+.fnpill { position: absolute; background: var(--sel); color: #fff; border-radius: 8px; padding: 6px 16px; font-size: 20px; font-weight: 500; transform: translateX(-50%); white-space: nowrap; }
+
+/* scanline glitch overlay */
+.scan { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen; }
+
+/* ---- LED dot-matrix generation wipe ---- */
+.mosaic { position: absolute; inset: -6px; border-radius: 26px; overflow: hidden; opacity: 0; pointer-events: none; }
+/* LED generation field: statically-masked dot strips radiating from the
+   send corner, staggered by opacity; background-position offsets keep all
+   dot grids phase-aligned. */
+.mosaic { z-index: 1; }
+/* prompt text reads THROUGH the LED field */
+.hinput .ptext { z-index: 2; }
+.ms {
+  position: absolute; top: -11px; height: 304px; opacity: 0;
+  transform-origin: 50% 78%;
+  background-image:
+    radial-gradient(circle, rgba(240, 255, 128, 0.8) 1.8px, rgba(240, 255, 128, 0) 2.4px),
+    radial-gradient(circle, rgba(173, 255, 47, 0.3) 3.5px, rgba(173, 255, 47, 0) 5px);
+  background-size: 11px 11px, 11px 11px;
+  -webkit-mask-image: radial-gradient(ellipse 62% 58% at 50% 58%, #000 50%, transparent 96%);
+  mask-image: radial-gradient(ellipse 62% 58% at 50% 58%, #000 50%, transparent 96%);
+}
+.ms.dim {
+  background-image:
+    radial-gradient(circle, rgba(173, 255, 47, 0.6) 1.7px, rgba(173, 255, 47, 0) 2.3px),
+    radial-gradient(circle, rgba(173, 255, 47, 0.22) 3.2px, rgba(173, 255, 47, 0) 4.6px);
+  background-size: 15px 15px, 15px 15px;
+}
+.ms1 { left: 555px; width: 130px; background-position: -555px 11px; }
+.ms2 { left: 445px; width: 140px; background-position: -445px 11px; }
+.ms3 { left: 335px; width: 145px; background-position: -335px 11px; }
+.ms4 { left: 215px; width: 150px; background-position: -215px 11px; }
+.ms5 { left: 95px;  width: 150px; background-position: -95px 11px; }
+.ms6 { left: -25px; width: 150px; background-position: 25px 11px; }

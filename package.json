@@ -23,6 +23,7 @@
     "render:cursor-sidechat-demo": "EF_RENDER_PROJECT=cursor-sidechat-demo editframe render --data '{\"project\": \"cursor-sidechat-demo\"}' -o cursor-sidechat-demo/output/demo.mp4",
     "render:elevenlabs-montage-demo": "EF_RENDER_PROJECT=elevenlabs-montage-demo editframe render --data '{\"project\": \"elevenlabs-montage-demo\"}' -o elevenlabs-montage-demo/output/demo.mp4",
     "render:higgsfield-mcp-demo": "EF_RENDER_PROJECT=higgsfield-mcp-demo editframe render --data '{\"project\": \"higgsfield-mcp-demo\"}' -o higgsfield-mcp-demo/output/demo.mp4",
+    "render:higgsfield-figma-demo": "EF_RENDER_PROJECT=higgsfield-figma-demo editframe render --data '{\"project\": \"higgsfield-figma-demo\"}' -o higgsfield-figma-demo/output/demo.mp4",
     "render:fal-ai-demo": "EF_RENDER_PROJECT=fal-ai-demo editframe render --data '{\"project\": \"fal-ai-demo\"}' -o fal-ai-demo/output/demo.mp4",
     "render:fashionnova-the-edit-demo": "EF_RENDER_PROJECT=fashionnova-the-edit-demo editframe render --data '{\"project\": \"fashionnova-the-edit-demo\"}' -o fashionnova-the-edit-demo/output/demo.mp4",
     "render:figma-agent-demo": "EF_RENDER_PROJECT=figma-agent-demo editframe render --data '{\"project\": \"figma-agent-demo\"}' -o figma-agent-demo/output/demo.mp4",

@@ -31,6 +31,7 @@ each example still lives in its own folder with its own `src/`, `README.md`, `CR
 | [`codex-demo`](codex-demo/) | OpenAI Codex bug fix workflow — 22s |
 | [`elevenlabs-montage-demo`](elevenlabs-montage-demo/) | ElevenLabs agents — metrics, charts, watercolor globe — 22s |
 | [`higgsfield-mcp-demo`](higgsfield-mcp-demo/) | Higgsfield MCP — prompt card, generated tiles, snack-bag attach — 38.1s |
+| [`higgsfield-figma-demo`](higgsfield-figma-demo/) | Higgsfield for Figma — brief, generate, ship a watch campaign — 27s |
 | [`linear-agents-demo`](linear-agents-demo/) | Linear for Agents product demo — 32s |
 | [`allbirds-tree-runner-demo`](allbirds-tree-runner-demo/) | Allbirds Tree Runner NZ — vertical social ad — 25s |
 | [`fashionnova-the-edit-demo`](fashionnova-the-edit-demo/) | Fashion Nova — The Edit — vertical social ad — 25s |

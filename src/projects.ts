@@ -214,6 +214,16 @@ export const projects: ProjectDef[] = [
     loadPosterUrl: () => import("../higgsfield-mcp-demo/poster.jpg").then((m) => m.default),
   },
   {
+    id: "higgsfield-figma-demo",
+    title: "Higgsfield for Figma",
+    description: "Multiplayer canvas — brief, generate, ship a watch campaign",
+    duration: "27s",
+    aspect: "landscape",
+    loadVideo: () => import("../higgsfield-figma-demo/src/Video").then((m) => m.Video),
+    loadStylesUrl: () => import("../higgsfield-figma-demo/src/styles.css?url").then((m) => m.default),
+    loadPosterUrl: () => import("../higgsfield-figma-demo/poster.jpg").then((m) => m.default),
+  },
+  {
     id: "linear-agents-demo",
     title: "Linear — Linear for Agents",
     description: "Linear for Agents product demo",
