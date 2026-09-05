@@ -1,0 +1,279 @@
+@import "tailwindcss";
+@import "@shared/styles/reveal.css";
+
+@font-face {
+  font-family: "Hanken Grotesk";
+  src: url("./assets/fonts/HankenGrotesk-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+:root {
+  --ink: #000000;
+  --gray: #8b8b8b;
+  --dark: #363636;
+}
+
+html, body, #root { margin: 0; padding: 0; }
+
+.stage {
+  width: 1920px;
+  height: 1080px;
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
+  font-family: "Hanken Grotesk", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.scene { position: absolute; inset: 0; }
+
+/* ---------- Beat 1/2: logo ---------- */
+.blossom {
+  position: absolute;
+  left: 960px; top: 540px;
+  width: 194px;
+  aspect-ratio: 256 / 258;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+}
+.blossomB {
+  position: absolute;
+  left: 960px; top: 540px;
+  width: 186px;
+  aspect-ratio: 360 / 372;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+}
+.appicon {
+  position: absolute;
+  left: 960px; top: 540px;
+  width: 249px;
+  aspect-ratio: 499 / 501;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+}
+
+/* ---------- Headlines ---------- */
+.headline {
+  display: flex; align-items: center; justify-content: center;
+  color: #000000;
+  font-weight: 900;
+  font-size: 96px;
+  letter-spacing: 2px;
+  text-align: center;
+}
+.hline { white-space: pre; line-height: 112px; width: max-content; margin: 0 auto; will-change: transform; }
+.s-h1 .hline { font-size: 97px; }
+.s-h2 .hline { letter-spacing: 0.75px; }
+.s-h3 .hline { line-height: 116px; }
+.headline span { will-change: opacity; }
+
+/* ---------- UI world ---------- */
+.cam { position: absolute; inset: 0; transform-origin: 0 0; will-change: transform; }
+.uislide { position: absolute; inset: 0; will-change: transform, opacity; }
+
+.composer {
+  position: absolute;
+  left: 210px; top: 328px;
+  width: 2270px; height: 293px;
+  background: #ffffff;
+  border: 1px solid #eaeae8;
+  border-bottom: 2px solid #d4d4d2;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.012), 0 2px 3px rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+  z-index: 1;
+}
+.cbody { position: absolute; inset: 0; will-change: transform; }
+.ph {
+  position: absolute;
+  left: 83px; top: 34px;
+  font-size: 44px;
+  color: #9a9a98;
+  white-space: pre;
+  will-change: opacity;
+}
+.plusicon {
+  position: absolute;
+  left: 58px; top: 174px;
+  width: 70px;
+  aspect-ratio: 140 / 150;
+}
+.lowerbar {
+  position: absolute;
+  left: 213px; top: 620px;
+  width: 2264px; height: 146px;
+  background: #f4f5f5;
+  border-radius: 0 0 47px 47px;
+  z-index: 0;
+  will-change: transform;
+}
+.lbicon { position: absolute; top: 50px; }
+.lbdark {
+  position: absolute; top: 40px;
+  font-size: 40px; color: #3a3c39; font-weight: 450;
+}
+.lbgray {
+  position: absolute; top: 40px;
+  font-size: 40px; color: #8c8d8d; font-weight: 430;
+}
+
+/* transcript viewport: bottom-anchored single visible line */
+.trview {
+  position: absolute;
+  left: 62px; top: 38px;
+  width: 2088px; height: 70px;
+  overflow: hidden;
+}
+.trtext {
+  font-size: 44px;
+  line-height: 70px;
+  letter-spacing: 0.75px;
+  color: #1e1e1e;
+  white-space: pre;
+  width: max-content;
+  will-change: transform;
+}
+.trw { will-change: opacity; }
+
+/* waveform */
+.wavegroup { position: absolute; inset: 0; will-change: opacity; }
+.wbar {
+  position: absolute;
+  top: 209px;
+  width: 10px;
+  border-radius: 5px;
+  background: #000;
+  transform: translateY(-50%);
+  will-change: opacity, height, left;
+}
+.wdot {
+  position: absolute;
+  top: 209px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #c0cdcb;
+  transform: translateY(-50%);
+}
+
+/* right controls in world (positions are relative to composer box; world x = left+210) */
+.rightgrp { position: absolute; inset: 0; }
+.selrow {
+  position: absolute; left: 1546px; top: 213px;
+  transform: translateY(-50%);
+  display: flex; align-items: center; gap: 14px;
+}
+.selblack { font-size: 44px; font-weight: 660; color: #1c1e1b; white-space: pre; position: relative; top: 2px; }
+.selgray { font-size: 44px; font-weight: 545; color: #969694; white-space: pre; position: relative; top: 2px; }
+.chev { width: 31px; aspect-ratio: 68 / 39; margin-left: 21px; }
+.ctl {
+  position: absolute; top: 212px;
+  transform: translate(-50%, -50%);
+  width: 102px; height: 102px;
+}
+.ctl img, .ctl ef-image { width: 100%; height: 100%; object-fit: contain; }
+.spinw { background: #f3f3f1; border-radius: 50%; }
+.ctl.spinw { width: 106px; height: 106px; }
+.sendw { width: 102px; height: 102px; }
+.spinring {
+  position: absolute; left: 50%; top: 50%; margin: -16px 0 0 -16px;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 5px solid #8a8a88; border-left-color: #c6c6c4;
+}
+.wtimer {
+  position: absolute; right: 306px; top: 213px;
+  transform: translateY(-50%);
+  font-size: 44px; color: #8c8d8d; white-space: pre;
+}
+
+/* ---------- macro: model selector ---------- */
+.s-sel { transform-origin: 800px 535px; will-change: transform; background: #fff; }
+.selline {
+  position: absolute;
+  left: 270px; top: 544px;
+  will-change: left;
+  transform: translateY(-54%);
+  font-size: 184px;
+  white-space: pre;
+}
+.selc.sb { color: #000000; font-weight: 460; }
+.selc.sg { color: #8f9090; }
+.seldot {
+  position: absolute;
+  top: 548px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  will-change: left, background, opacity;
+}
+.selbarline {
+  position: absolute;
+  left: 0; right: 0; top: 872px;
+  height: 4px;
+  background: #e3e3e1;
+  box-shadow: 0 0 6px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* ---------- macro: mic corner ---------- */
+.s-mic { background: #fff; }
+.edge-r {
+  position: absolute;
+  left: 1755px; top: -20px; height: 758px;
+  width: 3px; background: #e7e7e5;
+}
+.edge-b {
+  position: absolute;
+  left: -20px; top: 870px; width: 1645px;
+  height: 3px; background: #e7e7e5;
+}
+.corner-br {
+  position: absolute;
+  left: 1626px; top: 741px;
+  width: 132px; height: 132px;
+  border-right: 3px solid #e7e7e5;
+  border-bottom: 3px solid #e7e7e5;
+  border-radius: 0 0 132px 0;
+  box-sizing: border-box;
+  background: #fff;
+}
+.timer {
+  position: absolute;
+  left: 150px; top: 535px;
+  width: 450px;
+  text-align: right;
+  font-size: 225px;
+  font-weight: 500;
+  color: #8c8c8c;
+  letter-spacing: 2px;
+}
+.timer .tmr {
+  position: absolute; right: 0; top: 0;
+  transform: translateY(-50%);
+  white-space: pre;
+}
+.micwrap3 {
+  position: absolute;
+  left: 962px; top: 535px;
+  width: 372px; height: 372px;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+}
+.micwrap3 img, .send3 img,
+.micwrap3 ef-image, .send3 ef-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.send3 {
+  position: absolute;
+  left: 1425px; top: 535px;
+  width: 374px; height: 374px;
+  transform: translate(-50%, -50%);
+}
+
+/* 1:1 opacity gates (0-duration). `both` holds the from-state through the delay. */
+@keyframes instant-hide {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes instant-show {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

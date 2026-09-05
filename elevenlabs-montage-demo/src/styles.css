@@ -1,0 +1,527 @@
+@import "@shared/styles/reveal.css";
+
+.stage {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  background: #f4f3ef;
+  overflow: hidden;
+  font-family: "Inter", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.stage img {
+  max-width: none;
+}
+.scene {
+  position: absolute;
+  inset: 0;
+}
+/* G cards fade out ABOVE the incoming earth (earth wash shows through translucent cards) */
+.sG {
+  z-index: 2;
+}
+
+/* ---------- AB ---------- */
+/* Native backdrop: static defocused blob field + per-frame film grain,
+   drawn on <canvas> by drawIntroBg (no pre-rendered frames, no CSS gradients —
+   the bg is grainy and textured, not a smooth gradient). */
+.sAB .bgcanvas {
+  position: absolute;
+  inset: 0;
+  width: 1920px;
+  height: 1080px;
+}
+.earthcanvas {
+  position: absolute;
+  inset: 0;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+}
+.iibars {
+  position: absolute;
+  left: 960px;
+  top: 525px;
+  width: 68px;
+  height: 109px;
+  transform: translate(-50%, -50%);
+}
+.iibar {
+  position: absolute;
+  top: 0;
+  width: 23px;
+  height: 109px;
+  background: #ffffff;
+  border-radius: 2px;
+}
+.iibar.b1 { left: 0; }
+.iibar.b2 { left: 45px; }
+.wordmark {
+  position: absolute;
+  inset: 0;
+  white-space: nowrap;
+}
+/* left group: bar1 at x0, second II bar pops at x14, Eleven letters pop
+   inline at x30 — the whole group flies left as the letters appear */
+.wmL {
+  position: absolute;
+  left: 948px;
+  top: 512px;
+  height: 46px;
+}
+.wmbar {
+  position: absolute;
+  top: 4px;
+  width: 8px;
+  height: 38px;
+  background: #ffffff;
+  border-radius: 1px;
+}
+/* the right bar of the split II flies right on its own, then hands off to
+   the Agents reveal */
+.wmbar.wmb2fly {
+  left: 960px;
+  top: 516px;
+}
+.wmtxt {
+  position: absolute;
+  top: -2px;
+  left: 30px;
+  color: #ffffff;
+  font-size: 50px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+/* Agents run: letters pop LTR while the run slides left to close the gap */
+.wmR {
+  position: absolute;
+  left: 1064px;
+  top: 510px;
+  color: #ffffff;
+  font-size: 50px;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+.bloomdot {
+  position: absolute;
+  left: 807px;
+  top: 534px;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 70%);
+}
+.bloom {
+  position: absolute;
+  left: 960px;
+  top: 530px;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(243, 242, 238, 1) 0%, rgba(243, 242, 238, 1) 55%, rgba(243, 242, 238, 0.92) 66%, rgba(243, 242, 238, 0.35) 87%, rgba(243, 242, 238, 0) 100%);
+  transform: translate(-50%, -50%);
+}
+.whiteout {
+  position: absolute;
+  inset: 0;
+  background: #f2f1ec;
+}
+
+/* ---------- C ---------- */
+.spot {
+  white-space: nowrap;
+  position: absolute;
+  left: 960px;
+  top: 540px;
+  transform: translate(-50%, -50%);
+  color: #171614;
+  font-size: 62px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* ---------- D table ---------- */
+.sD { color: #1e1f1d; }
+.dscale {
+  position: absolute;
+  inset: 0;
+  transform-origin: 773px 407px;
+}
+.dtline { position: absolute; inset: 0; }
+.dtitle {
+  white-space: nowrap;
+  position: absolute;
+  left: 221px;
+  top: 234px;
+  font-size: 30px;
+  transform-origin: 0 0;
+  font-weight: 500;
+  letter-spacing: 0px;
+  line-height: 1;
+}
+.dsub {
+  white-space: nowrap;
+  position: absolute;
+  left: 221px;
+  top: 280px;
+  font-size: 18px;
+  color: #8c8d8a;
+  line-height: 1;
+}
+.dhdr {
+  position: absolute;
+  width: 220px;
+  text-align: center;
+  font-size: 18.5px;
+  line-height: 17px;
+  color: #8c8d8a;
+}
+.drow { position: absolute; inset: 0; }
+.dlabel {
+  white-space: nowrap;
+  position: absolute;
+  left: 221px;
+  top: 355px;
+  font-size: 24.5px;
+  font-weight: 500;
+  line-height: 1;
+}
+.ddesc {
+  white-space: nowrap;
+  position: absolute;
+  left: 221px;
+  top: 389px;
+  font-size: 17.5px;
+  color: #8c8d8a;
+  line-height: 1.2;
+}
+.dcell {
+  position: absolute;
+  top: 371px;
+  width: 220px;
+  text-align: center;
+  font-size: 21px;
+  font-weight: 500;
+  color: #55564f;
+  line-height: 1;
+}
+.darr {
+  position: absolute;
+  top: 373px;
+  width: 220px;
+  text-align: center;
+  line-height: 1;
+}
+.darr svg { display: inline-block; }
+.dash {
+  font-size: 21px;
+  font-weight: 500;
+}
+.c-g { color: #2fa46b; }
+.c-y { color: #dfa13c; }
+.c-r { color: #df4b41; }
+
+/* ---------- E chart ---------- */
+.eclip { position: absolute; inset: 0; }
+.epan { position: absolute; left: 0; top: 0; }
+.sE { transform-origin: 625px 436px; }
+
+/* ---------- F card ---------- */
+.fcard {
+  position: absolute;
+  background: #ffffff;
+  border-radius: 26px;
+  box-shadow: 0 10px 30px rgba(30, 30, 25, 0.05);
+  overflow: hidden;
+}
+.fscaler {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 837px;
+  height: 671px;
+  transform-origin: 0 0;
+}
+.ftitle {
+  white-space: nowrap;
+  position: absolute;
+  left: 35px;
+  top: 26px;
+  font-size: 30px;
+  font-weight: 600;
+  color: #212226;
+}
+.fvalue {
+  position: absolute;
+  white-space: nowrap;
+  left: 35px;
+  top: 72px;
+  font-size: 26px;
+  color: #8c8d8a;
+}
+.fstar { width: 24px; height: 22px; vertical-align: -3px; }
+.fgridline {
+  position: absolute;
+  left: 68px;
+  right: 26px;
+  height: 1.5px;
+  background: #dedddb;
+}
+.fylab {
+  white-space: nowrap;
+  position: absolute;
+  left: 36px;
+  width: 24px;
+  text-align: right;
+  font-size: 19px;
+  color: #a9a9a5;
+}
+.fplot { position: absolute; left: 0; top: 0; }
+.fxlab {
+  white-space: nowrap;
+  position: absolute;
+  top: 620px;
+  font-size: 19px;
+  color: #a9a9a5;
+}
+
+/* ---------- G ---------- */
+.gv { position: absolute; top: -200px; bottom: -200px; width: 1.5px; background: #e7e6e2; }
+.gh { position: absolute; left: -200px; right: -200px; height: 1.5px; background: #e7e6e2; }
+.gcirc {
+  position: absolute;
+  border: 1.5px solid #e7e6e2;
+  border-radius: 50%;
+}
+.gcard {
+  position: absolute;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(30, 30, 25, 0.05);
+  overflow: hidden;
+  transform-origin: center;
+}
+.gtitle {
+  white-space: nowrap;
+  position: absolute;
+  left: 22px;
+  top: 20px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #212226;
+}
+.gvalue {
+  white-space: nowrap;
+  position: absolute;
+  left: 22px;
+  top: 48px;
+  font-size: 17px;
+  color: #8c8d8a;
+}
+.ggridline {
+  position: absolute;
+  left: 60px;
+  right: 16px;
+  height: 1px;
+  background: #ececea;
+}
+.gylab {
+  white-space: nowrap;
+  position: absolute;
+  left: 14px;
+  width: 40px;
+  text-align: right;
+  font-size: 13px;
+  color: #a9a9a5;
+}
+.gplot { position: absolute; left: 0; top: 0; }
+.gxlab {
+  white-space: nowrap;
+  position: absolute;
+  bottom: 14px;
+  font-size: 13px;
+  color: #a9a9a5;
+}
+
+/* ---------- H ---------- */
+.hrot {
+  position: absolute;
+  inset: 0;
+  transform-origin: 960px 540px;
+}
+.hgl.v { position: absolute; top: -400px; bottom: -400px; width: 1.5px; background: #e7e6e2; }
+.hgl.h { position: absolute; left: -400px; right: -400px; height: 1.5px; background: #e7e6e2; }
+.hicon { position: absolute; }
+.hring {
+  position: absolute;
+  left: -118px;
+  top: -118px;
+  width: 236px;
+  height: 236px;
+  border: 1.5px solid #dbdad6;
+  border-radius: 50%;
+}
+.hicon img, .hicon ef-image { position: absolute; left: 0; top: 0; max-width: none; }
+.earth {
+  position: absolute;
+  left: 960px;
+  top: 540px;
+  width: 250px;
+  height: 250px;
+}
+.earthimg {
+  position: absolute;
+  inset: 0;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+}
+
+/* ---------- I ---------- */
+.blu {
+  position: absolute;
+  border-radius: 50%;
+  background: #4360d4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.blulbl {
+  color: #ffffff;
+  text-align: center;
+  line-height: 1.25;
+  font-weight: 400;
+}
+.gry {
+  position: absolute;
+  border-radius: 50%;
+  background: #e6e5e1;
+}
+.grylbl {
+  white-space: nowrap;
+  position: absolute;
+  width: 300px;
+  text-align: center;
+  font-size: 20px;
+  line-height: 1.3;
+  color: #6e6c67;
+}
+
+/* ---------- J ---------- */
+.jscale {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+}
+.jcard {
+  position: absolute;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(30, 30, 25, 0.05);
+  overflow: hidden;
+}
+.jtitle {
+  white-space: nowrap;
+  position: absolute;
+  left: 20px;
+  top: 17px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #212226;
+}
+.jblack {
+  position: absolute;
+  border-radius: 50%;
+  background: #10100e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.jblacklbl {
+  color: #ffffff;
+  text-align: center;
+  font-size: 25px;
+  line-height: 1.3;
+}
+.jgray {
+  position: absolute;
+  border-radius: 50%;
+  background: #e6e5e1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #3a3a37;
+  line-height: 1.25;
+}
+.jhl {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  background: #f8f8f8;
+  border-radius: 6px;
+}
+.jrow { position: absolute; left: 0; right: 0; height: 56px; }
+.jchev {
+  white-space: nowrap;
+  position: absolute;
+  left: 19px;
+  top: 3px;
+  font-size: 13px;
+  color: #55564f;
+}
+.jsubarr {
+  white-space: nowrap;
+  position: absolute;
+  left: 45px;
+  top: 2px;
+  font-size: 14px;
+  color: #8c8d8a;
+}
+.jname {
+  white-space: nowrap;
+  position: absolute;
+  top: -5px;
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 600;
+  color: #212226;
+}
+.jdesc {
+  position: absolute;
+  top: 15px;
+  font-size: 16px;
+  color: #9b9b97;
+  white-space: nowrap;
+  transform: scaleX(0.8);
+  transform-origin: 0 0;
+}
+.jnum {
+  white-space: nowrap;
+  position: absolute;
+  right: 108px;
+  top: 9px;
+  font-size: 13px;
+  line-height: 1;
+  color: #8c8d8a;
+}
+.jpct {
+  white-space: nowrap;
+  position: absolute;
+  right: 28px;
+  top: 7px;
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 600;
+  color: #212226;
+}
+
+/* UI font: bold/medium letterforms ~14% narrower than Inter */
+.dlabel { transform: scaleX(0.86); transform-origin: 0 0; }
+.jname { transform: scaleX(0.75); transform-origin: 0 0; }
+.jtitle { transform: scaleX(0.8); transform-origin: 0 0; }
+.gtitle, .ftitle { transform: scaleX(0.95); transform-origin: 0 0; }

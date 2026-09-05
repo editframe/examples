@@ -14,6 +14,7 @@ each example still lives in its own folder with its own `src/`, `README.md`, `CR
 | [`figma-agent-demo`](figma-agent-demo/) | Figma workspace with AI agent generating an onboarding flow — 30.8s |
 | [`vercel-deploy-demo`](vercel-deploy-demo/) | Vercel deploy flow from code push to live preview — 22.5s |
 | [`vercel-knowledge-base-demo`](vercel-knowledge-base-demo/) | Vercel Knowledge Base — 28.1s |
+| [`claude-cowork-demo`](claude-cowork-demo/) | Claude Cowork — typed QBR prompt, reply feed, Progress plan — 20s |
 | [`claude-security-demo`](claude-security-demo/) | Claude security public beta announcement — 19s |
 | [`claude-code-demo`](claude-code-demo/) | Claude Code agent view with orchestrated parallel subagents — 36s |
 | [`claude-office-demo`](claude-office-demo/) | Claude for Excel, PowerPoint, and Word — 30s |
@@ -21,10 +22,14 @@ each example still lives in its own folder with its own `src/`, `README.md`, `CR
 | [`claude-opus48-demo`](claude-opus48-demo/) | Claude Code agent view with orchestrated parallel subagents — 36s |
 | [`cursor-jira-demo`](cursor-jira-demo/) | Cursor replying to a Jira comment inside the editor — 28.5s |
 | [`cursor-sdk-demo`](cursor-sdk-demo/) | Cursor SDK product demo (light paper variant) — 25.3s |
+| [`cursor-sidechat-demo`](cursor-sidechat-demo/) | Cursor Side Chats — selection sweep into a side chat — 17.2s |
 | [`cursor-cloud-agents-demo`](cursor-cloud-agents-demo/) | Cursor Cloud Agents — 20.4s |
 | [`fal-ai-demo`](fal-ai-demo/) | fal.ai Assets introduction — 15.1s |
 | [`clerk-cli-demo`](clerk-cli-demo/) | Clerk CLI setup — 17.1s |
+| [`chatgpt-voice-demo`](chatgpt-voice-demo/) | ChatGPT voice — composer, mic, waveform — 26s |
 | [`codex-demo`](codex-demo/) | OpenAI Codex bug fix workflow — 22s |
+| [`elevenlabs-montage-demo`](elevenlabs-montage-demo/) | ElevenLabs agents — metrics, charts, watercolor globe — 22s |
+| [`higgsfield-mcp-demo`](higgsfield-mcp-demo/) | Higgsfield MCP — prompt card, generated tiles, snack-bag attach — 38.1s |
 | [`linear-agents-demo`](linear-agents-demo/) | Linear for Agents product demo — 32s |
 | [`allbirds-tree-runner-demo`](allbirds-tree-runner-demo/) | Allbirds Tree Runner NZ — vertical social ad — 25s |
 | [`fashionnova-the-edit-demo`](fashionnova-the-edit-demo/) | Fashion Nova — The Edit — vertical social ad — 25s |
