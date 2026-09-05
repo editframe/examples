@@ -12,6 +12,7 @@ each example still lives in its own folder with its own `src/`, `README.md`, `CR
 | Example | Description |
 |---|---|
 | [`figma-agent-demo`](figma-agent-demo/) | Figma workspace with AI agent generating an onboarding flow — 30.8s |
+| [`figma-motion-demo`](figma-motion-demo/) | Figma Motion — bloom, editor, dial, Goal Reached — 20s · 12fps |
 | [`vercel-deploy-demo`](vercel-deploy-demo/) | Vercel deploy flow from code push to live preview — 22.5s |
 | [`vercel-knowledge-base-demo`](vercel-knowledge-base-demo/) | Vercel Knowledge Base — 28.1s |
 | [`claude-cowork-demo`](claude-cowork-demo/) | Claude Cowork — typed QBR prompt, reply feed, Progress plan — 20s |

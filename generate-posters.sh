@@ -11,7 +11,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 demos=(
-  figma-agent-demo vercel-deploy-demo vercel-knowledge-base-demo
+  figma-agent-demo figma-motion-demo vercel-deploy-demo vercel-knowledge-base-demo
   claude-cowork-demo claude-security-demo claude-code-demo claude-office-demo
   claude-code-financial-demo claude-opus48-demo cursor-jira-demo
   cursor-sdk-demo cursor-sidechat-demo cursor-cloud-agents-demo fal-ai-demo clerk-cli-demo

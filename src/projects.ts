@@ -24,6 +24,16 @@ export const projects: ProjectDef[] = [
     loadPosterUrl: () => import("../figma-agent-demo/poster.jpg").then((m) => m.default),
   },
   {
+    id: "figma-motion-demo",
+    title: "Figma Motion",
+    description: "Product-launch intro — bloom, editor, dial, Goal Reached",
+    duration: "20s",
+    aspect: "landscape",
+    loadVideo: () => import("../figma-motion-demo/src/Video").then((m) => m.Video),
+    loadStylesUrl: () => import("../figma-motion-demo/src/styles.css?url").then((m) => m.default),
+    loadPosterUrl: () => import("../figma-motion-demo/poster.jpg").then((m) => m.default),
+  },
+  {
     id: "vercel-deploy-demo",
     title: "Vercel — Deploy Flow",
     description: "From code push to live preview",

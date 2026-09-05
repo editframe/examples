@@ -26,6 +26,7 @@
     "render:fal-ai-demo": "EF_RENDER_PROJECT=fal-ai-demo editframe render --data '{\"project\": \"fal-ai-demo\"}' -o fal-ai-demo/output/demo.mp4",
     "render:fashionnova-the-edit-demo": "EF_RENDER_PROJECT=fashionnova-the-edit-demo editframe render --data '{\"project\": \"fashionnova-the-edit-demo\"}' -o fashionnova-the-edit-demo/output/demo.mp4",
     "render:figma-agent-demo": "EF_RENDER_PROJECT=figma-agent-demo editframe render --data '{\"project\": \"figma-agent-demo\"}' -o figma-agent-demo/output/demo.mp4",
+    "render:figma-motion-demo": "EF_RENDER_PROJECT=figma-motion-demo editframe render --data '{\"project\": \"figma-motion-demo\"}' -o figma-motion-demo/output/demo.mp4 --fps 12",
     "render:gymshark-geo-seamless-demo": "EF_RENDER_PROJECT=gymshark-geo-seamless-demo editframe render --data '{\"project\": \"gymshark-geo-seamless-demo\"}' -o gymshark-geo-seamless-demo/output/demo-silent.mp4",
     "render:linear-agents-demo": "EF_RENDER_PROJECT=linear-agents-demo editframe render --data '{\"project\": \"linear-agents-demo\"}' -o linear-agents-demo/output/demo.mp4",
     "render:olipop-demo": "EF_RENDER_PROJECT=olipop-demo editframe render --data '{\"project\": \"olipop-demo\"}' -o olipop-demo/output/demo-silent.mp4 && bash olipop-demo/composite-well.sh",
