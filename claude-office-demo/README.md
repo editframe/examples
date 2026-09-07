@@ -11,7 +11,7 @@ A 30-second product demo of Claude for Excel, PowerPoint, and Word.
 ```bash
 npm install
 npm start             # Editframe workbench on localhost
-npm run render        # -> output/demo.mp4 (native, single pass)
+npm run render:claude-office-demo        # -> output/demo.mp4 (native, single pass)
 ```
 
 The rendered video is saved to `output/`.

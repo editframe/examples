@@ -10,7 +10,7 @@ A 30-second product demo of Claude Code agent templates for financial services.
 
 ```bash
 npm install
-npm run render
+npm run render:claude-code-financial-demo
 ```
 
 The rendered video is saved to `output/`.

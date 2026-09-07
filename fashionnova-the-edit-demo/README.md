@@ -30,12 +30,12 @@ Ink bleeds through see-through FASHION NOVA letters, swing-tickets swing in on a
 
 ```bash
 npm install
-NO_COLOR=1 FORCE_COLOR=0 npm run render    # → output/demo.mp4 (native, single pass)
+NO_COLOR=1 FORCE_COLOR=0 npm run render:fashionnova-the-edit-demo    # → output/demo.mp4 (native, single pass)
 ```
 
 > **Windows quirk:** Editframe CLI's Vite spawn parses ANSI-colored stdout. The `NO_COLOR=1 FORCE_COLOR=0` prefix is required or render init times out.
 
-The music bed plays as a single `<Audio>` element spanning the whole composition, so `npm run render` produces the final `output/demo.mp4` in one pass — no post-render mux step.
+The music bed plays as a single `<Audio>` element spanning the whole composition, so `npm run render:fashionnova-the-edit-demo` produces the final `output/demo.mp4` in one pass — no post-render mux step.
 
 ---
 
@@ -129,14 +129,14 @@ Fashion Nova is a **black & white brand** (theme `#000000`, no fixed accent colo
 git clone https://github.com/editframe/fashionnova-the-edit-demo.git
 cd fashionnova-the-edit-demo
 npm install
-NO_COLOR=1 FORCE_COLOR=0 npm run render
+NO_COLOR=1 FORCE_COLOR=0 npm run render:fashionnova-the-edit-demo
 ```
 
 1. **Swap the story** — each scene lives in its own file under `src/scenes/`, as its own `<Timegroup mode="fixed">` animated declaratively with CSS (`@keyframes` in `styles.css`, `Reveal` for one-shot callouts); retune a scene's local-ms delays or its `@keyframes` to re-cut a beat. `src/constants.ts` (`SCENES`) documents each scene's duration and the shared crossfade `overlap`.
 2. **Rebrand** — edit the palette/type/silver-accent tokens in `src/constants.ts`. Keep built graphics mono; let real photos keep their color.
 3. **Swap the looks** — replace the jpg/png files in `src/assets/` (referenced via `<Image src="/assets/...">` in the relevant scene file).
 4. **Swap audio** — replace `src/assets/fashionnova-the-edit-demo-music-bed.mp3` (bake any fades/normalization in with a local ffmpeg pass first) and adjust the `<Audio>` `volume` in `src/Video.tsx`; log in [`CREDITS.md`](CREDITS.md).
-5. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render`.
+5. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render:fashionnova-the-edit-demo`.
 
 ---
 

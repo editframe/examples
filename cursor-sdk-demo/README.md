@@ -10,7 +10,7 @@ A 25.3-second product demo of the Cursor SDK (light paper variant).
 
 ```bash
 npm install
-npm run render
+npm run render:cursor-sdk-demo
 ```
 
 The rendered video is saved to `output/demo.mp4` in one pass — music and keyboard SFX play as native `<Audio>` elements on the composition timeline, no post-render mux step.

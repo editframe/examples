@@ -10,7 +10,7 @@ A 30.8-second product demo showing a Figma workspace come alive: cursor selects 
 
 ```bash
 npm install
-npm run render
+npm run render:figma-agent-demo
 ```
 
 The rendered video is saved to `output/`.

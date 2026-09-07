@@ -10,7 +10,7 @@ A 20.4-second product demo of Cursor Cloud Agents.
 
 ```bash
 npm install
-npm run render
+npm run render:cursor-cloud-agents-demo
 ```
 
 The rendered video is saved to `output/demo.mp4`.

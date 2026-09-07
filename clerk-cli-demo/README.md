@@ -10,7 +10,7 @@ A 17.1-second product demo of Clerk CLI setup.
 
 ```bash
 npm install
-npm run render        # -> output/demo.mp4 (native, single pass)
+npm run render:clerk-cli-demo        # -> output/demo.mp4 (native, single pass)
 ```
 
 The rendered video is saved to `output/`.

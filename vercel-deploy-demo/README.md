@@ -10,7 +10,7 @@ A 22.5-second product demo capturing the full Vercel deploy flow, from code push
 
 ```bash
 npm install
-npm run render        # -> output/demo.mp4 (native, single pass)
+npm run render:vercel-deploy-demo        # -> output/demo.mp4 (native, single pass)
 ```
 
 The music bed plays as a single `<Audio>` element spanning the whole composition

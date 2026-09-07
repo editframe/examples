@@ -28,7 +28,7 @@ The final shipped render (with audio) lives at [`output/demo.mp4`](output/demo.m
 
 ```bash
 npm install
-NO_COLOR=1 FORCE_COLOR=0 npm run render    # → output/demo.mp4 (native, single pass)
+NO_COLOR=1 FORCE_COLOR=0 npm run render:linear-agents-demo    # → output/demo.mp4 (native, single pass)
 ```
 
 > **Windows quirk:** the Editframe CLI's Vite spawn parses ANSI-colored stdout. The `NO_COLOR=1 FORCE_COLOR=0` prefix is required or render init times out. The committed `output/demo.mp4` already has audio baked in — the render above just reproduces it.
@@ -132,13 +132,13 @@ Linear runs a dark, flat UI — a warm near-black ground, two greys of type, and
 git clone https://github.com/editframe/linear-agents-demo.git
 cd linear-agents-demo
 npm install
-NO_COLOR=1 FORCE_COLOR=0 npm run render
+NO_COLOR=1 FORCE_COLOR=0 npm run render:linear-agents-demo
 ```
 
 1. **Swap the story** — each beat is its own file under `src/scenes/`, sequenced by the inner `<Timegroup mode="sequence">` in `src/Video.tsx`. Edit a scene's own local timing constants directly in that file; scene durations live in `src/constants.ts` (`SCENES`).
 2. **Rebrand** — replace the palette tokens at the top of `src/constants.ts` (and `FONT` / `MONO`, also in `src/constants.ts`). Never use pure `#000` or drop shadows on text.
 3. **Swap the music** — replace `src/assets/linear-agents-demo-music-bed.mp3` (bake any new fade/loudnorm treatment into the file itself with a local ffmpeg pass — no runtime fade logic) and adjust the `<Audio>` `volume` in `src/Video.tsx`; log it in [`CREDITS.md`](CREDITS.md).
-4. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render`.
+4. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render:linear-agents-demo`.
 
 ---
 
