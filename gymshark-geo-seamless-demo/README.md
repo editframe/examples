@@ -32,7 +32,7 @@ A geo-camo logo hook snaps into the Geo Seamless tee, real athlete-training and 
 npm install
 
 # 1) render the SILENT composition (Editframe → React)
-NO_COLOR=1 FORCE_COLOR=0 npm run render      # → output/demo-silent.mp4
+NO_COLOR=1 FORCE_COLOR=0 npm run render:gymshark-geo-seamless-demo      # → output/demo-silent.mp4
 
 # 2) finalize: composite the real brand footage into the wells + mux the music
 bash add-audio.sh                            # → output/demo.mp4
@@ -152,7 +152,7 @@ soft drop shadows. Full spec in [`brand-rules-gymshark.md`](brand-rules-gymshark
 git clone https://github.com/editframe/gymshark-geo-seamless-demo.git
 cd gymshark-geo-seamless-demo
 npm install
-NO_COLOR=1 FORCE_COLOR=0 npm run render
+NO_COLOR=1 FORCE_COLOR=0 npm run render:gymshark-geo-seamless-demo
 bash add-audio.sh
 ```
 
@@ -165,7 +165,7 @@ bash add-audio.sh
    masks and overlay positions. Drop replacement footage into `audio/brand-video/`.
 4. **Re-time the audio** — adjust `MUSIC_START` / `FADE_IN` (and the fades/limiter) in
    `add-audio.sh`; log the new source in [`CREDITS.md`](CREDITS.md).
-5. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render`, then `bash add-audio.sh`.
+5. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render:gymshark-geo-seamless-demo`, then `bash add-audio.sh`.
 
 ---
 

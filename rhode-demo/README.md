@@ -32,7 +32,7 @@ A kinetic-premium DTC beauty ad: the lowercase "rhode" wordmark draws on, Highli
 ```bash
 npm install
 npm start             # Editframe workbench on localhost
-npm run render        # -> output/demo.mp4 (native, single pass)
+npm run render:rhode-demo        # -> output/demo.mp4 (native, single pass)
 ```
 
 > **Windows:** prefix render with `NO_COLOR=1 FORCE_COLOR=0` to avoid an ANSI hang.
@@ -139,7 +139,7 @@ git clone https://github.com/editframe/rhode-demo.git
 cd rhode-demo
 npm install
 npm start
-npm run render
+npm run render:rhode-demo
 ```
 
 1. **Swap the story** — each beat is its own `<Timegroup mode="fixed">` under
@@ -154,7 +154,7 @@ npm run render
    the relevant scene's `<Image src="/assets/...">` at the new file.
 4. **Swap the music** — replace `src/assets/rhode-demo-music-bed.mp3` and adjust the `<Audio>`
    `volume` in `src/Video.tsx`; log it in [`CREDITS.md`](CREDITS.md).
-5. **Render** — `npm run render`.
+5. **Render** — `npm run render:rhode-demo`.
 
 ---
 

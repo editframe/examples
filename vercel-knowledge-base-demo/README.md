@@ -10,7 +10,7 @@ A 28.1-second product demo of the Vercel Knowledge Base.
 
 ```bash
 npm install
-npm run render
+npm run render:vercel-knowledge-base-demo
 ```
 
 The rendered video is saved to `output/demo.mp4`.

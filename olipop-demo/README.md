@@ -33,7 +33,7 @@ A rotating-sunburst hook lifts the OLIPOP wordmark, a Tropical Punch can pushes 
 
 ```bash
 npm install
-NO_COLOR=1 FORCE_COLOR=0 npm run render    # → output/demo.mp4  (music baked in natively, well footage composited, audio carried through)
+NO_COLOR=1 FORCE_COLOR=0 npm run render:olipop-demo    # → output/demo.mp4  (music baked in natively, well footage composited, audio carried through)
 ```
 
 The music bed is a native `<Audio>` element on the composition timeline (see
@@ -158,7 +158,7 @@ grotesque sans) handles tracked caps and body. Tokens are the source of truth in
 git clone https://github.com/editframe/olipop-demo.git
 cd olipop-demo
 npm install
-NO_COLOR=1 FORCE_COLOR=0 npm run render
+NO_COLOR=1 FORCE_COLOR=0 npm run render:olipop-demo
 ```
 
 1. **Swap the story** — each beat is its own file under `src/scenes/`, with its own local
@@ -172,7 +172,7 @@ NO_COLOR=1 FORCE_COLOR=0 npm run render
    FFmpeg (audio-only, no video) and drop it at `src/assets/olipop-demo-music-bed.mp3`, then update
    the `MUSIC` constant in `src/Video.tsx` if you rename it; log it in
    [`CREDITS.md`](CREDITS.md).
-5. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render` (chains the Editframe render and the well-compositing pass into one command).
+5. **Render** — `NO_COLOR=1 FORCE_COLOR=0 npm run render:olipop-demo` (chains the Editframe render and the well-compositing pass into one command).
 
 ---
 

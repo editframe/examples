@@ -10,7 +10,7 @@ A 36-second product demo of Claude Code's agent view, with multiple subagents sp
 
 ```bash
 npm install
-npm run render
+npm run render:claude-code-demo
 ```
 
 The rendered video is saved to `output/`.

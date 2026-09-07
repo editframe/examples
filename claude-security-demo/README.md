@@ -10,7 +10,7 @@ A 19-second editorial product demo announcing Claude's security public beta, wit
 
 ```bash
 npm install
-npm run render
+npm run render:claude-security-demo
 ```
 
 The rendered video is saved to `output/`.

@@ -10,7 +10,7 @@ A 15.1-second product demo introducing fal Assets.
 
 ```bash
 npm install
-npm run render
+npm run render:fal-ai-demo
 ```
 
 The rendered video is saved to `output/demo.mp4` in one pass — the music bed plays as a

@@ -10,7 +10,7 @@ A 28.5-second product demo showing the Cursor + Jira integration: Cursor replies
 
 ```bash
 npm install
-npm run render         # -> output/demo.mp4 (native, single pass)
+npm run render:cursor-jira-demo         # -> output/demo.mp4 (native, single pass)
 ```
 
 The rendered video is saved to `output/`.

@@ -18,7 +18,7 @@
 ```bash
 npm install
 npm start             # Editframe workbench on localhost
-npm run render        # -> output/demo.mp4 (native, single pass)
+npm run render:allbirds-tree-runner-demo        # -> output/demo.mp4 (native, single pass)
 ```
 
 > **Windows:** prefix render with `NO_COLOR=1 FORCE_COLOR=0` to avoid an ANSI hang.
@@ -75,7 +75,7 @@ durations live in `SCENES` in `src/constants.ts`.
 ├── package-lock.json
 ├── vite.config.ts
 ├── tsconfig.json
-├── output/                     <- npm run render writes demo.mp4 here (not committed)
+├── output/                     <- npm run render:allbirds-tree-runner-demo writes demo.mp4 here (not committed)
 └── src/
     ├── Video.tsx               <- root: contain -> sequence of 7 scenes + AmbientField + Audio
     ├── main.tsx                <- TimelineRoot entry
@@ -133,7 +133,7 @@ git clone https://github.com/editframe/allbirds-tree-runner-demo.git
 cd allbirds-tree-runner-demo
 npm install
 npm start
-npm run render
+npm run render:allbirds-tree-runner-demo
 ```
 
 1. **Re-time beats** — scene durations + the shared crossfade length live in `SCENES` / `OVERLAP_MS` in `src/constants.ts`; each scene's own enter/exit timing lives in its file under `src/scenes/`, as local ms offsets from that scene's own start (`<Reveal enter={...} exit="transition">` for fades, `@keyframes` in `styles.css` for anything more custom).
