@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "InterV";
+  src: url("./assets/fonts/inter-var.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+ef-timegroup, ef-timegroup * {
+  font-family: "InterV", "Inter", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ---------- sprite ---------- */
+.s1b-sprite {
+  position: absolute; left: 830px; top: 470px; width: 260px; height: 140px;
+  overflow: hidden;
+}
+
+/* ---------- S3 thumbs ---------- */
+.s3-thumb { position: absolute; width: 145px; height: 200px; }
+
+/* ---------- S6 rows ---------- */
+.s6-row { position: absolute; height: 69px; border-radius: 14px; overflow: hidden; box-shadow: 0 0 42px rgba(185, 210, 225, 0.16); }
+.s6-glow {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, #57c8d8 0%, #7de9e0 45%, #b5f6ef 100%);
+}
+.s6-dark { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #212121 0%, #131414 55%, #060808 100%); }
+.s6-darkedge {
+  position: absolute; top: 0; bottom: 0; width: 90px;
+  background: linear-gradient(90deg, #23252b, rgba(35, 37, 43, 0));
+}
+.s6-art { position: absolute; left: 4px; top: 7px; width: 55px; height: 55px; border-radius: 10px; overflow: hidden; }
+.s6-heart { position: absolute; }
+
+/* ---------- player pill ---------- */
+.s9-pill {
+  position: absolute; left: 548px; top: 501px; width: 842px; height: 75px;
+  border-radius: 38px; background: rgba(107, 165, 153, 0.37);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+  overflow: hidden;
+}
+.s9-heart { position: absolute; }

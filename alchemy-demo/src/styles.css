@@ -1,0 +1,32 @@
+@import "tailwindcss";
+@import './tunnel-motion.css';
+@font-face{font-family:"Nimbus Sans";src:url("./assets/fonts/NimbusSans-Bold.otf") format("opentype");font-weight:700;font-style:normal;font-display:block}
+*{box-sizing:border-box}html,body{margin:0} .scenes,.scene{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;background:#fff;color:#000;font-family:Arial,sans-serif}
+.tunnel-square{position:absolute;left:960px;top:540px;transform:translate(-50%,-50%);border:solid #000;box-sizing:border-box}
+.seal-sizer,.seal-state{position:absolute}.seal-state{inset:0;opacity:0}
+
+
+@keyframes seal-1{0%{opacity:0}1.40704225%{opacity:1}5.63239437%{opacity:0}100%{opacity:0}}
+@keyframes seal-4{0%{opacity:0}5.633802817%{opacity:1}9.859154930%{opacity:0}100%{opacity:0}}
+@keyframes seal-10{0%{opacity:0}14.08309859%{opacity:1}18.30845070%{opacity:0}100%{opacity:0}}
+@keyframes seal-13{0%{opacity:0}18.30845070%{opacity:1}22.53380282%{opacity:0}100%{opacity:0}}
+@keyframes seal-16{0%{opacity:0}22.53380282%{opacity:1}26.75915493%{opacity:0}100%{opacity:0}}
+@keyframes seal-19{0%{opacity:0}26.75915493%{opacity:1}30.98450704%{opacity:0}100%{opacity:0}}
+@keyframes seal-22{0%{opacity:0}30.98450704%{opacity:1}35.20985915%{opacity:0}100%{opacity:0}}
+@keyframes seal-25{0%{opacity:0}35.20985915%{opacity:1}39.43521127%{opacity:0}100%{opacity:0}}
+@keyframes seal-28{0%{opacity:0}39.43521127%{opacity:1}43.66056338%{opacity:0}100%{opacity:0}}
+@keyframes seal-31{0%{opacity:0}43.66056338%{opacity:1}47.88591549%{opacity:0}100%{opacity:0}}
+@keyframes seal-34{0%{opacity:0}47.88591549%{opacity:1}52.11126761%{opacity:0}100%{opacity:0}}
+@keyframes seal-37{0%{opacity:0}52.11126761%{opacity:1}56.33661972%{opacity:0}100%{opacity:0}}
+@keyframes seal-40{0%{opacity:0}56.33661972%{opacity:1}60.56197183%{opacity:0}100%{opacity:0}}
+@keyframes seal-43{0%{opacity:0}60.56197183%{opacity:1}64.78732394%{opacity:0}100%{opacity:0}}
+@keyframes seal-46{0%{opacity:0}64.78732394%{opacity:1}69.01267606%{opacity:0}100%{opacity:0}}
+@keyframes seal-49{0%{opacity:0}69.01267606%{opacity:1}73.23802817%{opacity:0}100%{opacity:0}}
+@keyframes seal-52{0%{opacity:0}73.23802817%{opacity:1}77.46338028%{opacity:0}100%{opacity:0}}
+@keyframes seal-55{0%{opacity:0}77.46338028%{opacity:1}81.68873239%{opacity:0}100%{opacity:0}}
+@keyframes seal-58{0%{opacity:0}81.68873239%{opacity:1}85.91408451%{opacity:0}100%{opacity:0}}
+@keyframes seal-61{0%{opacity:0}85.91408451%{opacity:1}90.13943662%{opacity:0}100%{opacity:0}}
+@keyframes seal-64{0%{opacity:0}90.13943662%{opacity:1}94.36478873%{opacity:0}100%{opacity:0}}
+@keyframes seal-67{0%{opacity:0}94.36478873%{opacity:1}98.59014085%{opacity:0}100%{opacity:0}}
+@keyframes seal-70{0%{opacity:0}98.59014085%{opacity:1}99.99859155%{opacity:0}100%{opacity:0}}
+@keyframes seal-7{0%{opacity:0}9.859154930%{opacity:1}14.084507042%{opacity:0}100%{opacity:0}}

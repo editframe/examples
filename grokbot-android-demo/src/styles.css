@@ -1,0 +1,42 @@
+@import 'tailwindcss';
+*{box-sizing:border-box}html,body{margin:0}.comp-root{background:#fff;font-family:Arial,sans-serif;color:#000}.sequence,.scene{position:absolute;width:1920px;height:1080px;overflow:hidden;background:#fff}.phone{position:absolute;left:545px;top:108px;width:830px;height:1800px;border-radius:35px;overflow:hidden;box-shadow:0 10px 80px #00000018;transform-origin:50% 25%;animation:phone-motion 5.3s linear both}.wallpaper{position:absolute;inset:0;background:radial-gradient(ellipse at 5% 49%,#b5ffe0 0%,transparent 29%),linear-gradient(140deg,transparent 26%,#60edb080 35%,transparent 42%),linear-gradient(144deg,#39e999 0%,#02db69 23%,#29e88b 45%,#02db6b 69%,#65f2b5 100%)}.grain{position:absolute;inset:0;mix-blend-mode:soft-light}.chrome{color:#edfff5;animation:chrome 5.3s linear both}.carrier{position:absolute;left:41px;top:36px;font-size:28px}.camera{position:absolute;left:391px;top:26px;width:48px;height:48px;border-radius:50%;background:#063b29}.signals{position:absolute;right:37px;top:37px;width:96px;height:35px}.clock{position:absolute;left:65px;top:135px;font-size:170px;font-weight:300;letter-spacing:0;line-height:1.15}.date{position:absolute;left:65px;top:366px;font-size:44px}.greeting{position:absolute;left:65px;top:434px;font-size:32px}.card{position:absolute;left:583px;width:752px;height:174px;border-radius:39px;background:#e8efea;transform-origin:50% 50%;color:#25322d}.grok{top:635px;animation:grok-motion 5.3s linear both}.benji{top:821px;animation:benji-motion 5.3s linear both}.avatar{position:absolute;left:31px;top:38px;width:99px;height:99px;border-radius:25px;overflow:hidden}.avatar-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}.benji .avatar{width:105px;height:107px;left:29px;top:37px;border-radius:0}.copy{position:absolute;left:154px;top:48px}.title{font-size:32px;font-weight:600;line-height:38px;white-space:nowrap}.title span{font-weight:400;font-size:28px;color:#606b66}.body{font-size:29px;line-height:40px;white-space:nowrap}.benji .copy{top:27px}.chevron{position:absolute;left:673px;top:63px;width:48px;height:48px;border-radius:50%;background:#dce5df}.chevron svg{width:35px;height:35px;margin:6px}.benji .chevron{top:63px}
+
+@keyframes chrome{0%,10.69%{opacity:1}11.32%,43.4%{opacity:0}50%,100%{opacity:1}}
+
+
+.sentence{position:absolute;left:253px;top:493px;font-size:88px;line-height:106px;letter-spacing:-3.1px;white-space:pre}.sentence>span{position:relative;animation:reveal 1ms step-end both}.android{position:absolute;width:170px;height:100px;left:60px;top:-90px}
+@keyframes reveal{from{opacity:0}to{opacity:1}}
+
+
+
+.chrome{position:absolute;left:545px;top:108px;width:830px;height:1800px}
+.phone{transform-origin:50% 0}
+
+.clock{animation:clock-position 5.3s linear both}
+
+.date{top:358px}.greeting{top:430px}
+.sentence{top:487px;letter-spacing:-1px}.sentence>span:first-child{animation:none;opacity:1}.android{width:208px;left:48px}
+
+.wallpaper{background:radial-gradient(ellipse at 5% 44%,#bcffdf 0%,transparent 30%),linear-gradient(140deg,transparent 20%,#7bf3b9a0 35%,transparent 42%),linear-gradient(144deg,#45eb9c 0%,#08df70 23%,#30e986 45%,#04de74 69%,#65f2b5 100%)}
+.wallpaper:after{content:'';position:absolute;inset:0;background:linear-gradient(145deg,transparent 29%,#b2ffda88 36%,transparent 43%);transform:translateY(calc(var(--ef-progress,0)*-180px))}
+
+@keyframes phone-motion{
+  0%,10.69%{transform:scale(1)}
+  11.32%,40.88%{transform:translateY(-108px) scale(3.2);animation-timing-function:cubic-bezier(.2,.72,.2,1)}
+  62%,100%{transform:scale(1)}
+}
+@keyframes grok-motion{0%,10.69%{opacity:1;transform:none}11.32%,21.38%{opacity:0;transform:translateY(-183px) scale(1.25)}21.383648%{opacity:1;transform:translateY(-181.2500px) scale(1.25)}22.012579%{opacity:1;transform:translateY(-181.5100px) scale(1.27)}22.641509%{opacity:1;transform:translateY(-182.0300px) scale(1.31)}23.270440%{opacity:1;transform:translateY(-181.6800px) scale(1.36)}23.899371%{opacity:1;transform:translateY(-180.2000px) scale(1.4)}24.528302%{opacity:1;transform:translateY(-179.5900px) scale(1.43)}25.157233%{opacity:1;transform:translateY(-179.8500px) scale(1.45)}25.786164%{opacity:1;transform:translateY(-180.5450px) scale(1.465)}26.415094%{opacity:1;transform:translateY(-181.6750px) scale(1.475)}27.044025%{opacity:1;transform:translateY(-181.2400px) scale(1.48)}27.672956%{opacity:1;transform:translateY(-180.3700px) scale(1.49)}28.301887%{opacity:1;transform:translateY(-181.9350px) scale(1.495)}28.930818%{opacity:1;transform:translateY(-181.5000px) scale(1.5)}30.188679%{opacity:1;transform:translateY(-181.0650px) scale(1.505)}31.446541%{opacity:1;transform:translateY(-180.6300px) scale(1.51)}32.704403%{opacity:1;transform:translateY(-182.3690px) scale(1.513)}40.88%{opacity:1;transform:translateY(-182.5px) scale(1.5);animation-timing-function:cubic-bezier(.4,0,.2,1)}62%,100%{opacity:1;transform:none}}
+@keyframes benji-motion{0%,10.69%{transform:none}11.32%{transform:translateY(-355px) scale(.94);animation-timing-function:cubic-bezier(.16,.8,.24,1)}20.13%{transform:translateY(-355px) scale(1.5)}20.754717%{transform:translateY(-355.5px) scale(1.5)}21.383648%{transform:translateY(-349.5px) scale(1.5)}22.012579%{transform:translateY(-327.5px) scale(1.5)}22.641509%{transform:translateY(-269.5px) scale(1.5)}23.270440%{transform:translateY(-202.5px) scale(1.5)}23.899371%{transform:translateY(-159.5px) scale(1.5)}24.528302%{transform:translateY(-135.5px) scale(1.5)}25.157233%{transform:translateY(-123.5px) scale(1.5)}25.786164%{transform:translateY(-115.5px) scale(1.5)}26.415094%{transform:translateY(-109.5px) scale(1.5)}27.044025%{transform:translateY(-105.5px) scale(1.5)}27.672956%{transform:translateY(-101.5px) scale(1.5)}28.301887%{transform:translateY(-99.5px) scale(1.5)}28.930818%{transform:translateY(-95.5px) scale(1.5)}30.188679%{transform:translateY(-93.5px) scale(1.5)}31.446541%{transform:translateY(-91.5px) scale(1.5)}32.704403%{transform:translateY(-89.5px) scale(1.5)}40.88%{transform:translateY(-99.5px) scale(1.5);animation-timing-function:cubic-bezier(.4,0,.2,1)}62%,100%{transform:none}}
+@keyframes clock-position{
+  0%,10.69%{transform:none}
+  11.32%,43.4%{transform:translateY(170px);animation-timing-function:cubic-bezier(.2,.72,.2,1)}
+  62%,100%{transform:none}
+}
+
+
+
+
+
+
+
+

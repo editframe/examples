@@ -56,6 +56,9 @@ _USER_COMMENTS.txt
 chk*.jpg
 chk*.png
 
+# Local authoring playbooks — keep on disk, never ship
+BEST-PRACTICES.md
+
 # Editor / OS
 .DS_Store
 Thumbs.db

@@ -32,6 +32,15 @@ each example still lives in its own folder with its own `src/`, `README.md`, `CR
 | [`elevenlabs-montage-demo`](elevenlabs-montage-demo/) | ElevenLabs agents — metrics, charts, watercolor globe — 22s |
 | [`higgsfield-mcp-demo`](higgsfield-mcp-demo/) | Higgsfield MCP — prompt card, generated tiles, snack-bag attach — 38.1s |
 | [`higgsfield-figma-demo`](higgsfield-figma-demo/) | Higgsfield for Figma — brief, generate, ship a watch campaign — 27s |
+| [`grokbot-android-demo`](grokbot-android-demo/) | Grok Bot on Android — lock screen, announcement, lockup — 10s |
+| [`grokbot-more-plans-demo`](grokbot-more-plans-demo/) | Grok Bot — now on more plans — 12.48s |
+| [`grokbot-templates-demo`](grokbot-templates-demo/) | Grok Bot — shareable templates — 16.6s |
+| [`grokbot-to-buy-demo`](grokbot-to-buy-demo/) | Grok Bot — buy anything on the internet — 11.33s |
+| [`ramplabs-demo`](ramplabs-demo/) | Ramp Labs — invoice through work items — 25s |
+| [`firecrawl-demo`](firecrawl-demo/) | Firecrawl — vector type, chat, deck, burst, fold — 20s |
+| [`elevenlabs-vocals-demo`](elevenlabs-vocals-demo/) | ElevenLabs vocals — upload, carousel, aurora — 25s |
+| [`cursor-router-demo`](cursor-router-demo/) | Cursor Router — cost, Optimize For, router — 21.95s |
+| [`alchemy-demo`](alchemy-demo/) | Alchemy — tunnel, manuscript, philosopher, sand — 20s |
 | [`linear-agents-demo`](linear-agents-demo/) | Linear for Agents product demo — 32s |
 | [`allbirds-tree-runner-demo`](allbirds-tree-runner-demo/) | Allbirds Tree Runner NZ — vertical social ad — 25s |
 | [`fashionnova-the-edit-demo`](fashionnova-the-edit-demo/) | Fashion Nova — The Edit — vertical social ad — 25s |
